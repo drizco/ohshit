@@ -134,7 +134,7 @@ const CreateGame = () => {
               <h2 className="red-text m-4">{gameId}</h2>
             </Col>
           </Row>
-          <Row className="justify-content-center m-4">
+          <Row className="text-center m-4">
             <h3>Share this link to invite other players</h3>
           </Row>
           <Row className="justify-content-center" style={{ position: "relative" }}>
@@ -148,7 +148,7 @@ const CreateGame = () => {
               <h6 className={styles.copied}>{copySuccess}</h6>
             </Col>
           </Row>
-          <Row className="justify-content-center m-5">
+          <Row className="text-center m-5">
             <Link href={`/game/${gameId}`} className={styles.enter_game_button}>
               ENTER GAME
             </Link>

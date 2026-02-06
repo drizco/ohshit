@@ -129,7 +129,7 @@ const Players = ({
               >
                 <ModalBody>
                   <Container>
-                    <Row className="justify-content-center">
+                    <Row className="text-center">
                       <h1>Bid</h1>
                     </Row>
                     <Row className="justify-content-center mb-3">
