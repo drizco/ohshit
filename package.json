@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
     "start": "next start"
   },
   "dependencies": {
@@ -17,7 +17,6 @@
     "eslint": "^6.8.0",
     "eslint-plugin-react": "^7.19.0",
     "firebase": "^7.13.1",
-    "firebase-admin": "^8.10.0",
     "isomorphic-unfetch": "^3.0.0",
     "js-cookie": "^2.2.1",
     "next": "9.3.3",
@@ -31,5 +30,6 @@
     "sass-loader": "^8.0.2",
     "url-loader": "^4.0.0",
     "webpack": "^4.42.1"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
