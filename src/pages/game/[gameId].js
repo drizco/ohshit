@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext, useCallback, useMemo } from "react"
+import { useState, useEffect, useRef, useContext, useCallback, useMemo, useReducer } from "react"
 import { useRouter } from "next/router"
 import Link from "next/link"
 import Container from "reactstrap/lib/Container"
@@ -51,6 +51,75 @@ import {
 import CustomTrump from "../../components/CustomTrump"
 import TurnChange from "../../components/TurnChange"
 
+// Round state reducer for managing tricks, bids, trump, and winner modal
+function roundReducer(state, action) {
+  switch (action.type) {
+    case "LOAD_INITIAL":
+      return {
+        tricks: action.tricks || [],
+        bids: action.bids || {},
+        trump: action.trump || null,
+        showWinnerModal: false,
+      }
+    case "SET_TRICKS":
+      return {
+        ...state,
+        tricks: action.tricks,
+      }
+    case "ADD_TRICK":
+      return {
+        ...state,
+        tricks: [...state.tricks, action.trick],
+      }
+    case "UPDATE_TRICK":
+      const updatedTricks = [...state.tricks]
+      const idx = updatedTricks.findIndex((t) => t.trickId === action.trick.trickId)
+      updatedTricks[idx] = action.trick
+      return {
+        ...state,
+        tricks: updatedTricks,
+        showWinnerModal: action.trick.winner ? true : state.showWinnerModal,
+      }
+    case "SET_BIDS":
+      return {
+        ...state,
+        bids: action.bids,
+      }
+    case "UPDATE_BID":
+      return {
+        ...state,
+        bids: {
+          ...state.bids,
+          [action.playerId]: action.bidValue,
+        },
+      }
+    case "SET_TRUMP":
+      return {
+        ...state,
+        trump: action.trump,
+      }
+    case "SHOW_WINNER_MODAL":
+      return {
+        ...state,
+        showWinnerModal: true,
+      }
+    case "HIDE_WINNER_MODAL":
+      return {
+        ...state,
+        showWinnerModal: false,
+      }
+    case "RESET":
+      return {
+        tricks: [],
+        bids: {},
+        trump: null,
+        showWinnerModal: false,
+      }
+    default:
+      return state
+  }
+}
+
 const INITIAL_STATE = {
   game: null,
   players: {},
@@ -58,12 +127,15 @@ const INITIAL_STATE = {
   playerName: "",
   hand: [],
   bid: 0,
-  bids: {},
-  tricks: [],
-  winner: null,
   showYourTurn: false,
-  trump: null,
   queuedCard: null,
+}
+
+const INITIAL_ROUND_STATE = {
+  tricks: [],
+  bids: {},
+  trump: null,
+  showWinnerModal: false,
 }
 
 function Game({ gameId, isMobile }) {
@@ -71,25 +143,17 @@ function Game({ gameId, isMobile }) {
   const context = useContext(CombinedContext)
 
   const [state, setState] = useState(INITIAL_STATE)
-  const {
-    game,
-    players,
-    playerId,
-    playerName,
-    hand,
-    bid,
-    bids,
-    tricks,
-    winner,
-    showYourTurn,
-    trump,
-    queuedCard,
-  } = state
+  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard } = state
+
+  // Round state managed by reducer
+  const [roundState, dispatchRound] = useReducer(roundReducer, INITIAL_ROUND_STATE)
+  const { tricks, bids, trump, showWinnerModal } = roundState
 
   // Computed properties (derived from state)
   const trickIndex = useMemo(() => (tricks.length > 0 ? tricks.length - 1 : 0), [tricks])
   const roundScore = useMemo(() => getScore(tricks), [tricks])
   const isHost = useMemo(() => playerId && players[playerId]?.host, [playerId, players])
+  const winner = useMemo(() => tricks[trickIndex]?.winner, [tricks, trickIndex])
 
   const listeners = useRef({
     players: [],
@@ -100,6 +164,7 @@ function Game({ gameId, isMobile }) {
     bids: [],
   })
   const autoPlayTimeout = useRef(null)
+  const currentBidsRef = useRef(bids)
 
   const updateState = useCallback((updates) => {
     setState((prev) => {
@@ -107,6 +172,11 @@ function Game({ gameId, isMobile }) {
       return { ...prev, ...newUpdates }
     })
   }, [])
+
+  // Keep bids ref in sync with reducer state
+  useEffect(() => {
+    currentBidsRef.current = bids
+  }, [bids])
 
   const removeListeners = useCallback(() => {
     Object.values(listeners.current).forEach((unsubArray) => {
@@ -257,7 +327,7 @@ function Game({ gameId, isMobile }) {
 
         const unsub = onValue(trumpRef, (snapshot) => {
           const trump = snapshot.val()
-          updateState({ trump })
+          dispatchRound({ type: "SET_TRUMP", trump })
         })
 
         listeners.current.trump = [unsub]
@@ -266,7 +336,7 @@ function Game({ gameId, isMobile }) {
         console.error(`listenToTrump error:`, error)
       }
     },
-    [updateState],
+    [dispatchRound],
   )
 
   // Listen to tricks
@@ -286,33 +356,20 @@ function Game({ gameId, isMobile }) {
         const initialSnapshot = await get(trickRef)
         const tricks = Object.values(initialSnapshot.val() || {})
         tricks.forEach((trick) => loadedTrickIds.add(trick.trickId))
-        updateState({ tricks })
+        dispatchRound({ type: "SET_TRICKS", tricks })
 
         // Set up listeners for updates
         const unsubAdded = onChildAdded(trickRef, (snapshot) => {
           const trick = snapshot.val()
           if (!loadedTrickIds.has(trick.trickId)) {
             loadedTrickIds.add(trick.trickId)
-            updateState((prevState) => ({
-              tricks: [...prevState.tricks, trick],
-            }))
+            dispatchRound({ type: "ADD_TRICK", trick })
           }
         })
 
         const unsubChanged = onChildChanged(trickRef, (snapshot) => {
           const trick = snapshot.val()
-          updateState((prevState) => {
-            const newTricks = [...prevState.tricks]
-            const idx = newTricks.findIndex((t) => t.trickId === trick.trickId)
-            newTricks[idx] = trick
-            const newState = {
-              tricks: newTricks,
-            }
-            if (trick.winner) {
-              newState.winner = trick.winner
-            }
-            return newState
-          })
+          dispatchRound({ type: "UPDATE_TRICK", trick })
         })
 
         listeners.current.tricks = [unsubAdded, unsubChanged]
@@ -321,7 +378,7 @@ function Game({ gameId, isMobile }) {
         console.error(`listenToTrick error:`, error)
       }
     },
-    [updateState],
+    [dispatchRound],
   )
 
   // Listen to bids
@@ -341,14 +398,14 @@ function Game({ gameId, isMobile }) {
         const initialSnapshot = await get(bidRef)
         const bids = initialSnapshot.val() || {}
         Object.keys(bids).forEach((playerId) => loadedBidPlayerIds.add(playerId))
+
+        // Set bids in reducer
+        dispatchRound({ type: "SET_BIDS", bids })
+
+        // Adjust current bid based on new bids
         updateState((prevState) => {
-          const newBid = calculateAdjustedBid(
-            prevState.bid,
-            bids,
-            prevState.game,
-            prevState.players,
-          )
-          return { bids, bid: newBid }
+          const newBid = calculateAdjustedBid(prevState.bid, bids, prevState.game, prevState.players)
+          return { bid: newBid }
         })
 
         // Set up listener for updates
@@ -359,10 +416,13 @@ function Game({ gameId, isMobile }) {
           if (!loadedBidPlayerIds.has(playerId)) {
             loadedBidPlayerIds.add(playerId)
 
-            // Batched update: set bids and auto-adjust current bid
+            // Update bids in reducer
+            dispatchRound({ type: "UPDATE_BID", playerId, bidValue })
+
+            // Adjust current bid
             updateState((prevState) => {
               const newBids = {
-                ...prevState.bids,
+                ...bids,
                 [playerId]: bidValue,
               }
               const newBid = calculateAdjustedBid(
@@ -371,7 +431,7 @@ function Game({ gameId, isMobile }) {
                 prevState.game,
                 prevState.players,
               )
-              return { bids: newBids, bid: newBid }
+              return { bid: newBid }
             })
           }
         })
@@ -382,7 +442,7 @@ function Game({ gameId, isMobile }) {
         console.error(`listenToBid error:`, error)
       }
     },
-    [updateState],
+    [updateState, dispatchRound],
   )
 
   // Listen to round (combines trump, tricks, and bids)
@@ -777,7 +837,7 @@ function Game({ gameId, isMobile }) {
   const handleToggle = useCallback(
     (inc) => {
       updateState((prevState) => {
-        const { game, bids, players, bid } = prevState
+        const { game, players, bid } = prevState
         if (!game) return {}
 
         // Increment/decrement first, then auto-adjust if needed
@@ -787,7 +847,7 @@ function Game({ gameId, isMobile }) {
         return { bid: newBid }
       })
     },
-    [updateState],
+    [updateState, bids],
   )
 
   // Close modal
@@ -798,8 +858,8 @@ function Game({ gameId, isMobile }) {
 
     await Promise.all([listenToRound(roundId), listenToHand({ playerId, roundId })])
 
-    updateState({ winner: null })
-  }, [game, playerId, listenToRound, listenToHand, updateState])
+    dispatchRound({ type: "HIDE_WINNER_MODAL" })
+  }, [game, playerId, listenToRound, listenToHand, dispatchRound])
 
   // Render variables
   let name,
@@ -926,7 +986,7 @@ function Game({ gameId, isMobile }) {
           thisPlayer={playerId}
           gameScore={gameScore}
           timeLimit={timeLimit}
-          winnerModalShowing={Boolean(winner)}
+          winnerModalShowing={showWinnerModal && Boolean(winner)}
           status={status}
         />
       </div>
@@ -938,7 +998,7 @@ function Game({ gameId, isMobile }) {
       />
       <Modal
         centered
-        isOpen={Boolean(winner)}
+        isOpen={showWinnerModal && Boolean(winner)}
         toggle={closeModal}
         onOpened={() => {
           setTimeout(() => {
