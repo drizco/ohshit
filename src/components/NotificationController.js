@@ -1,99 +1,92 @@
-import React, { createRef } from "react"
+import { useState, useEffect, useRef, useContext, useCallback } from "react"
 import dynamic from "next/dynamic"
 import CombinedContext from "../context/CombinedContext"
+
 const Notification = dynamic(() => import("react-web-notification"), {
-  ssr: false
+  ssr: false,
 })
 
-class NotificationController extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      ignore: false
-    }
+function NotificationController({ showNotification, userName, onClose }) {
+  const [ignore, setIgnore] = useState(false)
+  const soundRef = useRef(null)
+  const { mute } = useContext(CombinedContext)
 
-    this.sound = createRef()
-  }
-  static contextType = CombinedContext
-
-  componentDidMount() {
+  useEffect(() => {
     if (navigator) {
       navigator.serviceWorker.register("/sw.js")
     }
-  }
+  }, [])
 
-  handlePermissionGranted = () => {
+  const handlePermissionGranted = useCallback(() => {
     console.log("Permission Granted")
-    this.setState({
-      ignore: false
-    })
-  }
-  handlePermissionDenied = () => {
+    setIgnore(false)
+  }, [])
+
+  const handlePermissionDenied = useCallback(() => {
     console.log("Permission Denied")
-    this.setState({
-      ignore: true
-    })
-  }
-  handleNotSupported = () => {
+    setIgnore(true)
+  }, [])
+
+  const handleNotSupported = useCallback(() => {
     console.log("Web Notification not Supported")
-    this.setState({
-      ignore: true
-    })
-  }
+    setIgnore(true)
+  }, [])
 
-  handleNotificationOnClose = (e, tag) => {
-    this.props.onClose()
-  }
+  const handleNotificationOnClose = useCallback(
+    (e, tag) => {
+      onClose()
+    },
+    [onClose],
+  )
 
-  handleNotificationOnShow = (e, tag) => {
-    if (!this.context.mute) {
-      this.playSound()
+  const playSound = useCallback(() => {
+    if (soundRef.current) {
+      soundRef.current.play()
     }
+  }, [])
+
+  const handleNotificationOnShow = useCallback(
+    (e, tag) => {
+      if (!mute) {
+        playSound()
+      }
+    },
+    [mute, playSound],
+  )
+
+  if (!showNotification) {
+    return null
   }
 
-  playSound = filename => {
-    if (this.sound) {
-      this.sound.play()
-    }
-  }
-
-  render() {
-    return this.props.showNotification ? (
-      <div>
-        <Notification
-          ignore={this.state.ignore}
-          askAgain={true}
-          notSupported={this.handleNotSupported}
-          onPermissionGranted={this.handlePermissionGranted}
-          onPermissionDenied={this.handlePermissionDenied}
-          onShow={this.handleNotificationOnShow}
-          onClose={this.handleNotificationOnClose}
-          timeout={2000}
-          title={"oopsie poopsie..."}
-          options={{
-            body: `your turn, ${this.props.userName}`,
-            icon: "/images/poop.png",
-            tag: "your-turn"
-          }}
+  return (
+    <div>
+      <Notification
+        ignore={ignore}
+        askAgain={true}
+        notSupported={handleNotSupported}
+        onPermissionGranted={handlePermissionGranted}
+        onPermissionDenied={handlePermissionDenied}
+        onShow={handleNotificationOnShow}
+        onClose={handleNotificationOnClose}
+        timeout={2000}
+        title={"oopsie poopsie..."}
+        options={{
+          body: `your turn, ${userName}`,
+          icon: "/images/poop.png",
+          tag: "your-turn",
+        }}
+      />
+      <audio id="sound" preload="auto" ref={soundRef}>
+        <source src="/audio/notification.mp3" type="audio/mpeg" />
+        <embed
+          hidden={true}
+          autostart="false"
+          loop={false}
+          src="/audio/notification.mp3"
         />
-        <audio
-          id="sound"
-          preload="auto"
-          ref={el => {
-            this.sound = el
-          }}
-        >
-          <source src="/audio/notification.mp3" type="audio/mpeg" />
-          <embed
-            hidden={true}
-            autostart="false"
-            loop={false}
-            src="/audio/notification.mp3"
-          />
-        </audio>
-      </div>
-    ) : null
-  }
+      </audio>
+    </div>
+  )
 }
 
 export default NotificationController

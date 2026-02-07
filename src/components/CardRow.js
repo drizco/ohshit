@@ -20,16 +20,15 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
     <>
       <ul className={styles.card_row}>
         {cards &&
-          cards.map(card => (
+          cards.map((card) => (
             <li
               className={classNames({
                 "playing-card": true,
                 [styles.shake]: illegalCard === card.cardId,
-                [styles.selected]:
-                  queuedCard && queuedCard.cardId === card.cardId
+                [styles.selected]: queuedCard && queuedCard.cardId === card.cardId,
               })}
               key={card.cardId}
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault()
                 const legal = isLegal({ hand: cards, card, leadSuit })
                 if (!legal) {
@@ -40,9 +39,7 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
             >
               <div>
                 <img src={getSource(card.suit, dark)} />
-                <h2 style={{ color: getColor(card.suit, dark) }}>
-                  {card.value}
-                </h2>
+                <h2 style={{ color: getColor(card.suit, dark) }}>{card.value}</h2>
               </div>
             </li>
           ))}
