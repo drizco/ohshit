@@ -1,6 +1,6 @@
-import firebase from "firebase/compat/app"
-import "firebase/compat/auth"
-import "firebase/compat/database"
+import { initializeApp, getApps, getApp } from "firebase/app"
+import { getAuth } from "firebase/auth"
+import { getDatabase, ref as dbRef } from "firebase/database"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FB_API_KEY,
@@ -9,15 +9,12 @@ const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_APP_ID
+  appId: process.env.NEXT_PUBLIC_APP_ID,
 }
 
 // Initialize Firebase
+export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 
-export const fb = !firebase.apps.length
-  ? firebase.initializeApp(firebaseConfig)
-  : firebase.app()
-
-export const auth = fb.auth()
-export const db = fb.database()
-export const ref = path => (path ? db.ref(path) : db.ref())
+export const auth = getAuth(app)
+export const db = getDatabase(app)
+export const ref = (path) => (path ? dbRef(db, path) : dbRef(db))
