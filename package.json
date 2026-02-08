@@ -2,7 +2,16 @@
   "name": "oh-shit",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:functions": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.functions.config.mjs",
+    "test:functions:watch": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.functions.config.mjs --watch",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules FIREBASE_EMULATOR=true jest --config jest.functions.config.mjs __tests__/integration",
+    "test:all": "npm run test && npm run test:functions",
+    "test:all:coverage": "npm run test:coverage && NODE_OPTIONS=--experimental-vm-modules jest --config jest.functions.config.mjs --coverage",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -20,8 +29,20 @@
     "sass": "^1.77.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@swc/core": "^1.15.11",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.5.1",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0"
+    "eslint-config-next": "^14.0.0",
+    "firebase-admin": "^13.6.1",
+    "firebase-functions-test": "^3.4.1",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
