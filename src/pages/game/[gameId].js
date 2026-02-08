@@ -48,6 +48,8 @@ import {
 } from "../../utils/api"
 import CustomTrump from "../../components/CustomTrump"
 import TurnChange from "../../components/TurnChange"
+import CountdownOverlay from "../../components/CountdownOverlay"
+import JoinGameForm from "../../components/JoinGameForm"
 
 // Round state reducer for managing tricks, bids, trump, and winner modal
 function roundReducer(state, action) {
@@ -141,7 +143,8 @@ function Game({ gameId, isMobile }) {
   const context = useContext(CombinedContext)
 
   const [state, setState] = useState(INITIAL_STATE)
-  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard } = state
+  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard } =
+    state
 
   // Round state managed by reducer
   const [roundState, dispatchRound] = useReducer(roundReducer, INITIAL_ROUND_STATE)
@@ -402,7 +405,12 @@ function Game({ gameId, isMobile }) {
 
         // Adjust current bid based on new bids
         updateState((prevState) => {
-          const newBid = calculateAdjustedBid(prevState.bid, bids, prevState.game, prevState.players)
+          const newBid = calculateAdjustedBid(
+            prevState.bid,
+            bids,
+            prevState.game,
+            prevState.players,
+          )
           return { bid: newBid }
         })
 
@@ -902,11 +910,10 @@ function Game({ gameId, isMobile }) {
   return (
     <>
       <div className={styles.game_page}>
-        {playerId === currentPlayer && timer >= 0 && timer <= timerShowMax && (
-          <div className={styles.countdown}>
-            <h1 className="red-text">{timer}</h1>
-          </div>
-        )}
+        <CountdownOverlay
+          timeRemaining={timer}
+          isVisible={playerId === currentPlayer && timer >= 0 && timer <= timerShowMax}
+        />
         <Row className={styles.info_row}>
           <Col xs="4">
             {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
@@ -948,26 +955,11 @@ function Game({ gameId, isMobile }) {
           </Col>
         </Row>
         {!playerId && (
-          <Col xs="4" className="mb-5">
-            <Row>
-              <Form>
-                <FormGroup>
-                  <Label for="name">User Name</Label>
-                  <Input
-                    data-lpignore="true"
-                    type="text"
-                    name="playerName"
-                    id="name"
-                    value={playerName || ""}
-                    onChange={handleChange}
-                  />
-                </FormGroup>
-                <Button disabled={!playerName} color="success" onClick={addPlayer}>
-                  JOIN
-                </Button>
-              </Form>
-            </Row>
-          </Col>
+          <JoinGameForm
+            playerName={playerName}
+            onPlayerNameChange={handleChange}
+            onJoin={addPlayer}
+          />
         )}
         <Players
           players={players}
