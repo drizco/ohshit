@@ -1,7 +1,11 @@
 {
+  "env": {
+    "node": true,
+    "es2020": true
+  },
   "parserOptions": {
-    // Required for certain syntax usages
-    "ecmaVersion": 2020
+    "ecmaVersion": 2020,
+    "sourceType": "module"
   },
   "plugins": ["promise"],
   "extends": "eslint:recommended",
