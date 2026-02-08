@@ -1,9 +1,9 @@
-const ShortUniqueId = require("short-unique-id").default
-const Deck = require("./deck")
+import ShortUniqueId from "short-unique-id";
+import Deck from "./deck.js";
 
-const uid = new ShortUniqueId({ length: 4 })
+const uid = new ShortUniqueId.default({ length: 4 });
 
-exports.newGame = async (req, res) => {
+export const newGame = async (req, res) => {
   try {
     const { ref, body } = req
     const { game, name, numCards, bidPoints, dirty, timeLimit } = body
@@ -41,19 +41,19 @@ exports.newGame = async (req, res) => {
   }
 }
 
-exports.replayGame = async (req, res) => {
+export const replayGame = async (req, res) => {
   try {
     const { ref, body } = req
     const { oldGameId, newGameId } = body
     await ref(`games/${oldGameId}`).update({ nextGame: newGameId })
     return res.sendStatus(200)
   } catch (error) {
-    console.log(`$$>>>>: exports.replayGame -> error`, error)
+    console.log(`$$>>>>: export const replayGame -> error`, error)
     return res.sendStatus(500)
   }
 }
 
-exports.startGame = async (req, res) => {
+export const startGame = async (req, res) => {
   try {
     const {
       ref,
@@ -152,7 +152,7 @@ exports.startGame = async (req, res) => {
   }
 }
 
-exports.submitBid = async (req, res) => {
+export const submitBid = async (req, res) => {
   try {
     const { ref, body } = req
     const { playerId, bid, nextPlayerId, gameId, allBidsIn, roundId } = body
@@ -171,7 +171,7 @@ exports.submitBid = async (req, res) => {
   }
 }
 
-exports.playCard = async (req, res) => {
+export const playCard = async (req, res) => {
   try {
     const { ref, body } = req
     const {
@@ -212,7 +212,7 @@ exports.playCard = async (req, res) => {
   }
 }
 
-exports.nextRound = async (req, res) => {
+export const nextRound = async (req, res) => {
   try {
     const { ref, body } = req
     const {
@@ -329,12 +329,12 @@ exports.nextRound = async (req, res) => {
     await Promise.all(promiseArray)
     return res.sendStatus(200)
   } catch (error) {
-    console.log(`$$>>>>: exports.nextRound -> error`, error)
+    console.log(`$$>>>>: export const nextRound -> error`, error)
     return res.sendStatus(500)
   }
 }
 
-exports.addPlayer = async (req, res) => {
+export const addPlayer = async (req, res) => {
   try {
     const { ref, body } = req
     const { playerName, gameId } = body
@@ -348,12 +348,12 @@ exports.addPlayer = async (req, res) => {
     })
     return res.status(200).send({ playerId })
   } catch (error) {
-    console.log(`$$>>>>: exports.addPlayer -> error`, error)
+    console.log(`$$>>>>: export const addPlayer -> error`, error)
     return res.sendStatus(500)
   }
 }
 
-exports.updatePlayer = async (req, res) => {
+export const updatePlayer = async (req, res) => {
   try {
     const { ref, params } = req
     const { playerId, gameId, present } = params
@@ -363,7 +363,7 @@ exports.updatePlayer = async (req, res) => {
     })
     return res.sendStatus(200)
   } catch (error) {
-    console.log(`$$>>>>: exports.updatePlayer -> error`, error)
+    console.log(`$$>>>>: export const updatePlayer -> error`, error)
     return res.sendStatus(500)
   }
 }

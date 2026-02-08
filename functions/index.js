@@ -1,8 +1,8 @@
-const functions = require("firebase-functions");
-const express = require("express");
-const cors = require("cors");
-const admin = require("firebase-admin");
-const {
+import functions from "firebase-functions";
+import express from "express";
+import cors from "cors";
+import admin from "firebase-admin";
+import {
   addPlayer,
   startGame,
   replayGame,
@@ -11,7 +11,7 @@ const {
   nextRound,
   newGame,
   updatePlayer,
-} = require("./game");
+} from "./game.js";
 
 admin.initializeApp();
 
@@ -36,9 +36,9 @@ app.post("/play-card", playCard);
 app.post("/next-round", nextRound);
 app.put("/update-player/:playerId/:gameId/:present", updatePlayer);
 
-exports.api = functions.https.onRequest(app);
+export const api = functions.https.onRequest(app);
 
-exports.clearOldGameData = functions.pubsub
+export const clearOldGameData = functions.pubsub
   .schedule("0 0 * * 1")
   .timeZone("America/Denver")
   .onRun(async context => {
