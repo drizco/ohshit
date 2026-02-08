@@ -1,22 +1,24 @@
 import { useState, useRef, useContext, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import Container from "reactstrap/lib/Container"
-import Button from "reactstrap/lib/Button"
-import Form from "reactstrap/lib/Form"
-import FormGroup from "reactstrap/lib/FormGroup"
-import Label from "reactstrap/lib/Label"
-import Input from "reactstrap/lib/Input"
-import InputGroup from "reactstrap/lib/InputGroup"
-import Dropdown from "reactstrap/lib/Dropdown"
-import DropdownItem from "reactstrap/lib/DropdownItem"
-import DropdownMenu from "reactstrap/lib/DropdownMenu"
-import DropdownToggle from "reactstrap/lib/DropdownToggle"
-import Row from "reactstrap/lib/Row"
+import {
+  Container,
+  Button,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  InputGroup,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Row,
+  Col,
+} from "reactstrap"
 import { newGame } from "../utils/api"
 import styles from "../styles/pages/home.module.scss"
 import { CopyIcon } from "../components/Icons"
-import Col from "reactstrap/lib/Col"
 import CombinedContext from "../context/CombinedContext"
 import classnames from "classnames"
 

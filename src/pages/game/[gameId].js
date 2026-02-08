@@ -1,17 +1,15 @@
-import { useState, useEffect, useRef, useContext, useCallback, useMemo, useReducer } from "react"
+import {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  useCallback,
+  useMemo,
+  useReducer,
+} from "react"
 import { useRouter } from "next/router"
 import Link from "next/link"
-import Container from "reactstrap/lib/Container"
-import Button from "reactstrap/lib/Button"
-import Form from "reactstrap/lib/Form"
-import FormGroup from "reactstrap/lib/FormGroup"
-import Label from "reactstrap/lib/Label"
-import Input from "reactstrap/lib/Input"
-import Row from "reactstrap/lib/Row"
-import Col from "reactstrap/lib/Col"
-import Modal from "reactstrap/lib/Modal"
-import ModalBody from "reactstrap/lib/ModalBody"
-import ModalHeader from "reactstrap/lib/ModalHeader"
+import { Container, Button, Row, Col, Modal, ModalBody, ModalHeader } from "reactstrap"
 import {
   ref,
   query,

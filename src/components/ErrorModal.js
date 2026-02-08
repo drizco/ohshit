@@ -1,6 +1,5 @@
 import React, { useContext } from "react"
-import Modal from "reactstrap/lib/Modal"
-import ModalBody from "reactstrap/lib/ModalBody"
+import { Modal, ModalBody } from "reactstrap"
 import CombinedContext from "../context/CombinedContext"
 
 const ErrorModal = () => {

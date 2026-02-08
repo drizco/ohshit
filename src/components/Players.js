@@ -1,17 +1,19 @@
-import { useContext } from "react"
-import Row from "reactstrap/lib/Row"
-import Col from "reactstrap/lib/Col"
-import { getSource, getColor } from "../utils/helpers"
-import Form from "reactstrap/lib/Form"
-import InputGroup from "reactstrap/lib/InputGroup"
-import Input from "reactstrap/lib/Input"
-import Button from "reactstrap/lib/Button"
 import classNames from "classnames"
-import styles from "../styles/components/players.module.scss"
+import { useContext } from "react"
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  Input,
+  InputGroup,
+  Modal,
+  ModalBody,
+  Row,
+} from "reactstrap"
 import CombinedContext from "../context/CombinedContext"
-import Modal from "reactstrap/lib/Modal"
-import ModalBody from "reactstrap/lib/ModalBody"
-import Container from "reactstrap/lib/Container"
+import styles from "../styles/components/players.module.scss"
+import { getColor, getSource } from "../utils/helpers"
 
 const Players = ({
   players,

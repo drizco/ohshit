@@ -1,7 +1,5 @@
 import { useState } from "react"
-import InputGroup from "reactstrap/lib/InputGroup"
-import Input from "reactstrap/lib/Input"
-import Button from "reactstrap/lib/Button"
+import { InputGroup, Input, Button } from "reactstrap"
 
 const CustomTrump = () => {
   const [trumpName, setTrumpName] = useState(
