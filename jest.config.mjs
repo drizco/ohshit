@@ -49,6 +49,10 @@ export default {
     "^@/pages/(.*)$": "<rootDir>/src/pages/$1",
     "^@/utils/(.*)$": "<rootDir>/src/utils/$1",
     "^@/hooks/(.*)$": "<rootDir>/src/hooks/$1",
+    // Mock Firebase SDK
+    "^firebase/database$": "<rootDir>/__tests__/setup/firebaseMock.js",
+    "^firebase/auth$": "<rootDir>/__tests__/setup/firebaseMock.js",
+    "^firebase/app$": "<rootDir>/__tests__/setup/firebaseMock.js",
     // Mock CSS/SCSS imports
     "\\.(css|scss|sass)$": "<rootDir>/__tests__/setup/styleMock.js",
     // Mock image imports
