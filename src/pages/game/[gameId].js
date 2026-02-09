@@ -499,13 +499,13 @@ function Game({ gameId, isMobile }) {
 
       updateState({ playerId: pId, playerName: pName })
 
-      await listenToPlayers(gameId)
+      await Promise.all([
+        listenToPlayers(gameId),
+        listenToGame({ gameId, playerId: pId }),
+      ])
 
       if (pId) {
-        await Promise.all([
-          updatePlayer({ playerId: pId, gameId, present: true }),
-          listenToGame({ gameId, playerId: pId }),
-        ])
+        await updatePlayer({ playerId: pId, gameId, present: true })
       }
     } catch (error) {
       context.setState({ error: true })
@@ -882,11 +882,11 @@ function Game({ gameId, isMobile }) {
     dispatchRound({ type: "HIDE_WINNER_MODAL" })
   }, [game, playerId, listenToRound, listenToHand, dispatchRound])
 
-  const user = playerId ? players[playerId] : null
+  const userName = playerId ? (players[playerId]?.name ?? "") : ""
 
   const { dark, timer } = context
 
-  if (!game || !user) return null
+  if (!game) return null
 
   const {
     name,
@@ -900,8 +900,6 @@ function Game({ gameId, isMobile }) {
     nextGame,
     timeLimit,
   } = game
-
-  const userName = user.name ?? ""
 
   const trick = tricks && trickIndex !== undefined ? tricks[trickIndex] : null
   const leadSuit = trick?.leadSuit
