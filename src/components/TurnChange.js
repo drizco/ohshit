@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
 import CombinedContext from "../context/CombinedContext"
 import Timer from "./Timer"
 
@@ -8,7 +8,7 @@ const TurnChange = ({
   currentPlayer,
   winner,
   randomPlay,
-  yourTurn
+  yourTurn,
 }) => {
   const { setState, timer } = useContext(CombinedContext)
 
@@ -26,7 +26,7 @@ const TurnChange = ({
       }
     }
     prevCurrentPlayer.current = currentPlayer
-  }, [currentPlayer, winner])
+  }, [currentPlayer, playerId, setState, timeLimit, winner, yourTurn])
 
   return (
     <>

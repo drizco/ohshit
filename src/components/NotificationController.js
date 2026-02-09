@@ -36,12 +36,9 @@ function NotificationController({ showNotification, userName, onClose }) {
     setIgnore(true)
   }, [])
 
-  const handleNotificationOnClose = useCallback(
-    (e, tag) => {
-      onClose()
-    },
-    [onClose],
-  )
+  const handleNotificationOnClose = useCallback(() => {
+    onClose()
+  }, [onClose])
 
   const playSound = useCallback(() => {
     if (soundRef.current) {
@@ -49,14 +46,11 @@ function NotificationController({ showNotification, userName, onClose }) {
     }
   }, [])
 
-  const handleNotificationOnShow = useCallback(
-    (e, tag) => {
-      if (!mute) {
-        playSound()
-      }
-    },
-    [mute, playSound],
-  )
+  const handleNotificationOnShow = useCallback(() => {
+    if (!mute) {
+      playSound()
+    }
+  }, [mute, playSound])
 
   if (!showNotification) {
     return null

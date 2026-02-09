@@ -3,7 +3,7 @@ import { useContext } from "react"
 import CombinedContext from "../context/CombinedContext"
 import { PINK, RED } from "../utils/constants"
 
-export default ({ loading }) => {
+const SpinnerComponent = ({ loading }) => {
   const { dark } = useContext(CombinedContext)
   return loading ? (
     <div
@@ -18,3 +18,5 @@ export default ({ loading }) => {
     </div>
   ) : null
 }
+
+export default SpinnerComponent

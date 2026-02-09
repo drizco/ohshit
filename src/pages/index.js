@@ -22,8 +22,6 @@ import { CopyIcon } from "../components/Icons"
 import CombinedContext from "../context/CombinedContext"
 import classnames from "classnames"
 
-const timeLimitOptions = ["none", "90", "60", "30", "10"]
-
 const CreateGame = () => {
   const router = useRouter()
   const [name, setName] = useState("")
@@ -44,11 +42,9 @@ const CreateGame = () => {
   const { setState } = useContext(CombinedContext)
 
   useEffect(() => {
-    setState({ mounted: true })
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(localStorage.getItem("player-name") || "")
-    return () => {
-      setState({ mounted: false })
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggle = () => {
