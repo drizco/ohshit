@@ -2,9 +2,13 @@ import { useState, useEffect, useRef, useContext, useCallback } from "react"
 import dynamic from "next/dynamic"
 import CombinedContext from "../context/CombinedContext"
 
-const Notification = dynamic(() => import("react-web-notification"), {
-  ssr: false,
-})
+const Notification = dynamic(
+  () => import("react-web-notification").then((mod) => mod.default || mod),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+)
 
 function NotificationController({ showNotification, userName, onClose }) {
   const [ignore, setIgnore] = useState(false)
