@@ -1,15 +1,13 @@
 import { useContext, useEffect } from "react"
-import CombinedContext from "../context/CombinedContext"
+import TimerContext from "../context/TimerContext"
 import useInterval from "../hooks/useInterval"
 
 const Timer = ({ timeLimit, playerId, currentPlayer, randomPlay }) => {
-  const { setState, timer } = useContext(CombinedContext)
+  const { setTimer, timer } = useContext(TimerContext)
 
   useInterval(() => {
-    setState((prevState) => {
-      return {
-        timer: prevState.timer != null ? prevState.timer - 1 : timeLimit,
-      }
+    setTimer((prevTimer) => {
+      return prevTimer != null ? prevTimer - 1 : timeLimit
     })
   }, 1000)
 

@@ -3,6 +3,8 @@ import Head from "next/head"
 import "bootstrap/dist/css/bootstrap.min.css"
 import "../styles/main.scss"
 import { CombinedProvider } from "../context/CombinedContext"
+import { SettingsProvider } from "../context/SettingsContext"
+import { TimerProvider } from "../context/TimerContext"
 import { auth } from "../lib/firebase"
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth"
 
@@ -21,29 +23,54 @@ import ErrorModal from "../components/ErrorModal"
 import Spinner from "../components/Spinner"
 
 export default function MyApp({ Component, pageProps }) {
-  const [state, setStateInternal] = useState({
-    mute: true,
-    dark:
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  // Global app state (loading, error, visible)
+  const [appState, setAppStateInternal] = useState({
     loading: false,
     error: false,
     visible: true,
-    timer: null,
   })
 
   const setState = useCallback((updates) => {
-    setStateInternal((prev) =>
+    setAppStateInternal((prev) =>
       typeof updates === "function" ? updates(prev) : { ...prev, ...updates },
     )
   }, [])
 
-  const contextValue = useMemo(
+  // Settings state (dark mode, mute) - changes infrequently
+  const [dark, setDark] = useState(
+    typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+  )
+  const [mute, setMute] = useState(true)
+
+  // Timer state - changes frequently, isolated
+  const [timer, setTimer] = useState(null)
+
+  // Context values with proper memoization
+  const combinedValue = useMemo(
     () => ({
-      ...state,
+      ...appState,
       setState,
     }),
-    [state, setState],
+    [appState, setState],
+  )
+
+  const settingsValue = useMemo(
+    () => ({
+      dark,
+      mute,
+      setDark,
+      setMute,
+    }),
+    [dark, mute],
+  )
+
+  const timerValue = useMemo(
+    () => ({
+      timer,
+      setTimer,
+    }),
+    [timer],
   )
 
   // Firebase anonymous auth
@@ -67,10 +94,7 @@ export default function MyApp({ Component, pageProps }) {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
 
       const handleChange = () => {
-        setStateInternal((prev) => ({
-          ...prev,
-          dark: mediaQuery.matches,
-        }))
+        setDark(mediaQuery.matches)
       }
 
       mediaQuery.addEventListener("change", handleChange)
@@ -81,21 +105,20 @@ export default function MyApp({ Component, pageProps }) {
   // page visibility listener
   useEffect(() => {
     const handleVisibilityChange = () => {
-      setStateInternal((prev) => ({
-        ...prev,
-        visible: document.visibilityState === "visible",
-      }))
+      setState({ visible: document.visibilityState === "visible" })
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
-  }, [])
+  }, [setState])
 
-  const { dark, loading } = state
+  const { loading } = appState
 
   return (
-    <CombinedProvider value={contextValue}>
-      <Head>
+    <CombinedProvider value={combinedValue}>
+      <SettingsProvider value={settingsValue}>
+        <TimerProvider value={timerValue}>
+          <Head>
         <title>oopsie poopsie</title>
         <link rel="icon" type="image/png" href="/images/favicon.ico" />
         <meta property="og:site_name" content="oopsie poopsie" />
@@ -167,6 +190,8 @@ export default function MyApp({ Component, pageProps }) {
           color: ${dark ? WHITE : BLACK};
         }
       `}</style>
+        </TimerProvider>
+      </SettingsProvider>
     </CombinedProvider>
   )
 }

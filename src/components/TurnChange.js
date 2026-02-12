@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef } from "react"
-import CombinedContext from "../context/CombinedContext"
+import TimerContext from "../context/TimerContext"
 import Timer from "./Timer"
 
 const TurnChange = ({
@@ -10,23 +10,23 @@ const TurnChange = ({
   randomPlay,
   yourTurn,
 }) => {
-  const { setState, timer } = useContext(CombinedContext)
+  const { setTimer, timer } = useContext(TimerContext)
 
   const prevCurrentPlayer = useRef(null)
 
   useEffect(() => {
     if (currentPlayer) {
       if (currentPlayer !== prevCurrentPlayer.current) {
-        setState({ timer: timeLimit })
+        setTimer(timeLimit)
       } else if (winner) {
-        setState({ timer: timeLimit })
+        setTimer(timeLimit)
       }
       if (currentPlayer === playerId || winner === playerId) {
         yourTurn()
       }
     }
     prevCurrentPlayer.current = currentPlayer
-  }, [currentPlayer, playerId, setState, timeLimit, winner, yourTurn])
+  }, [currentPlayer, playerId, setTimer, timeLimit, winner, yourTurn])
 
   return (
     <>

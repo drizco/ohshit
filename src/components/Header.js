@@ -1,14 +1,14 @@
 import { useState, useContext, useEffect } from "react"
 import Link from "next/link"
 import { Modal, ModalHeader, ModalBody } from "reactstrap"
-import CombinedContext from "../context/CombinedContext"
+import SettingsContext from "../context/SettingsContext"
 import styles from "../styles/components/header.module.scss"
 import { Sound, Mute, Sun, Moon } from "../components/Icons"
 
 const Header = () => {
   const [showRules, setShowRules] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const { mute, dark, setState } = useContext(CombinedContext)
+  const { mute, dark, setMute, setDark } = useContext(SettingsContext)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -20,15 +20,11 @@ const Header = () => {
   }
 
   const handleSound = () => {
-    setState((prevState) => ({
-      mute: !prevState.mute,
-    }))
+    setMute((prevMute) => !prevMute)
   }
 
   const handleDark = () => {
-    setState((prevState) => ({
-      dark: !prevState.dark,
-    }))
+    setDark((prevDark) => !prevDark)
   }
 
   return (

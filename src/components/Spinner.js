@@ -1,10 +1,10 @@
 import { Spinner } from "reactstrap"
 import { useContext } from "react"
-import CombinedContext from "../context/CombinedContext"
+import SettingsContext from "../context/SettingsContext"
 import { PINK, RED } from "../utils/constants"
 
 const SpinnerComponent = ({ loading }) => {
-  const { dark } = useContext(CombinedContext)
+  const { dark } = useContext(SettingsContext)
   return loading ? (
     <div
       className="spinner-container"

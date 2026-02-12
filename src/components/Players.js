@@ -11,7 +11,8 @@ import {
   ModalBody,
   Row,
 } from "reactstrap"
-import CombinedContext from "../context/CombinedContext"
+import SettingsContext from "../context/SettingsContext"
+import TimerContext from "../context/TimerContext"
 import styles from "../styles/components/players.module.scss"
 import { getColor, getSource } from "../utils/helpers"
 
@@ -27,12 +28,13 @@ const Players = ({
   afterBid,
   dealer,
   thisPlayer,
-  gameScore,
+  score,
   timeLimit,
   winnerModalShowing,
   status,
 }) => {
-  const { dark, timer } = useContext(CombinedContext)
+  const { dark } = useContext(SettingsContext)
+  const { timer } = useContext(TimerContext)
   let newPlayers = []
   let nextPlayer = thisPlayer
   const haveNextPlayer =
@@ -55,7 +57,7 @@ const Players = ({
         newPlayers.map(({ playerId, present, name }) => {
           const isCurrent = currentPlayer === playerId
           const isDealer = dealer === playerId
-          let playerScore = gameScore && gameScore[playerId] ? gameScore[playerId] : "0"
+          let playerScore = score && score[playerId] ? score[playerId] : "0"
           if (!status || status === "pending") {
             playerScore = ""
           }

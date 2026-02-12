@@ -2,10 +2,10 @@ import React, { useContext, useState, useEffect } from "react"
 
 import styles from "../styles/components/card-row.module.scss"
 import { getSource, getColor, isLegal } from "../utils/helpers"
-import CombinedContext from "../context/CombinedContext"
+import SettingsContext from "../context/SettingsContext"
 import classNames from "classnames"
 const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
-  const { dark } = useContext(CombinedContext)
+  const { dark } = useContext(SettingsContext)
   const [illegalCard, setIllegalCard] = useState(null)
   useEffect(() => {
     const timer = setTimeout(() => {

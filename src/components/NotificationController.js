@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext, useCallback } from "react"
 import dynamic from "next/dynamic"
-import CombinedContext from "../context/CombinedContext"
+import SettingsContext from "../context/SettingsContext"
 
 const Notification = dynamic(
   () => import("react-web-notification").then((mod) => mod.default || mod),
@@ -13,7 +13,7 @@ const Notification = dynamic(
 function NotificationController({ showNotification, userName, onClose }) {
   const [ignore, setIgnore] = useState(false)
   const soundRef = useRef(null)
-  const { mute } = useContext(CombinedContext)
+  const { mute } = useContext(SettingsContext)
 
   useEffect(() => {
     if (navigator) {
