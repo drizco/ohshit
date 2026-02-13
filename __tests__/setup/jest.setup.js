@@ -1,9 +1,9 @@
 // Jest setup for frontend/component tests
-import { jest, beforeAll, afterAll, expect } from '@jest/globals';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import { jest, beforeAll, afterAll, expect } from '@jest/globals'
+import * as matchers from '@testing-library/jest-dom/matchers'
 
 // Extend expect with jest-dom matchers
-expect.extend(matchers);
+expect.extend(matchers)
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -26,7 +26,7 @@ jest.mock('next/router', () => ({
     isFallback: false,
   })),
   withRouter: (component) => component,
-}));
+}))
 
 // Mock localStorage
 const localStorageMock = {
@@ -34,8 +34,8 @@ const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-};
-global.localStorage = localStorageMock;
+}
+global.localStorage = localStorageMock
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -43,8 +43,8 @@ const sessionStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-};
-global.sessionStorage = sessionStorageMock;
+}
+global.sessionStorage = sessionStorageMock
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -59,7 +59,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-});
+})
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -67,13 +67,13 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   takeRecords() {
-    return [];
+    return []
   }
   unobserve() {}
-};
+}
 
 // Suppress console errors in tests (comment out for debugging)
-const originalError = console.error;
+const originalError = console.error
 beforeAll(() => {
   console.error = (...args) => {
     if (
@@ -81,12 +81,12 @@ beforeAll(() => {
       (args[0].includes('Warning: ReactDOM.render') ||
         args[0].includes('Not implemented: HTMLFormElement.prototype.submit'))
     ) {
-      return;
+      return
     }
-    originalError.call(console, ...args);
-  };
-});
+    originalError.call(console, ...args)
+  }
+})
 
 afterAll(() => {
-  console.error = originalError;
-});
+  console.error = originalError
+})

@@ -92,15 +92,12 @@ describe('TurnChange Component', () => {
     )
 
     // Change the current player
-    rerender(
-      <TurnChange {...defaultProps} currentPlayer="player-2" />,
-      {
-        contextValue: {
-          timer: 30,
-          setTimer: mockSetTimer,
-        },
-      }
-    )
+    rerender(<TurnChange {...defaultProps} currentPlayer="player-2" />, {
+      contextValue: {
+        timer: 30,
+        setTimer: mockSetTimer,
+      },
+    })
 
     // setTimer should be called to reset timer to timeLimit
     expect(mockSetTimer).toHaveBeenCalledWith(60)

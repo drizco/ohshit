@@ -1,4 +1,4 @@
-import { Form, FormGroup, Label, Input, Button, Row, Col } from "reactstrap"
+import { Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap'
 
 /**
  * JoinGameForm - Player name input and join button
@@ -21,7 +21,7 @@ const JoinGameForm = ({ playerName, onPlayerNameChange, onJoin }) => {
               type="text"
               name="playerName"
               id="name"
-              value={playerName || ""}
+              value={playerName || ''}
               onChange={onPlayerNameChange}
             />
           </FormGroup>

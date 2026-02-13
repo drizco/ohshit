@@ -18,9 +18,10 @@ export const push = () => ({ key: 'mock-key' })
 export const off = () => {}
 
 // firebase/auth mocks
-export const signInAnonymously = () => Promise.resolve({
-  user: { uid: 'test-uid', isAnonymous: true }
-})
+export const signInAnonymously = () =>
+  Promise.resolve({
+    user: { uid: 'test-uid', isAnonymous: true },
+  })
 export const onAuthStateChanged = (auth, callback) => {
   callback({ uid: 'test-uid', isAnonymous: true })
   return () => {}

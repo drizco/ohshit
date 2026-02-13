@@ -1,4 +1,4 @@
-import { handleDirtyGame } from "./helpers"
+import { handleDirtyGame } from './helpers'
 
 /**
  * Calculate the adjusted bid value based on dirty game rules.

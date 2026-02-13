@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback } from 'react'
 import {
   newGame,
   replayGame,
@@ -7,9 +7,9 @@ import {
   submitBid as submitBidApi,
   addPlayer as addPlayerApi,
   nextRound as nextRoundApi,
-} from "../utils/api"
-import { calculateLeader, isLegal } from "../utils/helpers"
-import { calculateAdjustedBid } from "../utils/bidHelpers"
+} from '../utils/api'
+import { calculateLeader, isLegal } from '../utils/helpers'
+import { calculateAdjustedBid } from '../utils/bidHelpers'
 
 /**
  * Custom hook for game actions
@@ -124,7 +124,7 @@ const useGameActions = ({
 
         if (
           game &&
-          game.status === "play" &&
+          game.status === 'play' &&
           game.currentPlayer &&
           game.currentPlayer === playerId &&
           isLegal({ hand, card, leadSuit })
@@ -164,7 +164,7 @@ const useGameActions = ({
           }
         } else if (
           game &&
-          game.status === "play" &&
+          game.status === 'play' &&
           game.currentPlayer &&
           game.currentPlayer !== playerId &&
           isLegal({ hand, card, leadSuit }) &&
@@ -199,7 +199,7 @@ const useGameActions = ({
       nextRound,
       updateState,
       autoPlayTimeoutRef,
-    ],
+    ]
   )
 
   // Your turn handler - auto-plays queued card when it's player's turn
@@ -246,7 +246,7 @@ const useGameActions = ({
         console.error(`submitBid error:`, error)
       }
     },
-    [bid, game, bids, players, playerId, gameId, setState],
+    [bid, game, bids, players, playerId, gameId, setState]
   )
 
   // Random play - plays a random legal card or bids randomly
@@ -255,7 +255,7 @@ const useGameActions = ({
 
     const { status } = game
 
-    if (status === "play") {
+    if (status === 'play') {
       let handCopy = [...hand]
       let leadSuit
       const trick = tricks[trickIndex]
@@ -272,7 +272,7 @@ const useGameActions = ({
       if (card) {
         playCard(card)
       }
-    } else if (status === "bid") {
+    } else if (status === 'bid') {
       const randomBid = Math.floor(Math.random() * (hand.length + 1))
       submitBid(randomBid)
     }
@@ -306,7 +306,10 @@ const useGameActions = ({
       if (response.ok) {
         const { playerId: newPlayerId, gameId: gameIdResponse } = await response.json()
         localStorage.setItem(`oh-shit-${gameIdResponse}-player-id`, newPlayerId)
-        await replayGame({ oldGameId: currentGameId, newGameId: gameIdResponse })
+        await replayGame({
+          oldGameId: currentGameId,
+          newGameId: gameIdResponse,
+        })
       }
       setState({ loading: false })
     } catch (error) {
@@ -323,7 +326,7 @@ const useGameActions = ({
       if (response.ok) {
         const { playerId: newPlayerId } = await response.json()
         localStorage.setItem(`oh-shit-${gameId}-player-id`, newPlayerId)
-        localStorage.setItem("player-name", playerName)
+        localStorage.setItem('player-name', playerName)
         updateState({ playerId: newPlayerId })
         setState({ loading: false })
       }
@@ -351,7 +354,7 @@ const useGameActions = ({
       const { value, name } = e.target
       updateState({ [name]: value })
     },
-    [updateState],
+    [updateState]
   )
 
   // Handle bid toggle - increments or decrements bid with auto-adjustment
@@ -368,14 +371,14 @@ const useGameActions = ({
         return { bid: newBid }
       })
     },
-    [updateState, bids],
+    [updateState, bids]
   )
 
   // Close modal - closes the winner modal
   const closeModal = useCallback(async () => {
     if (!game) return
 
-    dispatchRound({ type: "HIDE_WINNER_MODAL" })
+    dispatchRound({ type: 'HIDE_WINNER_MODAL' })
   }, [game, dispatchRound])
 
   return {

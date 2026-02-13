@@ -1,32 +1,29 @@
 // Unit tests for Firebase game functions
-import { jest } from '@jest/globals';
+import { jest } from '@jest/globals'
 import {
   newGame,
   addPlayer,
-  startGame,
   submitBid,
-  playCard,
-  nextRound,
   replayGame,
   updatePlayer,
-} from '../../functions/game.js';
+} from '../../functions/game.js'
 
 // Mock the deck
-jest.mock('../../functions/deck.js');
+jest.mock('../../functions/deck.js')
 
 describe('Game Functions - newGame', () => {
-  let mockRef;
-  let mockReq;
-  let mockRes;
+  let mockRef
+  let mockReq
+  let mockRes
 
   beforeEach(() => {
     // Create mock database reference
     const mockPush = {
       key: 'player-123',
       set: jest.fn(() => Promise.resolve()),
-    };
+    }
 
-    mockRef = jest.fn((path) => ({
+    mockRef = jest.fn(() => ({
       once: jest.fn(() =>
         Promise.resolve({
           exists: () => false, // Game ID is unique
@@ -35,7 +32,7 @@ describe('Game Functions - newGame', () => {
       ),
       update: jest.fn(() => Promise.resolve()),
       push: jest.fn(() => mockPush),
-    }));
+    }))
 
     mockReq = {
       ref: mockRef,
@@ -47,30 +44,30 @@ describe('Game Functions - newGame', () => {
         dirty: false,
         timeLimit: 60,
       },
-    };
+    }
 
     mockRes = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
       sendStatus: jest.fn().mockReturnThis(),
-    };
-  });
+    }
+  })
 
   test('should create a new game with valid parameters', async () => {
-    await newGame(mockReq, mockRes);
+    await newGame(mockReq, mockRes)
 
-    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.send).toHaveBeenCalledWith(
       expect.objectContaining({
         playerId: expect.any(String),
         gameId: expect.any(String),
       })
-    );
-  });
+    )
+  })
 
   test('should create game with correct status', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation((path) => ({
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({
       once: jest.fn(() =>
         Promise.resolve({
           exists: () => false,
@@ -79,19 +76,19 @@ describe('Game Functions - newGame', () => {
       ),
       update: mockUpdate,
       push: jest.fn(() => ({ key: 'player-123' })),
-    }));
+    }))
 
-    await newGame(mockReq, mockRes);
+    await newGame(mockReq, mockRes)
 
-    expect(mockUpdate).toHaveBeenCalled();
-    const updateArg = mockUpdate.mock.calls[0][0];
-    const statusKey = Object.keys(updateArg).find(key => key.endsWith('/status'));
-    expect(updateArg[statusKey]).toBe('pending');
-  });
+    expect(mockUpdate).toHaveBeenCalled()
+    const updateArg = mockUpdate.mock.calls[0][0]
+    const statusKey = Object.keys(updateArg).find((key) => key.endsWith('/status'))
+    expect(updateArg[statusKey]).toBe('pending')
+  })
 
   test('should handle bidPoints flag correctly', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation((path) => ({
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({
       once: jest.fn(() =>
         Promise.resolve({
           exists: () => false,
@@ -99,47 +96,51 @@ describe('Game Functions - newGame', () => {
       ),
       update: mockUpdate,
       push: jest.fn(() => ({ key: 'player-123' })),
-    }));
+    }))
 
     // Test with bidPoints = 1 (should set noBidPoints to false)
-    await newGame(mockReq, mockRes);
-    const updateArg1 = mockUpdate.mock.calls[0][0];
-    const noBidPointsKey1 = Object.keys(updateArg1).find(key => key.endsWith('/noBidPoints'));
-    expect(updateArg1[noBidPointsKey1]).toBe(false);
+    await newGame(mockReq, mockRes)
+    const updateArg1 = mockUpdate.mock.calls[0][0]
+    const noBidPointsKey1 = Object.keys(updateArg1).find((key) =>
+      key.endsWith('/noBidPoints')
+    )
+    expect(updateArg1[noBidPointsKey1]).toBe(false)
 
     // Test with bidPoints = 0 (should set noBidPoints to true)
-    mockReq.body.bidPoints = 0;
-    await newGame(mockReq, mockRes);
-    const updateArg2 = mockUpdate.mock.calls[1][0];
-    const noBidPointsKey2 = Object.keys(updateArg2).find(key => key.endsWith('/noBidPoints'));
-    expect(updateArg2[noBidPointsKey2]).toBe(true);
-  });
+    mockReq.body.bidPoints = 0
+    await newGame(mockReq, mockRes)
+    const updateArg2 = mockUpdate.mock.calls[1][0]
+    const noBidPointsKey2 = Object.keys(updateArg2).find((key) =>
+      key.endsWith('/noBidPoints')
+    )
+    expect(updateArg2[noBidPointsKey2]).toBe(true)
+  })
 
   test('should handle errors and return 500', async () => {
     mockRef.mockImplementation(() => ({
       once: jest.fn(() => Promise.reject(new Error('Database error'))),
-    }));
+    }))
 
-    await newGame(mockReq, mockRes);
+    await newGame(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500);
-  });
-});
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+  })
+})
 
 describe('Game Functions - addPlayer', () => {
-  let mockRef;
-  let mockReq;
-  let mockRes;
+  let mockRef
+  let mockReq
+  let mockRes
 
   beforeEach(() => {
     const mockPush = {
       key: 'new-player-id',
       update: jest.fn(() => Promise.resolve()),
-    };
+    }
 
-    mockRef = jest.fn((path) => ({
+    mockRef = jest.fn(() => ({
       push: jest.fn(() => mockPush),
-    }));
+    }))
 
     mockReq = {
       ref: mockRef,
@@ -147,64 +148,64 @@ describe('Game Functions - addPlayer', () => {
         playerName: 'New Player',
         gameId: 'TEST',
       },
-    };
+    }
 
     mockRes = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
       sendStatus: jest.fn().mockReturnThis(),
-    };
-  });
+    }
+  })
 
   test('should add a new player to the game', async () => {
-    await addPlayer(mockReq, mockRes);
+    await addPlayer(mockReq, mockRes)
 
-    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.send).toHaveBeenCalledWith({
       playerId: 'new-player-id',
-    });
-  });
+    })
+  })
 
   test('should set present flag to true', async () => {
-    const mockPushUpdate = jest.fn(() => Promise.resolve());
+    const mockPushUpdate = jest.fn(() => Promise.resolve())
     mockRef.mockImplementation(() => ({
       push: () => ({
         key: 'new-player-id',
         update: mockPushUpdate,
       }),
-    }));
+    }))
 
-    await addPlayer(mockReq, mockRes);
+    await addPlayer(mockReq, mockRes)
 
     expect(mockPushUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         present: true,
       })
-    );
-  });
+    )
+  })
 
   test('should handle errors', async () => {
     mockRef.mockImplementation(() => ({
       push: () => ({
         update: jest.fn(() => Promise.reject(new Error('Database error'))),
       }),
-    }));
+    }))
 
-    await addPlayer(mockReq, mockRes);
+    await addPlayer(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500);
-  });
-});
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+  })
+})
 
 describe('Game Functions - submitBid', () => {
-  let mockRef;
-  let mockReq;
-  let mockRes;
+  let mockRef
+  let mockReq
+  let mockRes
 
   beforeEach(() => {
     mockRef = jest.fn(() => ({
       update: jest.fn(() => Promise.resolve()),
-    }));
+    }))
 
     mockReq = {
       ref: mockRef,
@@ -216,78 +217,78 @@ describe('Game Functions - submitBid', () => {
         allBidsIn: false,
         roundId: 'round-1',
       },
-    };
+    }
 
     mockRes = {
       sendStatus: jest.fn(),
-    };
-  });
+    }
+  })
 
   test('should submit a bid successfully', async () => {
-    await submitBid(mockReq, mockRes);
+    await submitBid(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(200);
-  });
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(200)
+  })
 
   test('should convert bid to number', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    mockReq.body.bid = '5';
-    await submitBid(mockReq, mockRes);
+    mockReq.body.bid = '5'
+    await submitBid(mockReq, mockRes)
 
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         'rounds/round-1/bids/player-1': 5,
       })
-    );
-  });
+    )
+  })
 
   test('should change status to play when all bids are in', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    mockReq.body.allBidsIn = true;
-    await submitBid(mockReq, mockRes);
+    mockReq.body.allBidsIn = true
+    await submitBid(mockReq, mockRes)
 
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         'games/TEST/status': 'play',
       })
-    );
-  });
+    )
+  })
 
   test('should not change status when not all bids are in', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    mockReq.body.allBidsIn = false;
-    await submitBid(mockReq, mockRes);
+    mockReq.body.allBidsIn = false
+    await submitBid(mockReq, mockRes)
 
-    const updateArg = mockUpdate.mock.calls[0][0];
-    expect(updateArg['games/TEST/status']).toBeUndefined();
-  });
+    const updateArg = mockUpdate.mock.calls[0][0]
+    expect(updateArg['games/TEST/status']).toBeUndefined()
+  })
 
   test('should handle errors', async () => {
     mockRef.mockImplementation(() => ({
       update: jest.fn(() => Promise.reject(new Error('Database error'))),
-    }));
+    }))
 
-    await submitBid(mockReq, mockRes);
+    await submitBid(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500);
-  });
-});
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+  })
+})
 
 describe('Game Functions - updatePlayer', () => {
-  let mockRef;
-  let mockReq;
-  let mockRes;
+  let mockRef
+  let mockReq
+  let mockRes
 
   beforeEach(() => {
-    mockRef = jest.fn((path) => ({
+    mockRef = jest.fn(() => ({
       update: jest.fn(() => Promise.resolve()),
-    }));
+    }))
 
     mockReq = {
       ref: mockRef,
@@ -296,59 +297,59 @@ describe('Game Functions - updatePlayer', () => {
         gameId: 'TEST',
         present: 'true',
       },
-    };
+    }
 
     mockRes = {
       sendStatus: jest.fn(),
-    };
-  });
+    }
+  })
 
   test('should update player presence to true', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    await updatePlayer(mockReq, mockRes);
+    await updatePlayer(mockReq, mockRes)
 
     expect(mockUpdate).toHaveBeenCalledWith({
       gameId: 'TEST',
       present: true,
-    });
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(200);
-  });
+    })
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(200)
+  })
 
   test('should update player presence to false', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    mockReq.params.present = 'false';
-    await updatePlayer(mockReq, mockRes);
+    mockReq.params.present = 'false'
+    await updatePlayer(mockReq, mockRes)
 
     expect(mockUpdate).toHaveBeenCalledWith({
       gameId: 'TEST',
       present: false,
-    });
-  });
+    })
+  })
 
   test('should handle errors', async () => {
     mockRef.mockImplementation(() => ({
       update: jest.fn(() => Promise.reject(new Error('Database error'))),
-    }));
+    }))
 
-    await updatePlayer(mockReq, mockRes);
+    await updatePlayer(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500);
-  });
-});
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+  })
+})
 
 describe('Game Functions - replayGame', () => {
-  let mockRef;
-  let mockReq;
-  let mockRes;
+  let mockRef
+  let mockReq
+  let mockRes
 
   beforeEach(() => {
-    mockRef = jest.fn((path) => ({
+    mockRef = jest.fn(() => ({
       update: jest.fn(() => Promise.resolve()),
-    }));
+    }))
 
     mockReq = {
       ref: mockRef,
@@ -356,30 +357,30 @@ describe('Game Functions - replayGame', () => {
         oldGameId: 'OLD',
         newGameId: 'NEW',
       },
-    };
+    }
 
     mockRes = {
       sendStatus: jest.fn(),
-    };
-  });
+    }
+  })
 
   test('should link old game to new game', async () => {
-    const mockUpdate = jest.fn(() => Promise.resolve());
-    mockRef.mockImplementation(() => ({ update: mockUpdate }));
+    const mockUpdate = jest.fn(() => Promise.resolve())
+    mockRef.mockImplementation(() => ({ update: mockUpdate }))
 
-    await replayGame(mockReq, mockRes);
+    await replayGame(mockReq, mockRes)
 
-    expect(mockUpdate).toHaveBeenCalledWith({ nextGame: 'NEW' });
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(200);
-  });
+    expect(mockUpdate).toHaveBeenCalledWith({ nextGame: 'NEW' })
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(200)
+  })
 
   test('should handle errors', async () => {
     mockRef.mockImplementation(() => ({
       update: jest.fn(() => Promise.reject(new Error('Database error'))),
-    }));
+    }))
 
-    await replayGame(mockReq, mockRes);
+    await replayGame(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500);
-  });
-});
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+  })
+})

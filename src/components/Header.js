@@ -1,9 +1,9 @@
-import { useState, useContext, useEffect } from "react"
-import Link from "next/link"
-import { Modal, ModalHeader, ModalBody } from "reactstrap"
-import SettingsContext from "../context/SettingsContext"
-import styles from "../styles/components/header.module.scss"
-import { Sound, Mute, Sun, Moon } from "../components/Icons"
+import { useState, useContext, useEffect } from 'react'
+import Link from 'next/link'
+import { Modal, ModalHeader, ModalBody } from 'reactstrap'
+import SettingsContext from '../context/SettingsContext'
+import styles from '../styles/components/header.module.scss'
+import { Sound, Mute, Sun, Moon } from '../components/Icons'
 
 const Header = () => {
   const [showRules, setShowRules] = useState(false)
@@ -38,7 +38,7 @@ const Header = () => {
         <div className={styles.rules}>
           {mounted && (
             <>
-              <div title={dark ? "Light mode" : "Dark mode"} onClick={handleDark}>
+              <div title={dark ? 'Light mode' : 'Dark mode'} onClick={handleDark}>
                 {dark ? (
                   <Sun className={styles.icon} />
                 ) : (
@@ -46,7 +46,7 @@ const Header = () => {
                 )}
               </div>
               <div
-                title={`Notification sounds ${mute ? "muted" : "active"}`}
+                title={`Notification sounds ${mute ? 'muted' : 'active'}`}
                 onClick={handleSound}
               >
                 {mute ? (
@@ -69,7 +69,7 @@ const Header = () => {
         toggle={toggleRules}
         contentClassName="rules-modal"
       >
-        <ModalHeader tag={"h2"} toggle={toggleRules}>
+        <ModalHeader tag={'h2'} toggle={toggleRules}>
           rules
         </ModalHeader>
         <ModalBody>

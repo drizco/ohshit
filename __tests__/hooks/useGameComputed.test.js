@@ -30,7 +30,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -45,7 +44,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -60,7 +58,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -82,7 +79,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -98,7 +94,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -119,7 +114,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players,
           playerId: 'p1',
-          
         })
       )
 
@@ -137,7 +131,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players,
           playerId: 'p2',
-          
         })
       )
 
@@ -154,7 +147,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players,
           playerId: null,
-          
         })
       )
 
@@ -171,7 +163,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players,
           playerId: 'p2',
-          
         })
       )
 
@@ -188,7 +179,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players,
           playerId: 'p1',
-          
         })
       )
 
@@ -209,7 +199,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -225,7 +214,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -239,7 +227,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -252,7 +239,6 @@ describe('useGameComputed Hook', () => {
           tricks: undefined,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -272,7 +258,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -287,7 +272,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -300,7 +284,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -321,7 +304,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -336,7 +318,6 @@ describe('useGameComputed Hook', () => {
           tricks,
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -349,7 +330,6 @@ describe('useGameComputed Hook', () => {
           tricks: [],
           players: {},
           playerId: null,
-          
         })
       )
 
@@ -398,7 +378,6 @@ describe('useGameComputed Hook', () => {
             tricks,
             players: {},
             playerId: null,
-            
           }),
         {
           initialProps: { tricks: initialTricks },
@@ -426,7 +405,6 @@ describe('useGameComputed Hook', () => {
             tricks: [],
             players,
             playerId,
-            
           }),
         {
           initialProps: { playerId: 'p1' },

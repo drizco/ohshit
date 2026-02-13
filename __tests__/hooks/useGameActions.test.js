@@ -1,5 +1,5 @@
-import { jest } from "@jest/globals"
-import { renderHook, act, waitFor } from "@testing-library/react"
+import { jest } from '@jest/globals'
+import { renderHook, act, waitFor } from '@testing-library/react'
 
 // Create mocks before any imports
 const mockNewGame = jest.fn()
@@ -16,7 +16,7 @@ const mockCalculateAdjustedBid = jest.fn()
 
 // Mock localStorage
 delete global.localStorage
-Object.defineProperty(global, "localStorage", {
+Object.defineProperty(global, 'localStorage', {
   value: {
     getItem: jest.fn(),
     setItem: jest.fn(),
@@ -27,7 +27,7 @@ Object.defineProperty(global, "localStorage", {
 })
 
 // Mock API module
-jest.unstable_mockModule("@/utils/api", () => ({
+jest.unstable_mockModule('@/utils/api', () => ({
   newGame: mockNewGame,
   replayGame: mockReplayGame,
   startGame: mockStartGame,
@@ -39,13 +39,13 @@ jest.unstable_mockModule("@/utils/api", () => ({
 }))
 
 // Mock helpers
-jest.unstable_mockModule("@/utils/helpers", () => ({
+jest.unstable_mockModule('@/utils/helpers', () => ({
   calculateLeader: mockCalculateLeader,
   isLegal: mockIsLegal,
 }))
 
 // Mock bidHelpers
-jest.unstable_mockModule("@/utils/bidHelpers", () => ({
+jest.unstable_mockModule('@/utils/bidHelpers', () => ({
   calculateAdjustedBid: mockCalculateAdjustedBid,
 }))
 
@@ -53,11 +53,11 @@ jest.unstable_mockModule("@/utils/bidHelpers", () => ({
 let useGameActions
 
 beforeAll(async () => {
-  const mod = await import("@/hooks/useGameActions")
+  const mod = await import('@/hooks/useGameActions')
   useGameActions = mod.default
 })
 
-describe("useGameActions Hook", () => {
+describe('useGameActions Hook', () => {
   let mockContext
   let mockUpdateState
   let mockDispatchRound
@@ -82,7 +82,7 @@ describe("useGameActions Hook", () => {
 
     // Default mock implementations
     mockIsLegal.mockReturnValue(true)
-    mockCalculateLeader.mockReturnValue({ playerId: "p1" })
+    mockCalculateLeader.mockReturnValue({ playerId: 'p1' })
     mockCalculateAdjustedBid.mockReturnValue(3)
     mockPlayCardApi.mockResolvedValue({})
     mockSubmitBidApi.mockResolvedValue({})
@@ -90,33 +90,33 @@ describe("useGameActions Hook", () => {
     mockStartGame.mockResolvedValue({})
     mockNewGame.mockResolvedValue({
       ok: true,
-      json: async () => ({ playerId: "new-p1", gameId: "new-g1" }),
+      json: async () => ({ playerId: 'new-p1', gameId: 'new-g1' }),
     })
     mockAddPlayerApi.mockResolvedValue({
       ok: true,
-      json: async () => ({ playerId: "new-p1" }),
+      json: async () => ({ playerId: 'new-p1' }),
     })
   })
 
-  describe("nextRound", () => {
-    test("advances to next round with correct parameters", async () => {
+  describe('nextRound', () => {
+    test('advances to next round with correct parameters', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numCards: 5,
             roundNum: 1,
             descending: false,
-            dealer: "p1",
-            gameId: "game-1",
+            dealer: 'p1',
+            gameId: 'game-1',
             numRounds: 10,
-            roundId: "round-1",
+            roundId: 'round-1',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 0,
@@ -133,7 +133,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -145,32 +145,32 @@ describe("useGameActions Hook", () => {
         numRounds: 10,
         numCards: 6,
         descending: false,
-        gameId: "game-1",
+        gameId: 'game-1',
         noBidPoints: 5,
-        roundId: "round-1",
+        roundId: 'round-1',
         gameOver: false,
-        dealer: "p2",
+        dealer: 'p2',
       })
     })
 
-    test("handles descending rounds correctly", async () => {
+    test('handles descending rounds correctly', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numCards: 5,
             roundNum: 5,
             descending: true,
-            dealer: "p1",
-            gameId: "game-1",
+            dealer: 'p1',
+            gameId: 'game-1',
             numRounds: 10,
-            roundId: "round-5",
+            roundId: 'round-5',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 0,
@@ -187,7 +187,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -198,28 +198,28 @@ describe("useGameActions Hook", () => {
         expect.objectContaining({
           numCards: 4,
           descending: true,
-        }),
+        })
       )
     })
 
-    test("resets to ascending when numCards reaches 0", async () => {
+    test('resets to ascending when numCards reaches 0', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numCards: 1,
             roundNum: 8,
             descending: true,
-            dealer: "p1",
-            gameId: "game-1",
+            dealer: 'p1',
+            gameId: 'game-1',
             numRounds: 10,
-            roundId: "round-8",
+            roundId: 'round-8',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 0,
@@ -236,7 +236,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -247,28 +247,28 @@ describe("useGameActions Hook", () => {
         expect.objectContaining({
           numCards: 2,
           descending: false,
-        }),
+        })
       )
     })
 
-    test("sets gameOver when reaching last round", async () => {
+    test('sets gameOver when reaching last round', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numCards: 5,
             roundNum: 10,
             descending: false,
-            dealer: "p1",
-            gameId: "game-1",
+            dealer: 'p1',
+            gameId: 'game-1',
             numRounds: 10,
-            roundId: "round-10",
+            roundId: 'round-10',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 0,
@@ -285,7 +285,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -295,30 +295,30 @@ describe("useGameActions Hook", () => {
       expect(mockNextRoundApi).toHaveBeenCalledWith(
         expect.objectContaining({
           gameOver: true,
-        }),
+        })
       )
     })
 
-    test("handles errors correctly", async () => {
-      mockNextRoundApi.mockRejectedValue(new Error("API error"))
+    test('handles errors correctly', async () => {
+      mockNextRoundApi.mockRejectedValue(new Error('API error'))
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numCards: 5,
             roundNum: 1,
             descending: false,
-            dealer: "p1",
-            gameId: "game-1",
+            dealer: 'p1',
+            gameId: 'game-1',
             numRounds: 10,
-            roundId: "round-1",
+            roundId: 'round-1',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 0,
@@ -335,7 +335,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -346,36 +346,36 @@ describe("useGameActions Hook", () => {
     })
   })
 
-  describe("playCard", () => {
-    test("plays card when it is player turn and card is legal", async () => {
-      const mockCard = { cardId: "c1", rank: 5, suit: "H" }
+  describe('playCard', () => {
+    test('plays card when it is player turn and card is legal', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
       const mockTrick = {
         trickId: 1,
-        cards: { p2: { cardId: "c2", rank: 3, suit: "H" } },
-        leadSuit: "H",
+        cards: { p2: { cardId: 'c2', rank: 3, suit: 'H' } },
+        leadSuit: 'H',
       }
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
-            currentPlayer: "p1",
+            status: 'play',
+            currentPlayer: 'p1',
             numPlayers: 3,
-            gameId: "game-1",
-            roundId: "round-1",
+            gameId: 'game-1',
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
-          hand: [mockCard, { cardId: "c3", rank: 6, suit: "S" }],
+          hand: [mockCard, { cardId: 'c3', rank: 6, suit: 'S' }],
           bid: 2,
           bids: {},
           tricks: [mockTrick],
           trickIndex: 0,
-          trump: "D",
+          trump: 'D',
           queuedCard: null,
           visible: mockContext.visible,
           setState: mockContext.setState,
@@ -385,7 +385,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -394,22 +394,22 @@ describe("useGameActions Hook", () => {
 
       expect(mockContext.setState).toHaveBeenCalledWith({ loading: true })
       expect(mockPlayCardApi).toHaveBeenCalledWith({
-        playerId: "p1",
-        nextPlayerId: "p2",
+        playerId: 'p1',
+        nextPlayerId: 'p2',
         card: mockCard,
-        leader: "p1",
+        leader: 'p1',
         allCardsIn: false,
-        gameId: "game-1",
-        roundId: "round-1",
+        gameId: 'game-1',
+        roundId: 'round-1',
         trickId: 1,
-        leadSuit: "H",
+        leadSuit: 'H',
         nextRound: false,
       })
       expect(mockContext.setState).toHaveBeenCalledWith({ loading: false })
     })
 
-    test("queues card when it is not player turn", async () => {
-      const mockCard = { cardId: "c1", rank: 5, suit: "H" }
+    test('queues card when it is not player turn', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
       const mockTrick = {
         trickId: 1,
         cards: {},
@@ -418,25 +418,25 @@ describe("useGameActions Hook", () => {
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
-            currentPlayer: "p2", // Not player's turn
+            status: 'play',
+            currentPlayer: 'p2', // Not player's turn
             numPlayers: 3,
-            gameId: "game-1",
-            roundId: "round-1",
+            gameId: 'game-1',
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [mockCard],
           bid: 2,
           bids: {},
           tricks: [mockTrick],
           trickIndex: 0,
-          trump: "D",
+          trump: 'D',
           queuedCard: null,
           visible: mockContext.visible,
           setState: mockContext.setState,
@@ -446,7 +446,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -457,40 +457,40 @@ describe("useGameActions Hook", () => {
       expect(mockUpdateState).toHaveBeenCalled()
     })
 
-    test("calls nextRound when last card is played", async () => {
-      const mockCard = { cardId: "c1", rank: 5, suit: "H" }
+    test('calls nextRound when last card is played', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
       const mockTrick = {
         trickId: 1,
-        cards: { p2: { cardId: "c2" }, p3: { cardId: "c3" } },
-        leadSuit: "H",
+        cards: { p2: { cardId: 'c2' }, p3: { cardId: 'c3' } },
+        leadSuit: 'H',
       }
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
-            currentPlayer: "p1",
+            status: 'play',
+            currentPlayer: 'p1',
             numPlayers: 3,
-            gameId: "game-1",
-            roundId: "round-1",
+            gameId: 'game-1',
+            roundId: 'round-1',
             roundNum: 1,
             numRounds: 10,
             descending: false,
-            dealer: "p1",
+            dealer: 'p1',
             noBidPoints: 5,
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [mockCard], // Last card
           bid: 2,
           bids: {},
           tricks: [mockTrick],
           trickIndex: 0,
-          trump: "D",
+          trump: 'D',
           queuedCard: null,
           visible: mockContext.visible,
           setState: mockContext.setState,
@@ -500,7 +500,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -512,10 +512,10 @@ describe("useGameActions Hook", () => {
       })
     })
 
-    test("handles errors correctly", async () => {
-      mockPlayCardApi.mockRejectedValue(new Error("API error"))
+    test('handles errors correctly', async () => {
+      mockPlayCardApi.mockRejectedValue(new Error('API error'))
 
-      const mockCard = { cardId: "c1", rank: 5, suit: "H" }
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
       const mockTrick = {
         trickId: 1,
         cards: {},
@@ -524,25 +524,25 @@ describe("useGameActions Hook", () => {
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
-            currentPlayer: "p1",
+            status: 'play',
+            currentPlayer: 'p1',
             numPlayers: 3,
-            gameId: "game-1",
-            roundId: "round-1",
+            gameId: 'game-1',
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [mockCard],
           bid: 2,
           bids: {},
           tricks: [mockTrick],
           trickIndex: 0,
-          trump: "D",
+          trump: 'D',
           queuedCard: null,
           visible: mockContext.visible,
           setState: mockContext.setState,
@@ -552,30 +552,33 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
         await result.current.playCard(mockCard)
       })
 
-      expect(mockContext.setState).toHaveBeenCalledWith({ loading: false, error: true })
+      expect(mockContext.setState).toHaveBeenCalledWith({
+        loading: false,
+        error: true,
+      })
     })
   })
 
-  describe("submitBid", () => {
-    test("submits bid correctly", async () => {
+  describe('submitBid', () => {
+    test('submits bid correctly', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numPlayers: 3,
-            roundId: "round-1",
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 3,
@@ -592,7 +595,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -601,28 +604,28 @@ describe("useGameActions Hook", () => {
 
       expect(mockContext.setState).toHaveBeenCalledWith({ loading: true })
       expect(mockSubmitBidApi).toHaveBeenCalledWith({
-        gameId: "game-1",
-        playerId: "p1",
-        nextPlayerId: "p2",
+        gameId: 'game-1',
+        playerId: 'p1',
+        nextPlayerId: 'p2',
         bid: 3,
         allBidsIn: false,
-        roundId: "round-1",
+        roundId: 'round-1',
       })
       expect(mockContext.setState).toHaveBeenCalledWith({ loading: false })
     })
 
-    test("uses optional bid when provided", async () => {
+    test('uses optional bid when provided', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numPlayers: 3,
-            roundId: "round-1",
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 3,
@@ -639,7 +642,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -649,22 +652,22 @@ describe("useGameActions Hook", () => {
       expect(mockSubmitBidApi).toHaveBeenCalledWith(
         expect.objectContaining({
           bid: 5,
-        }),
+        })
       )
     })
 
-    test("sets allBidsIn when all other players have bid", async () => {
+    test('sets allBidsIn when all other players have bid', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
             numPlayers: 3,
-            roundId: "round-1",
+            roundId: 'round-1',
           },
           players: {
-            p1: { nextPlayer: "p2" },
+            p1: { nextPlayer: 'p2' },
           },
           hand: [],
           bid: 3,
@@ -681,7 +684,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -691,31 +694,31 @@ describe("useGameActions Hook", () => {
       expect(mockSubmitBidApi).toHaveBeenCalledWith(
         expect.objectContaining({
           allBidsIn: true,
-        }),
+        })
       )
     })
   })
 
-  describe("randomPlay", () => {
-    test("plays random card when status is play", () => {
+  describe('randomPlay', () => {
+    test('plays random card when status is play', () => {
       const mockCards = [
-        { cardId: "c1", rank: 5, suit: "H" },
-        { cardId: "c2", rank: 6, suit: "S" },
+        { cardId: 'c1', rank: 5, suit: 'H' },
+        { cardId: 'c2', rank: 6, suit: 'S' },
       ]
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
+            status: 'play',
           },
           players: {},
           hand: mockCards,
           bid: 0,
           bids: {},
-          tricks: [{ trickId: 1, leadSuit: "H", cards: {} }],
+          tricks: [{ trickId: 1, leadSuit: 'H', cards: {} }],
           trickIndex: 0,
           trump: null,
           queuedCard: null,
@@ -727,7 +730,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       act(() => {
@@ -738,17 +741,17 @@ describe("useGameActions Hook", () => {
       // Can't easily assert which card since it's random
     })
 
-    test("submits random bid when status is bid", () => {
+    test('submits random bid when status is bid', () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "bid",
+            status: 'bid',
           },
           players: {},
-          hand: [{ cardId: "c1" }, { cardId: "c2" }, { cardId: "c3" }],
+          hand: [{ cardId: 'c1' }, { cardId: 'c2' }, { cardId: 'c3' }],
           bid: 0,
           bids: {},
           tricks: [],
@@ -763,7 +766,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       act(() => {
@@ -774,20 +777,20 @@ describe("useGameActions Hook", () => {
     })
   })
 
-  describe("other actions", () => {
-    test("playAgain creates new game", async () => {
+  describe('other actions', () => {
+    test('playAgain creates new game', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            name: "Test Game",
+            name: 'Test Game',
             numCards: 5,
             noBidPoints: 5,
             dirty: true,
             timeLimit: 30,
-            gameId: "game-1",
+            gameId: 'game-1',
           },
           players: {},
           hand: [],
@@ -805,7 +808,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -815,17 +818,17 @@ describe("useGameActions Hook", () => {
       expect(mockNewGame).toHaveBeenCalled()
       expect(mockReplayGame).toHaveBeenCalled()
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        "oh-shit-new-g1-player-id",
-        "new-p1",
+        'oh-shit-new-g1-player-id',
+        'new-p1'
       )
     })
 
-    test("addPlayer adds player to game", async () => {
+    test('addPlayer adds player to game', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
+          gameId: 'game-1',
           playerId: null,
-          playerName: "New Player",
+          playerName: 'New Player',
           game: {},
           players: {},
           hand: [],
@@ -843,7 +846,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -851,23 +854,23 @@ describe("useGameActions Hook", () => {
       })
 
       expect(mockAddPlayerApi).toHaveBeenCalledWith({
-        playerName: "New Player",
-        gameId: "game-1",
+        playerName: 'New Player',
+        gameId: 'game-1',
       })
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        "oh-shit-game-1-player-id",
-        "new-p1",
+        'oh-shit-game-1-player-id',
+        'new-p1'
       )
-      expect(localStorage.setItem).toHaveBeenCalledWith("player-name", "New Player")
-      expect(mockUpdateState).toHaveBeenCalledWith({ playerId: "new-p1" })
+      expect(localStorage.setItem).toHaveBeenCalledWith('player-name', 'New Player')
+      expect(mockUpdateState).toHaveBeenCalledWith({ playerId: 'new-p1' })
     })
 
-    test("startGameHandler starts the game", async () => {
+    test('startGameHandler starts the game', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {},
           players: {},
           hand: [],
@@ -885,22 +888,22 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
         await result.current.startGameHandler()
       })
 
-      expect(mockStartGame).toHaveBeenCalledWith({ gameId: "game-1" })
+      expect(mockStartGame).toHaveBeenCalledWith({ gameId: 'game-1' })
     })
 
-    test("handleChange updates state from input", () => {
+    test('handleChange updates state from input', () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {},
           players: {},
           hand: [],
@@ -918,31 +921,31 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       act(() => {
         result.current.handleChange({
-          target: { name: "playerName", value: "New Name" },
+          target: { name: 'playerName', value: 'New Name' },
         })
       })
 
-      expect(mockUpdateState).toHaveBeenCalledWith({ playerName: "New Name" })
+      expect(mockUpdateState).toHaveBeenCalledWith({ playerName: 'New Name' })
     })
 
-    test("handleToggle increments bid", () => {
+    test('handleToggle increments bid', () => {
       // Mock updateState to execute the updater function
       const mockUpdateStateWithExec = jest.fn((updater) => {
-        if (typeof updater === "function") {
+        if (typeof updater === 'function') {
           updater({ game: {}, players: {}, bid: 3 })
         }
       })
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {},
           players: {},
           hand: [],
@@ -960,7 +963,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       act(() => {
@@ -971,14 +974,14 @@ describe("useGameActions Hook", () => {
       expect(mockCalculateAdjustedBid).toHaveBeenCalled()
     })
 
-    test("closeModal hides winner modal and re-initializes listeners", async () => {
+    test('closeModal hides winner modal and re-initializes listeners', async () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            roundId: "round-1",
+            roundId: 'round-1',
           },
           players: {},
           hand: [],
@@ -996,27 +999,29 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
         await result.current.closeModal()
       })
 
-      expect(mockDispatchRound).toHaveBeenCalledWith({ type: "HIDE_WINNER_MODAL" })
+      expect(mockDispatchRound).toHaveBeenCalledWith({
+        type: 'HIDE_WINNER_MODAL',
+      })
     })
 
-    test("yourTurn handles queued card", async () => {
-      const mockCard = { cardId: "c1", rank: 5, suit: "H" }
+    test('yourTurn handles queued card', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
 
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {
-            status: "play",
-            currentPlayer: "p1",
+            status: 'play',
+            currentPlayer: 'p1',
           },
           players: {},
           hand: [mockCard],
@@ -1034,7 +1039,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       await act(async () => {
@@ -1045,12 +1050,12 @@ describe("useGameActions Hook", () => {
       expect(mockAutoPlayTimeout.current).toBeTruthy()
     })
 
-    test("yourTurn shows notification when no queued card", () => {
+    test('yourTurn shows notification when no queued card', () => {
       const { result } = renderHook(() =>
         useGameActions({
-          gameId: "game-1",
-          playerId: "p1",
-          playerName: "Player 1",
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
           game: {},
           players: {},
           hand: [],
@@ -1068,7 +1073,7 @@ describe("useGameActions Hook", () => {
           listenToGame: mockListenToGame,
           listenToRound: mockListenToRound,
           listenToHand: mockListenToHand,
-        }),
+        })
       )
 
       act(() => {

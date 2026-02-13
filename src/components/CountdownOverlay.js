@@ -1,5 +1,5 @@
-import React from "react"
-import styles from "../styles/pages/game.module.scss"
+import React from 'react'
+import styles from '../styles/pages/game.module.scss'
 
 /**
  * CountdownOverlay - Displays a large countdown timer overlay

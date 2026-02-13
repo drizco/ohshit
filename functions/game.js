@@ -1,7 +1,7 @@
-import ShortUniqueId from "short-unique-id";
-import Deck from "./deck.js";
+import ShortUniqueId from 'short-unique-id'
+import Deck from './deck.js'
 
-const uid = new ShortUniqueId.default({ length: 4 });
+const uid = new ShortUniqueId.default({ length: 4 })
 
 export const newGame = async (req, res) => {
   try {
@@ -12,8 +12,8 @@ export const newGame = async (req, res) => {
     while (!unique) {
       // eslint-disable-next-line no-await-in-loop
       unique = await ref(`games/${gameId}`)
-        .once("value")
-        .then(snap => !snap.exists())
+        .once('value')
+        .then((snap) => !snap.exists())
       if (!unique) {
         gameId = uid()
       }
@@ -24,7 +24,7 @@ export const newGame = async (req, res) => {
     updateObj[`games/${gameId}/timestamp`] = new Date()
     updateObj[`games/${gameId}/name`] = game
     updateObj[`games/${gameId}/gameId`] = gameId
-    updateObj[`games/${gameId}/status`] = "pending"
+    updateObj[`games/${gameId}/status`] = 'pending'
     updateObj[`games/${gameId}/dirty`] = dirty
     updateObj[`games/${gameId}/timeLimit`] = timeLimit
     updateObj[`games/${gameId}/noBidPoints`] = !bidPoints
@@ -58,17 +58,17 @@ export const startGame = async (req, res) => {
   try {
     const {
       ref,
-      body: { gameId }
+      body: { gameId },
     } = req
     let [players, numCards] = await Promise.all([
-      ref("players")
-        .orderByChild("gameId")
+      ref('players')
+        .orderByChild('gameId')
         .equalTo(gameId)
-        .once("value")
-        .then(snap => snap.val()),
+        .once('value')
+        .then((snap) => snap.val()),
       ref(`games/${gameId}/numCards`)
-        .once("value")
-        .then(snap => snap.val())
+        .once('value')
+        .then((snap) => snap.val()),
     ])
     players = Object.values(players)
     const deckSize = 52
@@ -80,7 +80,7 @@ export const startGame = async (req, res) => {
 
     const hands = {}
     for (let i = numCards; i > 0; i--) {
-      players.forEach(player => {
+      players.forEach((player) => {
         const card = deck.deal()
         if (hands[player.playerId]) {
           hands[player.playerId].push(card)
@@ -92,7 +92,7 @@ export const startGame = async (req, res) => {
 
     const trump = deck.deal().suit
 
-    const roundRef = ref("rounds").push()
+    const roundRef = ref('rounds').push()
     const roundKey = roundRef.key
 
     const trickRef = ref(`rounds/${roundKey}/tricks`).push()
@@ -111,7 +111,7 @@ export const startGame = async (req, res) => {
 
     const updateObj = {}
 
-    players.forEach(player => {
+    players.forEach((player) => {
       updateObj[`players/${player.playerId}/nextPlayer`] = player.nextPlayer
     })
 
@@ -122,28 +122,30 @@ export const startGame = async (req, res) => {
     updateObj[`games/${gameId}/numRounds`] = numCards * 2 - 1
     updateObj[`games/${gameId}/currentPlayer`] = dealer.nextPlayer
     updateObj[`games/${gameId}/dealer`] = dealer.playerId
-    updateObj[`games/${gameId}/status`] = "bid"
+    updateObj[`games/${gameId}/status`] = 'bid'
     updateObj[`rounds/${roundKey}/roundId`] = roundKey
     updateObj[`rounds/${roundKey}/numPlayers`] = numPlayers
     updateObj[`rounds/${roundKey}/trump`] = trump
     updateObj[`rounds/${roundKey}/gameId`] = gameId
     updateObj[`rounds/${roundKey}/tricks/${trickKey}/trickId`] = trickKey
 
-    Object.keys(hands).forEach(playerId => {
+    Object.keys(hands).forEach((playerId) => {
       const hand = hands[playerId]
       const sortedHand = deck.sortHand(hand)
-      const player = players.find(p => p.playerId === playerId)
+      const player = players.find((p) => p.playerId === playerId)
       updateObj[`hands/${playerId}/gameId`] = gameId
       updateObj[`hands/${playerId}/uid`] = player.uid
-      sortedHand.forEach(card => {
+      sortedHand.forEach((card) => {
         const cardRef = ref(`hands/${playerId}/rounds/${roundKey}/cards`).push()
         const cardId = cardRef.key
-        updateObj[
-          `hands/${playerId}/rounds/${roundKey}/cards/${cardId}`
-        ] = Object.assign({}, card, {
-          cardId,
-          playerId
-        })
+        updateObj[`hands/${playerId}/rounds/${roundKey}/cards/${cardId}`] = Object.assign(
+          {},
+          card,
+          {
+            cardId,
+            playerId,
+          }
+        )
       })
     })
 
@@ -164,7 +166,7 @@ export const submitBid = async (req, res) => {
     updateObj[`rounds/${roundId}/bids/${playerId}`] = Number(bid)
     updateObj[`games/${gameId}/currentPlayer`] = nextPlayerId
     if (allBidsIn) {
-      updateObj[`games/${gameId}/status`] = "play"
+      updateObj[`games/${gameId}/status`] = 'play'
     }
     await ref().update(updateObj)
     return res.sendStatus(200)
@@ -187,7 +189,7 @@ export const playCard = async (req, res) => {
       roundId,
       trickId,
       leadSuit,
-      nextRound
+      nextRound,
     } = body
     const updateObj = {}
     if (leadSuit) {
@@ -226,27 +228,27 @@ export const nextRound = async (req, res) => {
       roundId,
       noBidPoints,
       gameOver,
-      dealer
+      dealer,
     } = body
     const updateObj = {}
     const promiseArray = []
 
     const [bidSnap, tricksSnap] = await Promise.all([
-      ref(`rounds/${roundId}/bids`).once("value"),
-      ref(`rounds/${roundId}/tricks`).orderByKey().once("value")
+      ref(`rounds/${roundId}/bids`).once('value'),
+      ref(`rounds/${roundId}/tricks`).orderByKey().once('value'),
     ])
     const scoreObj = {}
     const bidObj = bidSnap.val()
-    Object.keys(bidObj).forEach(key => {
+    Object.keys(bidObj).forEach((key) => {
       scoreObj[key] = { bid: bidObj[key], won: 0 }
     })
 
-    tricksSnap.forEach(trickSnap => {
+    tricksSnap.forEach((trickSnap) => {
       const trick = trickSnap.val()
       scoreObj[trick.winner].won += 1
     })
 
-    Object.keys(scoreObj).forEach(playerId => {
+    Object.keys(scoreObj).forEach((playerId) => {
       let score = 0
       if (scoreObj[playerId].bid === scoreObj[playerId].won) {
         score += 10
@@ -256,24 +258,24 @@ export const nextRound = async (req, res) => {
       }
       promiseArray.push(
         ref(`games/${gameId}/score/${playerId}`).transaction(
-          oldScore => (oldScore || 0) + score
+          (oldScore) => (oldScore || 0) + score
         )
       )
     })
 
     if (gameOver) {
-      updateObj[`games/${gameId}/status`] = "over"
+      updateObj[`games/${gameId}/status`] = 'over'
     } else {
       const deck = new Deck()
 
-      const playersSnap = await ref("players")
-        .orderByChild("gameId")
+      const playersSnap = await ref('players')
+        .orderByChild('gameId')
         .equalTo(gameId)
-        .once("value")
+        .once('value')
 
       const hands = {}
       for (let i = numCards; i > 0; i--) {
-        playersSnap.forEach(playerSnap => {
+        playersSnap.forEach((playerSnap) => {
           const player = playerSnap.val()
           const card = deck.deal()
           if (hands[player.playerId]) {
@@ -290,7 +292,7 @@ export const nextRound = async (req, res) => {
       const numPlayers = Object.keys(playersObj).length
 
       const trump = deck.deal().suit
-      const roundRef = ref("rounds").push()
+      const roundRef = ref('rounds').push()
       const roundKey = roundRef.key
 
       const trickRef = ref(`rounds/${roundKey}/tricks`).push()
@@ -298,7 +300,7 @@ export const nextRound = async (req, res) => {
 
       updateObj[`games/${gameId}/roundId`] = roundKey
       updateObj[`games/${gameId}/roundNum`] = roundNum
-      updateObj[`games/${gameId}/status`] = "bid"
+      updateObj[`games/${gameId}/status`] = 'bid'
       updateObj[`games/${gameId}/numCards`] = numCards
       updateObj[`games/${gameId}/descending`] = descending
       updateObj[`games/${gameId}/dealer`] = newDealer.playerId
@@ -309,21 +311,18 @@ export const nextRound = async (req, res) => {
       updateObj[`rounds/${roundKey}/gameId`] = gameId
       updateObj[`rounds/${roundKey}/tricks/${trickKey}/trickId`] = trickKey
 
-      Object.keys(hands).forEach(playerId => {
+      Object.keys(hands).forEach((playerId) => {
         const hand = hands[playerId]
         const sortedHand = deck.sortHand(hand)
         updateObj[`hands/${playerId}/gameId`] = gameId
-        sortedHand.forEach(card => {
-          const cardRef = ref(
-            `hands/${playerId}/rounds/${roundKey}/cards`
-          ).push()
+        sortedHand.forEach((card) => {
+          const cardRef = ref(`hands/${playerId}/rounds/${roundKey}/cards`).push()
           const cardId = cardRef.key
-          updateObj[
-            `hands/${playerId}/rounds/${roundKey}/cards/${cardId}`
-          ] = Object.assign({}, card, {
-            cardId,
-            playerId
-          })
+          updateObj[`hands/${playerId}/rounds/${roundKey}/cards/${cardId}`] =
+            Object.assign({}, card, {
+              cardId,
+              playerId,
+            })
         })
       })
     }
@@ -341,14 +340,14 @@ export const addPlayer = async (req, res) => {
   try {
     const { ref, body } = req
     const { playerName, gameId } = body
-    const playerRef = ref("players").push()
+    const playerRef = ref('players').push()
     const playerId = playerRef.key
     await playerRef.update({
       name: playerName,
       gameId,
       playerId,
       present: true,
-      uid: req.uid
+      uid: req.uid,
     })
     return res.status(200).send({ playerId })
   } catch (error) {
@@ -363,7 +362,7 @@ export const updatePlayer = async (req, res) => {
     const { playerId, gameId, present } = params
     await ref(`players/${playerId}`).update({
       gameId,
-      present: present === "true"
+      present: present === 'true',
     })
     return res.sendStatus(200)
   } catch (error) {

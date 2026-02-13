@@ -9,20 +9,20 @@ export const mockGame = {
   dirty: false,
   timeLimit: 60,
   noBidPoints: false,
-};
+}
 
 export const mockGameBidPhase = {
   ...mockGame,
   status: 'bid',
   currentRound: 'round-1',
-};
+}
 
 export const mockGamePlayPhase = {
   ...mockGame,
   status: 'play',
   currentRound: 'round-1',
   currentTrick: 'trick-1',
-};
+}
 
 export const mockPlayer = {
   playerId: 'player-1',
@@ -33,7 +33,7 @@ export const mockPlayer = {
   bid: null,
   score: 0,
   nextPlayer: null,
-};
+}
 
 export const mockPlayers = [
   {
@@ -66,15 +66,15 @@ export const mockPlayers = [
     bid: null,
     score: 0,
   },
-];
+]
 
 export const mockHand = [
   { rank: 13, suit: 'H' }, // Ace of Hearts
   { rank: 12, suit: 'H' }, // King of Hearts
   { rank: 11, suit: 'S' }, // Queen of Spades
   { rank: 10, suit: 'D' }, // Jack of Diamonds
-  { rank: 5, suit: 'C' },  // 6 of Clubs
-];
+  { rank: 5, suit: 'C' }, // 6 of Clubs
+]
 
 export const mockRound = {
   roundId: 'round-1',
@@ -84,7 +84,7 @@ export const mockRound = {
   trump: 'H',
   dealer: 'player-1',
   currentTrick: 'trick-1',
-};
+}
 
 export const mockTrick = {
   trickId: 'trick-1',
@@ -95,7 +95,7 @@ export const mockTrick = {
     { playerId: 'player-2', card: { rank: 12, suit: 'H' } },
   ],
   winner: null,
-};
+}
 
 export const mockCards = {
   aceOfHearts: { rank: 13, suit: 'H' },
@@ -105,4 +105,4 @@ export const mockCards = {
   sixOfClubs: { rank: 5, suit: 'C' },
   twoOfHearts: { rank: 1, suit: 'H' },
   twoOfSpades: { rank: 1, suit: 'S' },
-};
+}

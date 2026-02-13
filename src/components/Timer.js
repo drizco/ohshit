@@ -1,6 +1,6 @@
-import { useContext, useEffect } from "react"
-import TimerContext from "../context/TimerContext"
-import useInterval from "../hooks/useInterval"
+import { useContext, useEffect } from 'react'
+import TimerContext from '../context/TimerContext'
+import useInterval from '../hooks/useInterval'
 
 const Timer = ({ timeLimit, playerId, currentPlayer, randomPlay }) => {
   const { setTimer, timer } = useContext(TimerContext)

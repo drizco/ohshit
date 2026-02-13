@@ -1,45 +1,45 @@
-import { BLUE, PINK } from "./constants"
+import { BLUE, PINK } from './constants'
 
 export const absoluteUrl = (req, setLocalhost) => {
-  let protocol = "https:"
+  let protocol = 'https:'
   let host = req
-    ? req.headers["x-forwarded-host"] || req.headers["host"]
+    ? req.headers['x-forwarded-host'] || req.headers['host']
     : window.location.host
-  if (host.indexOf("localhost") > -1) {
+  if (host.indexOf('localhost') > -1) {
     if (setLocalhost) host = setLocalhost
-    protocol = "http:"
+    protocol = 'http:'
   }
   return {
     protocol: protocol,
     host: host,
-    origin: protocol + "//" + host
+    origin: protocol + '//' + host,
   }
 }
 
 export const getColor = (suit, dark) => {
-  if (suit === "C" || suit === "S") {
-    return dark ? BLUE : "#000"
+  if (suit === 'C' || suit === 'S') {
+    return dark ? BLUE : '#000'
   } else {
-    return dark ? PINK : "#db0007"
+    return dark ? PINK : '#db0007'
   }
 }
 
 export const getSource = (suit, dark) => {
   switch (suit) {
-    case "C":
-      return `/images/club${dark ? "-dark" : ""}.png`
-    case "H":
-      return `/images/heart${dark ? "-dark" : ""}.png`
-    case "S":
-      return `/images/spade${dark ? "-dark" : ""}.png`
-    case "D":
-      return `/images/diamond${dark ? "-dark" : ""}.png`
+    case 'C':
+      return `/images/club${dark ? '-dark' : ''}.png`
+    case 'H':
+      return `/images/heart${dark ? '-dark' : ''}.png`
+    case 'S':
+      return `/images/spade${dark ? '-dark' : ''}.png`
+    case 'D':
+      return `/images/diamond${dark ? '-dark' : ''}.png`
   }
 }
 
 export const isLegal = ({ hand, card, leadSuit }) => {
   if (!leadSuit) return true
-  const hasSuit = hand.some(c => c.suit === leadSuit)
+  const hasSuit = hand.some((c) => c.suit === leadSuit)
   if (hasSuit) {
     return card.suit === leadSuit
   }
@@ -63,7 +63,7 @@ export const calculateLeader = ({ cards, trump, leadSuit }) =>
     return b.rank - a.rank
   })[0]
 
-export const getScore = tricks =>
+export const getScore = (tricks) =>
   tricks.reduce((scoreObj, tr) => {
     const newScoreObj = { ...scoreObj }
     if (tr.winner) {
@@ -76,7 +76,7 @@ export const getScore = tricks =>
   }, {})
 
 export const getNextPlayer = ({ playerId, players }) => {
-  const playerIndex = players.findIndex(p => p.playerId === playerId)
+  const playerIndex = players.findIndex((p) => p.playerId === playerId)
   let nextPlayerIndex = playerIndex + 1
   if (nextPlayerIndex === players.length) {
     nextPlayerIndex = 0
@@ -86,15 +86,9 @@ export const getNextPlayer = ({ playerId, players }) => {
 
 export const getWinner = ({ winner, players }) => players[winner].name
 
-export const calculateGameScore = ({
-  players,
-  bids,
-  roundScore,
-  score,
-  noBidPoints
-}) => {
+export const calculateGameScore = ({ players, bids, roundScore, score, noBidPoints }) => {
   const newGameScore = { ...score }
-  Object.values(players).forEach(player => {
+  Object.values(players).forEach((player) => {
     const bidsMade = bids[player.playerId]
     let tricksWon = roundScore[player.playerId] || 0
     let newScore = tricksWon && !noBidPoints ? tricksWon : 0
@@ -122,7 +116,7 @@ export const handleDirtyGame = ({ value, numCards, bids, players }) => {
   if (lastPlayer) {
     const wouldMakeClean = getAvailableTricks({
       numCards,
-      bids
+      bids,
     })
     if (wouldMakeClean < 0) {
       return true

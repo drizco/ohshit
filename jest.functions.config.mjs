@@ -44,4 +44,4 @@ export default {
 
   // Longer timeout for integration tests
   testTimeout: 30000,
-};
+}

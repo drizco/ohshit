@@ -1,4 +1,4 @@
-@import "../global/variables.scss";
+@import '../global/variables.scss';
 
 ul.players {
   list-style: none;
@@ -94,7 +94,7 @@ ul.players {
     }
 
     .dealer::after {
-      content: "dealer";
+      content: 'dealer';
       bottom: -50%;
       right: 0;
     }
@@ -137,7 +137,7 @@ ul.players {
         &.current_player_arrow {
           &::before {
             position: absolute;
-            content: "-->";
+            content: '-->';
             left: -6vw;
             top: 0;
             bottom: 0;

@@ -1,9 +1,9 @@
-import React from "react";
-import Header from "./Header";
+import React from 'react'
+import Header from './Header'
 // import InviteModal from "./InviteModal";
 
-const Layout = props => {
-  const { children } = props;
+const Layout = (props) => {
+  const { children } = props
 
   return (
     <>
@@ -11,7 +11,7 @@ const Layout = props => {
       {children}
       {/* <InviteModal /> */}
     </>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout

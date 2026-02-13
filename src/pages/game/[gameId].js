@@ -1,26 +1,26 @@
-import { useEffect, useRef, useContext } from "react"
-import { useRouter } from "next/router"
-import Link from "next/link"
-import { Container, Button, Row, Col, Modal, ModalBody, ModalHeader } from "reactstrap"
-import { onAuthStateChanged } from "firebase/auth"
-import CombinedContext from "../../context/CombinedContext"
-import { auth } from "../../lib/firebase"
-import styles from "../../styles/pages/game.module.scss"
-import CardRow from "../../components/CardRow"
-import { getSource, getAvailableTricks, getWinner } from "../../utils/helpers"
-import Players from "../../components/Players"
-import NotificationController from "../../components/NotificationController"
-import CustomTrump from "../../components/CustomTrump"
-import TurnChange from "../../components/TurnChange"
-import CountdownOverlay from "../../components/CountdownOverlay"
-import JoinGameForm from "../../components/JoinGameForm"
+import { useEffect, useRef, useContext } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
+import { Container, Button, Row, Col, Modal, ModalBody, ModalHeader } from 'reactstrap'
+import { onAuthStateChanged } from 'firebase/auth'
+import CombinedContext from '../../context/CombinedContext'
+import { auth } from '../../lib/firebase'
+import styles from '../../styles/pages/game.module.scss'
+import CardRow from '../../components/CardRow'
+import { getSource, getAvailableTricks, getWinner } from '../../utils/helpers'
+import Players from '../../components/Players'
+import NotificationController from '../../components/NotificationController'
+import CustomTrump from '../../components/CustomTrump'
+import TurnChange from '../../components/TurnChange'
+import CountdownOverlay from '../../components/CountdownOverlay'
+import JoinGameForm from '../../components/JoinGameForm'
 
 // Custom hooks
-import useGameState from "../../hooks/useGameState"
-import useGameComputed from "../../hooks/useGameComputed"
-import useGameListeners from "../../hooks/useGameListeners"
-import useGameActions from "../../hooks/useGameActions"
-import useInterval from "../../hooks/useInterval"
+import useGameState from '../../hooks/useGameState'
+import useGameComputed from '../../hooks/useGameComputed'
+import useGameListeners from '../../hooks/useGameListeners'
+import useGameActions from '../../hooks/useGameActions'
+import useInterval from '../../hooks/useInterval'
 
 function Game({ gameId, isMobile }) {
   const router = useRouter()
@@ -119,17 +119,17 @@ function Game({ gameId, isMobile }) {
   const prevRoundId = useRef(null)
   useEffect(() => {
     if (game?.roundId && prevRoundId.current && prevRoundId.current !== game.roundId) {
-      dispatchRound({ type: "RESET" })
+      dispatchRound({ type: 'RESET' })
     }
     prevRoundId.current = game?.roundId
   }, [game?.roundId, dispatchRound])
 
   // Handle "your turn" logic
   useEffect(() => {
-    if (game && game.currentPlayer === playerId && game.status === "play") {
+    if (game && game.currentPlayer === playerId && game.status === 'play') {
       yourTurn()
     }
-  }, [game?.currentPlayer, playerId, game?.status, yourTurn])
+  }, [game, playerId, yourTurn])
 
   // Interval for random play (if needed)
   useInterval(
@@ -138,7 +138,7 @@ function Game({ gameId, isMobile }) {
         randomPlay()
       }
     },
-    game?.autoPlay && game?.currentPlayer === playerId ? 1000 : null,
+    game?.autoPlay && game?.currentPlayer === playerId ? 1000 : null
   )
 
   // Render logic
@@ -178,17 +178,17 @@ function Game({ gameId, isMobile }) {
         />
         <Row className={styles.info_row}>
           <Col xs="4">
-            {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
+            {name && <h2 style={{ textDecoration: 'underline' }}>{name}</h2>}
           </Col>
           <Col xs="4">
-            {isHost && status && status === "pending" && (
+            {isHost && status && status === 'pending' && (
               <Row>
                 <Button color="success" onClick={startGameHandler}>
                   START GAME
                 </Button>
               </Row>
             )}
-            {status && (status === "bid" || status === "play" || status === "over") && (
+            {status && (status === 'bid' || status === 'play' || status === 'over') && (
               <>
                 <h4>{`ROUND: ${roundNum} of ${numRounds}`}</h4>
                 <h4>{`TOTAL TRICKS: ${numCards}`}</h4>
@@ -267,7 +267,7 @@ function Game({ gameId, isMobile }) {
           </Container>
         </ModalBody>
       </Modal>
-      <Modal centered isOpen={status === "over"}>
+      <Modal centered isOpen={status === 'over'}>
         <ModalHeader>
           <Row>
             <Col className="d-flex justify-content-center mb-3">
@@ -294,21 +294,21 @@ function Game({ gameId, isMobile }) {
                   <h5>{player.name}</h5>
                 </Col>
                 <Col xs="6">
-                  <h5 style={{ textAlign: "center" }}>
-                    {score && score[player.playerId] ? score[player.playerId] : "0"}
+                  <h5 style={{ textAlign: 'center' }}>
+                    {score && score[player.playerId] ? score[player.playerId] : '0'}
                   </h5>
                 </Col>
               </Row>
             ))}
           <Row>
             <Col>
-              {status === "over" ? (
+              {status === 'over' ? (
                 <>
                   <div className="mt-3 text-center">
                     <Button
                       color="primary"
                       onClick={() => {
-                        router.push("/")
+                        router.push('/')
                       }}
                     >
                       HOME
@@ -336,7 +336,7 @@ function Game({ gameId, isMobile }) {
           </Row>
         </ModalBody>
       </Modal>
-      {(status === "play" || status === "bid") && (
+      {(status === 'play' || status === 'bid') && (
         <TurnChange
           timeLimit={timeLimit}
           playerId={playerId}
@@ -359,9 +359,9 @@ function Game({ gameId, isMobile }) {
 
 export async function getServerSideProps(context) {
   const { gameId } = context.params
-  const userAgent = context.req.headers["user-agent"] || ""
+  const userAgent = context.req.headers['user-agent'] || ''
   const isMobile = Boolean(
-    userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i),
+    userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i)
   )
   return { props: { gameId, isMobile } }
 }

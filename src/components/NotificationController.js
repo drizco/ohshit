@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useContext, useCallback } from "react"
-import dynamic from "next/dynamic"
-import SettingsContext from "../context/SettingsContext"
+import { useState, useEffect, useRef, useContext, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+import SettingsContext from '../context/SettingsContext'
 
 const Notification = dynamic(
-  () => import("react-web-notification").then((mod) => mod.default || mod),
+  () => import('react-web-notification').then((mod) => mod.default || mod),
   {
     ssr: false,
     loading: () => null,
@@ -17,22 +17,22 @@ function NotificationController({ showNotification, userName, onClose }) {
 
   useEffect(() => {
     if (navigator) {
-      navigator.serviceWorker.register("/sw.js")
+      navigator.serviceWorker.register('/sw.js')
     }
   }, [])
 
   const handlePermissionGranted = useCallback(() => {
-    console.log("Permission Granted")
+    console.log('Permission Granted')
     setIgnore(false)
   }, [])
 
   const handlePermissionDenied = useCallback(() => {
-    console.log("Permission Denied")
+    console.log('Permission Denied')
     setIgnore(true)
   }, [])
 
   const handleNotSupported = useCallback(() => {
-    console.log("Web Notification not Supported")
+    console.log('Web Notification not Supported')
     setIgnore(true)
   }, [])
 
@@ -67,11 +67,11 @@ function NotificationController({ showNotification, userName, onClose }) {
         onShow={handleNotificationOnShow}
         onClose={handleNotificationOnClose}
         timeout={2000}
-        title={"oopsie poopsie..."}
+        title={'oopsie poopsie...'}
         options={{
           body: `your turn, ${userName}`,
-          icon: "/images/poop.png",
-          tag: "your-turn",
+          icon: '/images/poop.png',
+          tag: 'your-turn',
         }}
       />
       <audio id="sound" preload="auto" ref={soundRef}>

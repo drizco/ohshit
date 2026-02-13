@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react"
-import { onValue, onChildAdded, onChildChanged, onChildRemoved } from "firebase/database"
+import { useEffect, useRef, useState } from 'react'
+import { onValue, onChildAdded, onChildChanged, onChildRemoved } from 'firebase/database'
 
 /**
  * Generic Firebase listener hook that handles common patterns:
@@ -22,7 +22,7 @@ import { onValue, onChildAdded, onChildChanged, onChildRemoved } from "firebase/
 const useFirebaseListener = ({
   ref,
   enabled = true,
-  eventType = "value",
+  eventType = 'value',
   onData,
   onError,
 }) => {
@@ -46,12 +46,12 @@ const useFirebaseListener = ({
           let unsubscribe
 
           switch (type) {
-            case "value":
+            case 'value':
               unsubscribe = onValue(
                 ref,
                 (snapshot) => {
                   try {
-                    onData?.(snapshot, "value")
+                    onData?.(snapshot, 'value')
                   } catch (err) {
                     onError?.(err)
                     setError(err)
@@ -60,16 +60,16 @@ const useFirebaseListener = ({
                 (err) => {
                   onError?.(err)
                   setError(err)
-                },
+                }
               )
               break
 
-            case "child_added":
+            case 'child_added':
               unsubscribe = onChildAdded(
                 ref,
                 (snapshot) => {
                   try {
-                    onData?.(snapshot, "child_added")
+                    onData?.(snapshot, 'child_added')
                   } catch (err) {
                     onError?.(err)
                     setError(err)
@@ -78,16 +78,16 @@ const useFirebaseListener = ({
                 (err) => {
                   onError?.(err)
                   setError(err)
-                },
+                }
               )
               break
 
-            case "child_changed":
+            case 'child_changed':
               unsubscribe = onChildChanged(
                 ref,
                 (snapshot) => {
                   try {
-                    onData?.(snapshot, "child_changed")
+                    onData?.(snapshot, 'child_changed')
                   } catch (err) {
                     onError?.(err)
                     setError(err)
@@ -96,16 +96,16 @@ const useFirebaseListener = ({
                 (err) => {
                   onError?.(err)
                   setError(err)
-                },
+                }
               )
               break
 
-            case "child_removed":
+            case 'child_removed':
               unsubscribe = onChildRemoved(
                 ref,
                 (snapshot) => {
                   try {
-                    onData?.(snapshot, "child_removed")
+                    onData?.(snapshot, 'child_removed')
                   } catch (err) {
                     onError?.(err)
                     setError(err)
@@ -114,7 +114,7 @@ const useFirebaseListener = ({
                 (err) => {
                   onError?.(err)
                   setError(err)
-                },
+                }
               )
               break
 

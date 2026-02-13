@@ -101,15 +101,12 @@ describe('Timer Component', () => {
   })
 
   test('renders with different time limits', () => {
-    const { container } = render(
-      <Timer {...defaultProps} timeLimit={30} />,
-      {
-        contextValue: {
-          timer: 15,
-          setState: jest.fn(),
-        },
-      }
-    )
+    const { container } = render(<Timer {...defaultProps} timeLimit={30} />, {
+      contextValue: {
+        timer: 15,
+        setState: jest.fn(),
+      },
+    })
 
     expect(container).toBeInTheDocument()
   })

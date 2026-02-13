@@ -1,9 +1,9 @@
-import React, { useContext, useState, useEffect } from "react"
+import React, { useContext, useState, useEffect } from 'react'
 
-import styles from "../styles/components/card-row.module.scss"
-import { getSource, getColor, isLegal } from "../utils/helpers"
-import SettingsContext from "../context/SettingsContext"
-import classNames from "classnames"
+import styles from '../styles/components/card-row.module.scss'
+import { getSource, getColor, isLegal } from '../utils/helpers'
+import SettingsContext from '../context/SettingsContext'
+import classNames from 'classnames'
 const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
   const { dark } = useContext(SettingsContext)
   const [illegalCard, setIllegalCard] = useState(null)
@@ -23,7 +23,7 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
           cards.map((card) => (
             <li
               className={classNames({
-                "playing-card": true,
+                'playing-card': true,
                 [styles.shake]: illegalCard === card.cardId,
                 [styles.selected]: queuedCard && queuedCard.cardId === card.cardId,
               })}

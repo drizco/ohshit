@@ -1,16 +1,16 @@
-import { useState } from "react"
-import { InputGroup, Input, Button } from "reactstrap"
+import { useState } from 'react'
+import { InputGroup, Input, Button } from 'reactstrap'
 
 const CustomTrump = () => {
   const [trumpName, setTrumpName] = useState(
-    localStorage.getItem("trumpNamePref") || "trump",
+    localStorage.getItem('trumpNamePref') || 'trump'
   )
 
   const [editMode, setEditMode] = useState(false)
 
   const save = () => {
     setEditMode(false)
-    localStorage.setItem("trumpNamePref", trumpName)
+    localStorage.setItem('trumpNamePref', trumpName)
   }
 
   return (
@@ -21,7 +21,7 @@ const CustomTrump = () => {
             value={trumpName}
             onChange={(e) => setTrumpName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === 'Enter') {
                 save()
               }
             }}

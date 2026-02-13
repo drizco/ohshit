@@ -5,10 +5,10 @@
  */
 export function createMockRef(data = {}) {
   const mockRef = jest.fn((path) => {
-    const pathData = path ? getNestedValue(data, path) : data;
+    const pathData = path ? getNestedValue(data, path) : data
 
     return {
-      once: jest.fn((eventType) =>
+      once: jest.fn(() =>
         Promise.resolve({
           exists: () => pathData !== undefined,
           val: () => pathData,
@@ -35,20 +35,20 @@ export function createMockRef(data = {}) {
         })),
       })),
       remove: jest.fn(() => Promise.resolve()),
-    };
-  });
+    }
+  })
 
-  return mockRef;
+  return mockRef
 }
 
 /**
  * Gets a nested value from an object using a path string
  */
 function getNestedValue(obj, path) {
-  if (!path) return obj;
+  if (!path) return obj
   return path.split('/').reduce((current, key) => {
-    return current?.[key];
-  }, obj);
+    return current?.[key]
+  }, obj)
 }
 
 /**
@@ -62,7 +62,7 @@ export function createMockRequest(body = {}, ref = null) {
       'content-type': 'application/json',
     },
     method: 'POST',
-  };
+  }
 }
 
 /**
@@ -74,15 +74,15 @@ export function createMockResponse() {
     send: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),
     sendStatus: jest.fn().mockReturnThis(),
-  };
-  return res;
+  }
+  return res
 }
 
 /**
  * Waits for all promises to resolve
  */
 export function flushPromises() {
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise((resolve) => setImmediate(resolve))
 }
 
 /**
@@ -96,9 +96,9 @@ export function createSnapshot(data, key = null) {
     forEach: (callback) => {
       if (data && typeof data === 'object') {
         Object.entries(data).forEach(([childKey, childData]) => {
-          callback(createSnapshot(childData, childKey));
-        });
+          callback(createSnapshot(childData, childKey))
+        })
       }
     },
-  };
+  }
 }

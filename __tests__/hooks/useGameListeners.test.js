@@ -1,11 +1,18 @@
 import { jest } from '@jest/globals'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 
 // Create mocks before any imports
 const mockUseFirebaseListener = jest.fn()
 const mockCalculateAdjustedBid = jest.fn()
-const mockRef = jest.fn((dbInstance, path) => ({ _path: path, toString: () => path }))
-const mockQuery = jest.fn((ref, ...constraints) => ({ ...ref, _query: true, _constraints: constraints }))
+const mockRef = jest.fn((_dbInstance, path) => ({
+  _path: path,
+  toString: () => path,
+}))
+const mockQuery = jest.fn((ref, ...constraints) => ({
+  ...ref,
+  _query: true,
+  _constraints: constraints,
+}))
 const mockOrderByChild = jest.fn((child) => ({ _orderByChild: child }))
 const mockEqualTo = jest.fn((value) => ({ _equalTo: value }))
 
@@ -81,7 +88,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       // Find the players listener call (first call with query)
@@ -108,7 +115,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       // Get the onData callback from players listener
@@ -142,13 +149,8 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
-
-      const playersCall = mockUseFirebaseListener.mock.calls.find((call) => {
-        const config = call[0]
-        return config.enabled === true && config.eventType?.includes?.('child_added')
-      })
 
       // Players listener should have enabled: false when gameId is null
       const allCalls = mockUseFirebaseListener.mock.calls
@@ -170,7 +172,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       // Find game listener calls
@@ -204,13 +206,16 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       // Find the child_removed listener
       const removedCall = mockUseFirebaseListener.mock.calls.find((call) => {
         const config = call[0]
-        return config.ref?.toString().includes('games/') && config.eventType === 'child_removed'
+        return (
+          config.ref?.toString().includes('games/') &&
+          config.eventType === 'child_removed'
+        )
       })
 
       const { onData } = removedCall[0]
@@ -242,7 +247,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const handCalls = mockUseFirebaseListener.mock.calls.filter((call) => {
@@ -269,7 +274,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const handCalls = mockUseFirebaseListener.mock.calls.filter((call) => {
@@ -292,12 +297,14 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const handAddedCall = mockUseFirebaseListener.mock.calls.find((call) => {
         const config = call[0]
-        return config.ref?.toString().includes('hands/') && config.eventType === 'child_added'
+        return (
+          config.ref?.toString().includes('hands/') && config.eventType === 'child_added'
+        )
       })
 
       const { onData } = handAddedCall[0]
@@ -320,7 +327,9 @@ describe('useGameListeners Hook', () => {
       mockUpdateState.mockClear()
       onData(mockSnapshot, 'child_added')
       const updaterFn2 = mockUpdateState.mock.calls[0][0]
-      const resultDupe = updaterFn2({ hand: [{ cardId: 'card-1', rank: 5, suit: 'H' }] })
+      const resultDupe = updaterFn2({
+        hand: [{ cardId: 'card-1', rank: 5, suit: 'H' }],
+      })
       expect(resultDupe).toEqual({})
     })
   })
@@ -338,7 +347,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const trumpCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -364,7 +373,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const trumpCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -401,7 +410,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const tricksCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -427,7 +436,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const tricksCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -462,7 +471,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       const tricksCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -499,7 +508,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 3,
           context: mockContext,
-        }),
+        })
       )
 
       const bidsCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -527,7 +536,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 3,
           context: mockContext,
-        }),
+        })
       )
 
       const bidsCall = mockUseFirebaseListener.mock.calls.find((call) => {
@@ -572,7 +581,7 @@ describe('useGameListeners Hook', () => {
           }),
         {
           initialProps: { roundId: 'round-1' },
-        },
+        }
       )
 
       // Get initial tricks listener count
@@ -609,7 +618,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       // Get any listener's onError callback
@@ -636,7 +645,7 @@ describe('useGameListeners Hook', () => {
           players: {},
           bid: 0,
           context: mockContext,
-        }),
+        })
       )
 
       expect(result.current.removeListeners).toBeDefined()

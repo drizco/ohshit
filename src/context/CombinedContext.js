@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
-const CombinedContext = React.createContext({});
+const CombinedContext = React.createContext({})
 
-export const CombinedProvider = CombinedContext.Provider;
-export const CombinedConsumer = CombinedContext.Consumer;
-export default CombinedContext;
+export const CombinedProvider = CombinedContext.Provider
+export const CombinedConsumer = CombinedContext.Consumer
+export default CombinedContext

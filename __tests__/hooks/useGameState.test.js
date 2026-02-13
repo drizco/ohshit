@@ -139,7 +139,10 @@ describe('useGameState Hook', () => {
       const { result } = renderHook(() => useGameState({ gameId: 'game-1' }))
 
       act(() => {
-        result.current.updateState({ playerId: 'player-123', playerName: 'Alice' })
+        result.current.updateState({
+          playerId: 'player-123',
+          playerName: 'Alice',
+        })
       })
 
       act(() => {
@@ -195,13 +198,19 @@ describe('useGameState Hook', () => {
       const { result } = renderHook(() => useGameState({ gameId: 'game-1' }))
 
       act(() => {
-        result.current.dispatchRound({ type: 'ADD_TRICK', trick: { trickId: 1 } })
+        result.current.dispatchRound({
+          type: 'ADD_TRICK',
+          trick: { trickId: 1 },
+        })
       })
 
       expect(result.current.roundState.tricks).toEqual([{ trickId: 1 }])
 
       act(() => {
-        result.current.dispatchRound({ type: 'ADD_TRICK', trick: { trickId: 2 } })
+        result.current.dispatchRound({
+          type: 'ADD_TRICK',
+          trick: { trickId: 2 },
+        })
       })
 
       expect(result.current.roundState.tricks).toEqual([{ trickId: 1 }, { trickId: 2 }])
@@ -214,7 +223,10 @@ describe('useGameState Hook', () => {
       act(() => {
         result.current.dispatchRound({
           type: 'SET_TRICKS',
-          tricks: [{ trickId: 1, cards: {} }, { trickId: 2, cards: {} }],
+          tricks: [
+            { trickId: 1, cards: {} },
+            { trickId: 2, cards: {} },
+          ],
         })
       })
 
@@ -369,7 +381,10 @@ describe('useGameState Hook', () => {
       expect(result.current.state.bid).toBe(0) // Reset to initial
       expect(result.current.state.hand).toEqual([]) // Reset to initial
 
-      expect(initResult).toEqual({ playerId: 'player-123', playerName: 'Alice' })
+      expect(initResult).toEqual({
+        playerId: 'player-123',
+        playerName: 'Alice',
+      })
     })
 
     test('handles missing localStorage values', () => {
@@ -500,7 +515,10 @@ describe('useGameState Hook', () => {
       expect(result.current.currentBidsRef.current).toEqual({})
 
       act(() => {
-        result.current.dispatchRound({ type: 'SET_BIDS', bids: { p1: 3, p2: 2 } })
+        result.current.dispatchRound({
+          type: 'SET_BIDS',
+          bids: { p1: 3, p2: 2 },
+        })
       })
 
       expect(result.current.currentBidsRef.current).toEqual({ p1: 3, p2: 2 })

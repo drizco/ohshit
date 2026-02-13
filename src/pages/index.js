@@ -1,6 +1,6 @@
-import { useState, useRef, useContext, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/router"
+import { useState, useRef, useContext, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   Container,
   Button,
@@ -15,24 +15,24 @@ import {
   DropdownToggle,
   Row,
   Col,
-} from "reactstrap"
-import { newGame } from "../utils/api"
-import styles from "../styles/pages/home.module.scss"
-import { CopyIcon } from "../components/Icons"
-import CombinedContext from "../context/CombinedContext"
-import classnames from "classnames"
+} from 'reactstrap'
+import { newGame } from '../utils/api'
+import styles from '../styles/pages/home.module.scss'
+import { CopyIcon } from '../components/Icons'
+import CombinedContext from '../context/CombinedContext'
+import classnames from 'classnames'
 
 const CreateGame = () => {
   const router = useRouter()
-  const [name, setName] = useState("")
-  const [game, setGame] = useState("")
-  const [gameCode, setGameCode] = useState("")
-  const [gameId, setGameId] = useState("")
-  const [url, setUrl] = useState("")
-  const [copySuccess, setCopySuccess] = useState("")
+  const [name, setName] = useState('')
+  const [game, setGame] = useState('')
+  const [gameCode, setGameCode] = useState('')
+  const [gameId, setGameId] = useState('')
+  const [url, setUrl] = useState('')
+  const [copySuccess, setCopySuccess] = useState('')
   const [dirty, setDirty] = useState(false)
   const [bidPoints, setBidPoints] = useState(false)
-  const [timeLimit, setTimeLimit] = useState("")
+  const [timeLimit, setTimeLimit] = useState('')
   const [numCards, setNumCards] = useState(5)
   const [create, setCreate] = useState(true)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -43,7 +43,7 @@ const CreateGame = () => {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setName(localStorage.getItem("player-name") || "")
+    setName(localStorage.getItem('player-name') || '')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -54,13 +54,13 @@ const CreateGame = () => {
   const handleChange = (e) => {
     const { name, value } = e.target
     switch (name) {
-      case "name":
+      case 'name':
         setName(value)
         break
-      case "game":
+      case 'game':
         setGame(value)
         break
-      case "game-code":
+      case 'game-code':
         setGameCode(value)
         break
       default:
@@ -101,8 +101,8 @@ const CreateGame = () => {
         setGameId(gameIdResponse)
         const origin = window.location.origin
         setUrl(`${origin}/game/${gameIdResponse}`)
-        setName("")
-        setGame("")
+        setName('')
+        setGame('')
       }
       setState({ loading: false })
     } catch (error) {
@@ -117,9 +117,9 @@ const CreateGame = () => {
 
   const copyToClipboard = (e) => {
     gameUrlRef.current.select()
-    document.execCommand("copy")
+    document.execCommand('copy')
     e.target.focus()
-    setCopySuccess("Copied!")
+    setCopySuccess('Copied!')
   }
 
   return (
@@ -135,7 +135,7 @@ const CreateGame = () => {
           <Row className="text-center m-4">
             <h3>Share this link to invite other players</h3>
           </Row>
-          <Row className="justify-content-center" style={{ position: "relative" }}>
+          <Row className="justify-content-center" style={{ position: 'relative' }}>
             <Col xs="10" sm="7">
               <InputGroup>
                 <Input value={url} readOnly innerRef={gameUrlRef} data-lpignore="true" />
@@ -234,7 +234,7 @@ const CreateGame = () => {
 
                   <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                     <DropdownToggle caret>
-                      {timeLimit ? `${timeLimit} seconds` : "None"}
+                      {timeLimit ? `${timeLimit} seconds` : 'None'}
                     </DropdownToggle>
                     <DropdownMenu flip={true} style={{ borderRadius: 0 }}>
                       <DropdownItem onClick={(e) => handleDropDown(e)}>none</DropdownItem>
@@ -261,7 +261,7 @@ const CreateGame = () => {
                       id="bid-checkbox"
                       checked={dirty}
                       onChange={() => setDirty(!dirty)}
-                    />{" "}
+                    />{' '}
                     Dirty bids only
                   </Label>
                 </FormGroup>
@@ -273,7 +273,7 @@ const CreateGame = () => {
                       id="bid-point-checkbox"
                       checked={bidPoints}
                       onChange={() => setBidPoints(!bidPoints)}
-                    />{" "}
+                    />{' '}
                     Earn points for bad bids
                   </Label>
                 </FormGroup>

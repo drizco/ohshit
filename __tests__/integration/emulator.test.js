@@ -8,15 +8,15 @@
  * yarn test:integration
  */
 
-import { jest } from '@jest/globals';
-import admin from 'firebase-admin';
-import { newGame, addPlayer, submitBid } from '../../functions/game.js';
+import { jest } from '@jest/globals'
+import admin from 'firebase-admin'
+import { newGame, addPlayer } from '../../functions/game.js'
 
 // Only run these tests if FIREBASE_EMULATOR environment variable is set
-const describeIfEmulator = process.env.FIREBASE_EMULATOR ? describe : describe.skip;
+const describeIfEmulator = process.env.FIREBASE_EMULATOR ? describe : describe.skip
 
 describeIfEmulator('Firebase Emulator Integration Tests', () => {
-  let db;
+  let db
 
   beforeAll(() => {
     // Initialize Firebase Admin with emulator settings
@@ -24,20 +24,20 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
       admin.initializeApp({
         projectId: 'demo-oopsie-poopsie',
         databaseURL: 'http://localhost:9000?ns=demo-oopsie-poopsie',
-      });
+      })
     }
-    db = admin.database();
-  });
+    db = admin.database()
+  })
 
   afterAll(async () => {
     // Cleanup
-    await admin.app().delete();
-  });
+    await admin.app().delete()
+  })
 
   beforeEach(async () => {
     // Clear database before each test
-    await db.ref().set(null);
-  });
+    await db.ref().set(null)
+  })
 
   describe('newGame integration', () => {
     test('should create a complete game in the database', async () => {
@@ -52,40 +52,40 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           dirty: false,
           timeLimit: 60,
         },
-      };
+      }
 
       const res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
-      await newGame(req, res);
+      await newGame(req, res)
 
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.send).toHaveBeenCalled()
 
-      const { gameId, playerId } = res.send.mock.calls[0][0];
+      const { gameId, playerId } = res.send.mock.calls[0][0]
 
       // Verify game was created in database
-      const gameSnapshot = await db.ref(`games/${gameId}`).once('value');
-      const game = gameSnapshot.val();
+      const gameSnapshot = await db.ref(`games/${gameId}`).once('value')
+      const game = gameSnapshot.val()
 
-      expect(game).toBeDefined();
-      expect(game.name).toBe('Integration Test Game');
-      expect(game.status).toBe('pending');
-      expect(game.numCards).toBe(10);
+      expect(game).toBeDefined()
+      expect(game.name).toBe('Integration Test Game')
+      expect(game.status).toBe('pending')
+      expect(game.numCards).toBe(10)
 
       // Verify player was created
-      const playerSnapshot = await db.ref(`players/${playerId}`).once('value');
-      const player = playerSnapshot.val();
+      const playerSnapshot = await db.ref(`players/${playerId}`).once('value')
+      const player = playerSnapshot.val()
 
-      expect(player).toBeDefined();
-      expect(player.name).toBe('Test Host');
-      expect(player.host).toBe(true);
-      expect(player.gameId).toBe(gameId);
-    });
-  });
+      expect(player).toBeDefined()
+      expect(player.name).toBe('Test Host')
+      expect(player.host).toBe(true)
+      expect(player.gameId).toBe(gameId)
+    })
+  })
 
   describe('addPlayer integration', () => {
     test('should add multiple players to a game', async () => {
@@ -101,16 +101,16 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           dirty: false,
           timeLimit: 45,
         },
-      };
+      }
 
       const newGameRes = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
-      await newGame(newGameReq, newGameRes);
-      const { gameId } = newGameRes.send.mock.calls[0][0];
+      await newGame(newGameReq, newGameRes)
+      const { gameId } = newGameRes.send.mock.calls[0][0]
 
       // Now add two more players
       const player2Req = {
@@ -120,15 +120,15 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           playerName: 'Player 2',
           gameId,
         },
-      };
+      }
 
       const player2Res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
-      await addPlayer(player2Req, player2Res);
+      await addPlayer(player2Req, player2Res)
 
       const player3Req = {
         ref: db.ref.bind(db),
@@ -137,34 +137,34 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           playerName: 'Player 3',
           gameId,
         },
-      };
+      }
 
       const player3Res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
-      await addPlayer(player3Req, player3Res);
+      await addPlayer(player3Req, player3Res)
 
       // Verify all players exist
       const playersSnapshot = await db
         .ref('players')
         .orderByChild('gameId')
         .equalTo(gameId)
-        .once('value');
+        .once('value')
 
-      const players = playersSnapshot.val();
-      const playerArray = Object.values(players);
+      const players = playersSnapshot.val()
+      const playerArray = Object.values(players)
 
-      expect(playerArray).toHaveLength(3);
+      expect(playerArray).toHaveLength(3)
       expect(playerArray.map((p) => p.name).sort()).toEqual([
         'Host Player',
         'Player 2',
         'Player 3',
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe('Full game flow integration', () => {
     test('should handle game creation, players joining, and starting', async () => {
@@ -173,7 +173,7 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
       await newGame(
         {
@@ -189,16 +189,16 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           },
         },
         createRes
-      );
+      )
 
-      const { gameId } = createRes.send.mock.calls[0][0];
+      const { gameId } = createRes.send.mock.calls[0][0]
 
       // 2. Add second player
       const addRes = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         sendStatus: jest.fn().mockReturnThis(),
-      };
+      }
 
       await addPlayer(
         {
@@ -210,23 +210,23 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
           },
         },
         addRes
-      );
+      )
 
       // 3. Verify game state
-      const gameSnapshot = await db.ref(`games/${gameId}`).once('value');
-      const game = gameSnapshot.val();
+      const gameSnapshot = await db.ref(`games/${gameId}`).once('value')
+      const game = gameSnapshot.val()
 
-      expect(game.status).toBe('pending');
+      expect(game.status).toBe('pending')
 
       // 4. Get all players
       const playersSnapshot = await db
         .ref('players')
         .orderByChild('gameId')
         .equalTo(gameId)
-        .once('value');
+        .once('value')
 
-      const players = Object.values(playersSnapshot.val());
-      expect(players).toHaveLength(2);
-    });
-  });
-});
+      const players = Object.values(playersSnapshot.val())
+      expect(players).toHaveLength(2)
+    })
+  })
+})

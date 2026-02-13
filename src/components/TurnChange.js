@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef } from "react"
-import TimerContext from "../context/TimerContext"
-import Timer from "./Timer"
+import { useContext, useEffect, useRef } from 'react'
+import TimerContext from '../context/TimerContext'
+import Timer from './Timer'
 
 const TurnChange = ({
   timeLimit,

@@ -1,13 +1,13 @@
-import { useCallback, useRef, useMemo } from "react"
-import { ref, query, orderByChild, equalTo } from "firebase/database"
-import { db } from "../lib/firebase"
-import useFirebaseListener from "./useFirebaseListener"
-import { calculateAdjustedBid } from "../utils/bidHelpers"
+import { useCallback, useRef, useMemo } from 'react'
+import { ref, query, orderByChild, equalTo } from 'firebase/database'
+import { db } from '../lib/firebase'
+import useFirebaseListener from './useFirebaseListener'
+import { calculateAdjustedBid } from '../utils/bidHelpers'
 
-const CHILD_ADDED = "child_added"
-const CHILD_CHANGED = "child_changed"
-const CHILD_REMOVED = "child_removed"
-const VALUE = "value"
+const CHILD_ADDED = 'child_added'
+const CHILD_CHANGED = 'child_changed'
+const CHILD_REMOVED = 'child_removed'
+const VALUE = 'value'
 const ADDED_OR_CHANGED = [CHILD_ADDED, CHILD_CHANGED]
 
 /**
@@ -53,8 +53,8 @@ const useGameListeners = ({
   // Players
   const playersRef = useMemo(
     () =>
-      gameId ? query(ref(db, "players"), orderByChild("gameId"), equalTo(gameId)) : null,
-    [gameId],
+      gameId ? query(ref(db, 'players'), orderByChild('gameId'), equalTo(gameId)) : null,
+    [gameId]
   )
 
   useFirebaseListener({
@@ -71,14 +71,14 @@ const useGameListeners = ({
           },
         }))
       },
-      [updateState],
+      [updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToPlayers error:", error)
+        console.error('listenToPlayers error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
@@ -97,14 +97,14 @@ const useGameListeners = ({
           game: { ...prevState.game, [key]: value },
         }))
       },
-      [updateState],
+      [updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToGame (child_added/changed) error:", error)
+        console.error('listenToGame (child_added/changed) error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
@@ -119,14 +119,14 @@ const useGameListeners = ({
           game: { ...prevState.game, [key]: null },
         }))
       },
-      [updateState],
+      [updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToGame (child_removed) error:", error)
+        console.error('listenToGame (child_removed) error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
@@ -134,7 +134,7 @@ const useGameListeners = ({
   const handRef = useMemo(
     () =>
       playerId && roundId ? ref(db, `hands/${playerId}/rounds/${roundId}/cards`) : null,
-    [playerId, roundId],
+    [playerId, roundId]
   )
 
   useFirebaseListener({
@@ -154,14 +154,14 @@ const useGameListeners = ({
           return {}
         })
       },
-      [updateState],
+      [updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToHand (child_added) error:", error)
+        console.error('listenToHand (child_added) error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
@@ -176,21 +176,21 @@ const useGameListeners = ({
           hand: prevState.hand.filter((c) => c.cardId !== key),
         }))
       },
-      [updateState],
+      [updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToHand (child_removed) error:", error)
+        console.error('listenToHand (child_removed) error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
   // Trump
   const trumpRef = useMemo(
     () => (roundId ? ref(db, `rounds/${roundId}/trump`) : null),
-    [roundId],
+    [roundId]
   )
 
   useFirebaseListener({
@@ -200,23 +200,23 @@ const useGameListeners = ({
     onData: useCallback(
       (snapshot) => {
         const trump = snapshot.val()
-        dispatchRound({ type: "SET_TRUMP", trump })
+        dispatchRound({ type: 'SET_TRUMP', trump })
       },
-      [dispatchRound],
+      [dispatchRound]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToTrump error:", error)
+        console.error('listenToTrump error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
   // Tricks
   const tricksRef = useMemo(
     () => (roundId ? ref(db, `rounds/${roundId}/tricks`) : null),
-    [roundId],
+    [roundId]
   )
 
   useFirebaseListener({
@@ -226,27 +226,27 @@ const useGameListeners = ({
     onData: useCallback(
       (snapshot, eventType) => {
         const trick = snapshot.val()
-        if (eventType === "child_added") {
-          dispatchRound({ type: "ADD_TRICK", trick })
-        } else if (eventType === "child_changed") {
-          dispatchRound({ type: "UPDATE_TRICK", trick })
+        if (eventType === 'child_added') {
+          dispatchRound({ type: 'ADD_TRICK', trick })
+        } else if (eventType === 'child_changed') {
+          dispatchRound({ type: 'UPDATE_TRICK', trick })
         }
       },
-      [dispatchRound],
+      [dispatchRound]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToTrick error:", error)
+        console.error('listenToTrick error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 
   // Bids
   const bidsRef = useMemo(
     () => (roundId ? ref(db, `rounds/${roundId}/bids`) : null),
-    [roundId],
+    [roundId]
   )
 
   useFirebaseListener({
@@ -258,7 +258,7 @@ const useGameListeners = ({
         const bidValue = snapshot.val()
         const pId = snapshot.key
 
-        dispatchRound({ type: "UPDATE_BID", playerId: pId, bidValue })
+        dispatchRound({ type: 'UPDATE_BID', playerId: pId, bidValue })
 
         updateState((prevState) => {
           const newBids = {
@@ -269,19 +269,19 @@ const useGameListeners = ({
             prevState.bid,
             newBids,
             prevState.game,
-            prevState.players,
+            prevState.players
           )
           return { bid: newBid }
         })
       },
-      [dispatchRound, updateState],
+      [dispatchRound, updateState]
     ),
     onError: useCallback(
       (error) => {
         setContextState({ error: true })
-        console.error("listenToBid error:", error)
+        console.error('listenToBid error:', error)
       },
-      [setContextState],
+      [setContextState]
     ),
   })
 

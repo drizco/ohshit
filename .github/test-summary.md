@@ -3,6 +3,7 @@
 ## Overview
 
 Comprehensive testing infrastructure has been set up for Oopsie Poopsie with:
+
 - ✅ **34 utility tests** - All passing
 - ✅ **34 Firebase Functions tests** - All passing
 - ✅ **3 component tests** with React Testing Library
@@ -11,6 +12,7 @@ Comprehensive testing infrastructure has been set up for Oopsie Poopsie with:
 ## Test Organization
 
 ### Directory Structure
+
 ```
 __tests__/
 ├── setup/              # Test configuration
@@ -23,6 +25,7 @@ __tests__/
 ```
 
 ### Configuration Files
+
 - `jest.config.js` - Frontend/component test config
 - `jest.functions.config.js` - Firebase Functions test config
 - `.babelrc.test` - Babel config for Jest
@@ -49,12 +52,14 @@ yarn test:all:coverage
 ## Coverage
 
 Run coverage reports with:
+
 ```bash
 yarn test:coverage          # Frontend coverage
 yarn test:functions --coverage  # Functions coverage
 ```
 
 View coverage:
+
 ```bash
 open coverage/index.html
 open coverage-functions/index.html
@@ -63,6 +68,7 @@ open coverage-functions/index.html
 ## What's Tested
 
 ### Utility Functions (`src/utils/helpers.js`)
+
 - ✅ `isLegal()` - Card play validation
 - ✅ `calculateLeader()` - Trick winner calculation
 - ✅ `getScore()` - Trick scoring
@@ -74,6 +80,7 @@ open coverage-functions/index.html
 - ✅ `getSource()` - Card suit images
 
 ### Firebase Functions (`functions/game.js`)
+
 - ✅ `newGame()` - Game creation
 - ✅ `addPlayer()` - Player joins
 - ✅ `startGame()` - Game start logic
@@ -84,6 +91,7 @@ open coverage-functions/index.html
 - ✅ `updatePlayer()` - Player presence
 
 ### Deck Class (`functions/deck.js`)
+
 - ✅ Constructor & deck creation
 - ✅ `deal()` - Card dealing
 - ✅ `sortHand()` - Hand sorting
@@ -91,11 +99,13 @@ open coverage-functions/index.html
 - ✅ `_shuffle()` - Card shuffling
 
 ### React Components
+
 - ✅ Header - Logo, rules modal, dark mode, sound toggle
 - ✅ Spinner - Loading states
 - ✅ CardRow - Card rendering and interaction
 
 ### Integration Tests
+
 - ✅ Full game creation flow
 - ✅ Multi-player scenarios
 - ✅ Database state verification
@@ -104,40 +114,46 @@ open coverage-functions/index.html
 ## Test Patterns
 
 ### Component Tests
+
 ```javascript
-import { render, screen, fireEvent } from '../helpers/render';
+import { render, screen, fireEvent } from '../helpers/render'
 
 test('toggles dark mode', () => {
-  render(<Header />, { contextValue: { dark: false } });
-  fireEvent.click(screen.getByTitle(/Dark mode/i));
+  render(<Header />, { contextValue: { dark: false } })
+  fireEvent.click(screen.getByTitle(/Dark mode/i))
   // assertions...
-});
+})
 ```
 
 ### Functions Tests
+
 ```javascript
-const { newGame } = require('../../functions/game');
+const { newGame } = require('../../functions/game')
 
 test('should create a new game', async () => {
-  const req = createMockRequest({ /* body */ });
-  const res = createMockResponse();
-  await newGame(req, res);
-  expect(res.status).toHaveBeenCalledWith(200);
-});
+  const req = createMockRequest({
+    /* body */
+  })
+  const res = createMockResponse()
+  await newGame(req, res)
+  expect(res.status).toHaveBeenCalledWith(200)
+})
 ```
 
 ### Utility Tests
+
 ```javascript
-import { isLegal } from '@/utils/helpers';
+import { isLegal } from '@/utils/helpers'
 
 test('should allow any card when no lead suit', () => {
-  expect(isLegal({ hand, card, leadSuit: null })).toBe(true);
-});
+  expect(isLegal({ hand, card, leadSuit: null })).toBe(true)
+})
 ```
 
 ## Next Steps
 
 ### Additional Coverage Needed
+
 - [ ] Players component tests
 - [ ] Timer component tests
 - [ ] TurnChange component tests
@@ -146,6 +162,7 @@ test('should allow any card when no lead suit', () => {
 - [ ] API wrapper tests (`src/utils/api.js`)
 
 ### Enhancements
+
 - [ ] E2E tests with Playwright/Cypress
 - [ ] Visual regression testing
 - [ ] Performance testing

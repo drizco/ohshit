@@ -1,29 +1,29 @@
 /* @styled-jsx=global */
 @font-face {
-  font-family: "Roboto_Mono_lt";
-  src: url("/fonts/RobotoMono-Light.ttf");
+  font-family: 'Roboto_Mono_lt';
+  src: url('/fonts/RobotoMono-Light.ttf');
   font-display: swap;
 }
 @font-face {
-  font-family: "Roboto_Mono";
-  src: url("/fonts/RobotoMono-Regular.ttf");
+  font-family: 'Roboto_Mono';
+  src: url('/fonts/RobotoMono-Regular.ttf');
   font-display: swap;
 }
 @font-face {
-  font-family: "Roboto_Mono_md";
-  src: url("/fonts/RobotoMono-Medium.ttf");
+  font-family: 'Roboto_Mono_md';
+  src: url('/fonts/RobotoMono-Medium.ttf');
   font-display: swap;
 }
 @font-face {
-  font-family: "Roboto_Mono_bd";
-  src: url("/fonts/RobotoMono-Bold.ttf");
+  font-family: 'Roboto_Mono_bd';
+  src: url('/fonts/RobotoMono-Bold.ttf');
   font-display: swap;
 }
 
-$font-regular: "Roboto_Mono", Arial, sans-serif;
-$font-light: "Roboto_Mono_lt", Arial, sans-serif;
-$font-bold: "Roboto_Mono_bd", Arial, sans-serif;
-$font-medium: "Roboto_Mono_md", Arial, sans-serif;
+$font-regular: 'Roboto_Mono', Arial, sans-serif;
+$font-light: 'Roboto_Mono_lt', Arial, sans-serif;
+$font-bold: 'Roboto_Mono_bd', Arial, sans-serif;
+$font-medium: 'Roboto_Mono_md', Arial, sans-serif;
 
 $red: #db0007;
 $red-faded: #d92839;

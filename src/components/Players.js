@@ -1,5 +1,5 @@
-import classNames from "classnames"
-import { useContext } from "react"
+import classNames from 'classnames'
+import { useContext } from 'react'
 import {
   Button,
   Col,
@@ -10,11 +10,11 @@ import {
   Modal,
   ModalBody,
   Row,
-} from "reactstrap"
-import SettingsContext from "../context/SettingsContext"
-import TimerContext from "../context/TimerContext"
-import styles from "../styles/components/players.module.scss"
-import { getColor, getSource } from "../utils/helpers"
+} from 'reactstrap'
+import SettingsContext from '../context/SettingsContext'
+import TimerContext from '../context/TimerContext'
+import styles from '../styles/components/players.module.scss'
+import { getColor, getSource } from '../utils/helpers'
 
 const Players = ({
   players,
@@ -57,9 +57,9 @@ const Players = ({
         newPlayers.map(({ playerId, present, name }) => {
           const isCurrent = currentPlayer === playerId
           const isDealer = dealer === playerId
-          let playerScore = score && score[playerId] ? score[playerId] : "0"
-          if (!status || status === "pending") {
-            playerScore = ""
+          let playerScore = score && score[playerId] ? score[playerId] : '0'
+          if (!status || status === 'pending') {
+            playerScore = ''
           }
           const timerShowMax = timeLimit > 10 ? 10 : 5
 
@@ -69,7 +69,7 @@ const Players = ({
                 className={classNames({
                   [styles.current_player_arrow]: isCurrent,
                   [styles.player_row]: true,
-                  "player-row": true,
+                  'player-row': true,
                 })}
               >
                 <Col xs="4" className="d-flex align-items-center">
@@ -87,7 +87,7 @@ const Players = ({
                         [styles.current_player]: isCurrent,
                         [styles.not_present]: !present,
                         [styles.dealer]: isDealer,
-                        "player-name": true,
+                        'player-name': true,
                       })}
                     >
                       {name}
@@ -101,7 +101,7 @@ const Players = ({
                         <h3>{`Bid: ${bids[playerId]}`}</h3>
                       </Col>
                       <Col xs="12" sm="6">
-                        <h3>{`Won: ${roundScore[playerId] || "0"}`}</h3>
+                        <h3>{`Won: ${roundScore[playerId] || '0'}`}</h3>
                       </Col>
                     </Row>
                   </Col>
@@ -124,7 +124,7 @@ const Players = ({
               <Modal
                 centered
                 isOpen={
-                  status === "bid" &&
+                  status === 'bid' &&
                   !winnerModalShowing &&
                   thisPlayer === playerId &&
                   currentPlayer === playerId
@@ -165,7 +165,7 @@ const Players = ({
                             value={bid}
                             name="bid"
                             id="bid"
-                            className={classNames(styles.toggle_results, "main-text")}
+                            className={classNames(styles.toggle_results, 'main-text')}
                             readOnly
                           />
                           <Button

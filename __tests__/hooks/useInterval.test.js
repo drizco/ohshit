@@ -51,12 +51,9 @@ describe('useInterval Hook', () => {
   test('updates interval when delay changes', () => {
     const callback = jest.fn()
 
-    const { rerender } = renderHook(
-      ({ delay }) => useInterval(callback, delay),
-      {
-        initialProps: { delay: 1000 },
-      }
-    )
+    const { rerender } = renderHook(({ delay }) => useInterval(callback, delay), {
+      initialProps: { delay: 1000 },
+    })
 
     // Initial interval at 1000ms
     jest.advanceTimersByTime(1000)
@@ -79,12 +76,9 @@ describe('useInterval Hook', () => {
   test('pauses interval when delay is null', () => {
     const callback = jest.fn()
 
-    const { rerender } = renderHook(
-      ({ delay }) => useInterval(callback, delay),
-      {
-        initialProps: { delay: 1000 },
-      }
-    )
+    const { rerender } = renderHook(({ delay }) => useInterval(callback, delay), {
+      initialProps: { delay: 1000 },
+    })
 
     // Initial interval works
     jest.advanceTimersByTime(1000)
@@ -101,12 +95,9 @@ describe('useInterval Hook', () => {
   test('resumes interval when delay changes from null to a value', () => {
     const callback = jest.fn()
 
-    const { rerender } = renderHook(
-      ({ delay }) => useInterval(callback, delay),
-      {
-        initialProps: { delay: null },
-      }
-    )
+    const { rerender } = renderHook(({ delay }) => useInterval(callback, delay), {
+      initialProps: { delay: null },
+    })
 
     // With null delay, callback should not be called
     jest.advanceTimersByTime(2000)
@@ -123,12 +114,9 @@ describe('useInterval Hook', () => {
     const callback1 = jest.fn()
     const callback2 = jest.fn()
 
-    const { rerender } = renderHook(
-      ({ cb }) => useInterval(cb, 1000),
-      {
-        initialProps: { cb: callback1 },
-      }
-    )
+    const { rerender } = renderHook(({ cb }) => useInterval(cb, 1000), {
+      initialProps: { cb: callback1 },
+    })
 
     jest.advanceTimersByTime(1000)
     expect(callback1).toHaveBeenCalledTimes(1)
