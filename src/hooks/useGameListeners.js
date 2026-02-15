@@ -249,9 +249,12 @@ const useGameListeners = ({
           dispatchRound({ type: 'ADD_TRICK', trick })
         } else if (eventType === 'child_changed') {
           dispatchRound({ type: 'UPDATE_TRICK', trick })
+          if (trick.winner) {
+            updateState({ lastWinner: trick.winner })
+          }
         }
       },
-      [dispatchRound]
+      [dispatchRound, updateState]
     ),
     onError: useCallback(
       (error) => {

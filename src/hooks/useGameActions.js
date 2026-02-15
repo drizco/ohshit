@@ -48,7 +48,6 @@ const useGameActions = ({
   visible,
   setState,
   updateState,
-  dispatchRound,
   autoPlayTimeoutRef,
 }) => {
   // Play card - handles playing a card or queuing it for later
@@ -96,15 +95,7 @@ const useGameActions = ({
         console.error(`playCard error:`, error)
       }
     },
-    [
-      setState,
-      tricks,
-      trickIndex,
-      game,
-      playerId,
-      updateState,
-      autoPlayTimeoutRef,
-    ]
+    [setState, tricks, trickIndex, game, playerId, updateState, autoPlayTimeoutRef]
   )
 
   // Your turn handler - auto-plays queued card when it's player's turn
@@ -275,8 +266,8 @@ const useGameActions = ({
   const closeModal = useCallback(async () => {
     if (!game) return
 
-    dispatchRound({ type: 'HIDE_WINNER_MODAL' })
-  }, [game, dispatchRound])
+    updateState({ lastWinner: null })
+  }, [game, updateState])
 
   return {
     playCard,

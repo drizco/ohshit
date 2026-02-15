@@ -33,9 +33,9 @@ function Game({ gameId, isMobile }) {
     context,
   })
 
-  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard } =
+  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard, lastWinner } =
     state
-  const { tricks, bids, trump, showWinnerModal } = roundState
+  const { tricks, bids, trump } = roundState
 
   // Hook #2: Computed Values
   const computed = useGameComputed({
@@ -73,7 +73,6 @@ function Game({ gameId, isMobile }) {
     visible,
     setState,
     updateState,
-    dispatchRound,
     autoPlayTimeoutRef,
   })
 
@@ -242,7 +241,7 @@ function Game({ gameId, isMobile }) {
           thisPlayer={playerId}
           score={score}
           timeLimit={timeLimit}
-          winnerModalShowing={showWinnerModal && Boolean(winner)}
+          winnerModalShowing={Boolean(lastWinner)}
           status={status}
         />
       </div>
@@ -254,7 +253,7 @@ function Game({ gameId, isMobile }) {
       />
       <Modal
         centered
-        isOpen={showWinnerModal && Boolean(winner)}
+        isOpen={Boolean(lastWinner)}
         toggle={closeModal}
         onOpened={() => {
           setTimeout(() => {
@@ -264,8 +263,8 @@ function Game({ gameId, isMobile }) {
       >
         <ModalBody>
           <Container className="text-align-center">
-            {winner && (
-              <h2 className="mb-3">{`${getWinner({ winner, players })} won!`}</h2>
+            {lastWinner && (
+              <h2 className="mb-3">{`${getWinner({ winner: lastWinner, players })} won!`}</h2>
             )}
             <Button onClick={closeModal}>CLOSE</Button>
           </Container>

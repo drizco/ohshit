@@ -8,7 +8,6 @@ function roundReducer(state, action) {
         tricks: action.tricks || [],
         bids: action.bids || {},
         trump: action.trump || null,
-        showWinnerModal: false,
       }
     case 'SET_TRICKS':
       return {
@@ -27,7 +26,6 @@ function roundReducer(state, action) {
       return {
         ...state,
         tricks: updatedTricks,
-        showWinnerModal: action.trick.winner ? true : state.showWinnerModal,
       }
     }
     case 'SET_BIDS':
@@ -48,22 +46,11 @@ function roundReducer(state, action) {
         ...state,
         trump: action.trump,
       }
-    case 'SHOW_WINNER_MODAL':
-      return {
-        ...state,
-        showWinnerModal: true,
-      }
-    case 'HIDE_WINNER_MODAL':
-      return {
-        ...state,
-        showWinnerModal: false,
-      }
     case 'RESET':
       return {
         tricks: [],
         bids: {},
         trump: null,
-        showWinnerModal: false,
       }
     default:
       return state
@@ -79,13 +66,13 @@ const INITIAL_STATE = {
   bid: 0,
   showYourTurn: false,
   queuedCard: null,
+  lastWinner: null, // Store winner playerId to show modal (cleared when modal closes)
 }
 
 const INITIAL_ROUND_STATE = {
   tricks: [],
   bids: {},
   trump: null,
-  showWinnerModal: false,
 }
 
 /**
