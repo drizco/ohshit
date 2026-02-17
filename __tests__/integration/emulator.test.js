@@ -162,6 +162,82 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
         'Player 3',
       ])
     })
+
+    test('should return 404 when trying to join non-existent game', async () => {
+      const req = {
+        ref: db.ref.bind(db),
+        uid: 'test-uid-player',
+        body: {
+          playerName: 'Test Player',
+          gameId: 'NON_EXISTENT_GAME',
+        },
+      }
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn().mockReturnThis(),
+        sendStatus: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis(),
+      }
+
+      await addPlayer(req, res)
+
+      expect(res.status).toHaveBeenCalledWith(404)
+      expect(res.json).toHaveBeenCalledWith({ error: 'Game not found' })
+    })
+
+    test('should return 400 when trying to join game that is over', async () => {
+      // Create a game
+      const createRes = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn().mockReturnThis(),
+        sendStatus: jest.fn().mockReturnThis(),
+      }
+
+      await newGame(
+        {
+          ref: db.ref.bind(db),
+          uid: 'test-uid-host',
+          body: {
+            game: 'Finished Game',
+            name: 'Host',
+            numCards: 5,
+            bidPoints: 1,
+            dirty: false,
+            timeLimit: 30,
+          },
+        },
+        createRes
+      )
+
+      const { gameId } = createRes.send.mock.calls[0][0]
+
+      // Manually set game status to 'over'
+      await db.ref(`games/${gameId}/state/status`).set('over')
+
+      // Try to join the game
+      const joinRes = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn().mockReturnThis(),
+        sendStatus: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis(),
+      }
+
+      await addPlayer(
+        {
+          ref: db.ref.bind(db),
+          uid: 'test-uid-late-player',
+          body: {
+            playerName: 'Late Player',
+            gameId,
+          },
+        },
+        joinRes
+      )
+
+      expect(joinRes.status).toHaveBeenCalledWith(400)
+      expect(joinRes.json).toHaveBeenCalledWith({ error: 'Game has ended' })
+    })
   })
 
   describe('Full game flow integration', () => {

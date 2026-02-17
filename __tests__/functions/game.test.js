@@ -138,9 +138,20 @@ describe('Game Functions - addPlayer', () => {
       update: jest.fn(() => Promise.resolve()),
     }
 
-    mockRef = jest.fn(() => ({
-      push: jest.fn(() => mockPush),
-    }))
+    mockRef = jest.fn((path) => {
+      if (path === 'games/TEST/state') {
+        return {
+          once: jest.fn(() =>
+            Promise.resolve({
+              val: () => ({ status: 'pending' }),
+            })
+          ),
+        }
+      }
+      return {
+        push: jest.fn(() => mockPush),
+      }
+    })
 
     mockReq = {
       ref: mockRef,
@@ -154,6 +165,7 @@ describe('Game Functions - addPlayer', () => {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
       sendStatus: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     }
   })
 
@@ -168,12 +180,23 @@ describe('Game Functions - addPlayer', () => {
 
   test('should set present flag to true', async () => {
     const mockPushUpdate = jest.fn(() => Promise.resolve())
-    mockRef.mockImplementation(() => ({
-      push: () => ({
-        key: 'new-player-id',
-        update: mockPushUpdate,
-      }),
-    }))
+    mockRef.mockImplementation((path) => {
+      if (path === 'games/TEST/state') {
+        return {
+          once: jest.fn(() =>
+            Promise.resolve({
+              val: () => ({ status: 'pending' }),
+            })
+          ),
+        }
+      }
+      return {
+        push: () => ({
+          key: 'new-player-id',
+          update: mockPushUpdate,
+        }),
+      }
+    })
 
     await addPlayer(mockReq, mockRes)
 
@@ -184,11 +207,84 @@ describe('Game Functions - addPlayer', () => {
     )
   })
 
+  test('should return 404 when game does not exist', async () => {
+    mockRef.mockImplementation((path) => {
+      if (path === 'games/TEST/state') {
+        return {
+          once: jest.fn(() =>
+            Promise.resolve({
+              val: () => null,
+            })
+          ),
+        }
+      }
+      return {
+        push: jest.fn(),
+      }
+    })
+
+    await addPlayer(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(404)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Game not found' })
+  })
+
+  test('should return 400 when game is over', async () => {
+    mockRef.mockImplementation((path) => {
+      if (path === 'games/TEST/state') {
+        return {
+          once: jest.fn(() =>
+            Promise.resolve({
+              val: () => ({ status: 'over' }),
+            })
+          ),
+        }
+      }
+      return {
+        push: jest.fn(),
+      }
+    })
+
+    await addPlayer(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Game has ended' })
+  })
+
+  test('should allow joining games in bid, play, or pending status', async () => {
+    const statuses = ['pending', 'bid', 'play']
+
+    for (const status of statuses) {
+      jest.clearAllMocks()
+
+      const mockPushUpdate = jest.fn(() => Promise.resolve())
+      mockRef.mockImplementation((path) => {
+        if (path === 'games/TEST/state') {
+          return {
+            once: jest.fn(() =>
+              Promise.resolve({
+                val: () => ({ status }),
+              })
+            ),
+          }
+        }
+        return {
+          push: () => ({
+            key: 'new-player-id',
+            update: mockPushUpdate,
+          }),
+        }
+      })
+
+      await addPlayer(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenCalledWith(200)
+    }
+  })
+
   test('should handle errors', async () => {
     mockRef.mockImplementation(() => ({
-      push: () => ({
-        update: jest.fn(() => Promise.reject(new Error('Database error'))),
-      }),
+      once: jest.fn(() => Promise.reject(new Error('Database error'))),
     }))
 
     await addPlayer(mockReq, mockRes)

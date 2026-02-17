@@ -399,9 +399,36 @@ const advanceToNextRound = async (
     const playersObj = playersSnap.val()
     const players = Object.values(playersObj) as Player[]
 
+    // Rebuild playerOrder to include late-joining players and filter out absent players
+    const presentPlayers = players
+      .filter((p) => p.present !== false) // Include if present is true or undefined
+      .sort((a, b) => {
+        // Preserve relative order from old playerOrder
+        const aIndex = playerOrder.indexOf(a.playerId)
+        const bIndex = playerOrder.indexOf(b.playerId)
+
+        if (aIndex !== -1 && bIndex !== -1) {
+          return aIndex - bIndex // Both were in old order, preserve positions
+        } else if (aIndex !== -1) {
+          return -1 // a was in old order, comes first
+        } else if (bIndex !== -1) {
+          return 1 // b was in old order, comes first
+        } else {
+          return a.playerId.localeCompare(b.playerId) // Both new, stable sort
+        }
+      })
+
+    const updatedPlayerOrder = presentPlayers.map((p) => p.playerId)
+    const numPlayers = updatedPlayerOrder.length
+
+    // Validate minimum player count
+    if (numPlayers < 2) {
+      throw new Error('Not enough players to continue the game')
+    }
+
     const hands: Record<string, Card[]> = {}
     for (let i = numCards; i > 0; i--) {
-      players.forEach((player) => {
+      presentPlayers.forEach((player) => {
         const card = deck.deal()
         if (card) {
           if (hands[player.playerId]) {
@@ -412,8 +439,6 @@ const advanceToNextRound = async (
         }
       })
     }
-
-    const numPlayers = playerOrder.length
     const newDealerIndex = (currentDealerIndex + 1) % numPlayers
     const newCurrentPlayerIndex = (newDealerIndex + 1) % numPlayers
 
@@ -435,6 +460,8 @@ const advanceToNextRound = async (
     updateObj[`games/${gameId}/state/descending`] = descending
     updateObj[`games/${gameId}/state/dealerIndex`] = newDealerIndex
     updateObj[`games/${gameId}/state/currentPlayerIndex`] = newCurrentPlayerIndex
+    updateObj[`games/${gameId}/state/playerOrder`] = updatedPlayerOrder
+    updateObj[`games/${gameId}/state/numPlayers`] = numPlayers
     updateObj[`games/${gameId}/rounds/${roundKey}/roundId`] = roundKey
     updateObj[`games/${gameId}/rounds/${roundKey}/roundNum`] = roundNum
     updateObj[`games/${gameId}/rounds/${roundKey}/numPlayers`] = numPlayers
@@ -470,6 +497,20 @@ export const addPlayer = async (
   try {
     const { ref, body } = req
     const { playerName, gameId } = body
+
+    // Validate game exists and is joinable
+    const gameState = await ref(`games/${gameId}/state`)
+      .once('value')
+      .then((snap) => snap.val())
+
+    if (!gameState) {
+      return res.status(404).json({ error: 'Game not found' })
+    }
+
+    if (gameState.status === 'over') {
+      return res.status(400).json({ error: 'Game has ended' })
+    }
+
     const playerRef = ref(`games/${gameId}/players`).push()
     const playerId = playerRef.key as string
     await playerRef.update({
