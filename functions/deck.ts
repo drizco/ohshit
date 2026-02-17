@@ -1,4 +1,10 @@
+import type { Suit, Card, CardValue } from './types.js'
+
 class Deck {
+  suits: Suit[]
+  values: CardValue[]
+  cards: Card[]
+
   constructor() {
     this.suits = ['C', 'S', 'H', 'D']
     this.values = [
@@ -19,7 +25,7 @@ class Deck {
     this.cards = this.createDeck()
   }
 
-  sortHand(cards) {
+  sortHand(cards: Card[]): Card[] {
     return cards.sort((a, b) => {
       if (a.suit === 'C' && b.suit !== 'C') {
         return -1
@@ -43,12 +49,12 @@ class Deck {
     })
   }
 
-  deal() {
+  deal(): Card | undefined {
     return this.cards.shift()
   }
 
-  createDeck() {
-    const cards = []
+  createDeck(): Card[] {
+    const cards: Card[] = []
     this.suits.forEach((suit) => {
       this.values.forEach(({ rank, value }) => {
         cards.push({ suit, rank, value })
@@ -57,9 +63,9 @@ class Deck {
     return this._shuffle(cards)
   }
 
-  _shuffle(array) {
+  _shuffle(array: Card[]): Card[] {
     let currentIndex = array.length
-    let temporaryValue, randomIndex
+    let temporaryValue: Card, randomIndex: number
 
     while (0 !== currentIndex) {
       randomIndex = Math.floor(Math.random() * currentIndex)

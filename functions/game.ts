@@ -1,14 +1,21 @@
 import ShortUniqueId from 'short-unique-id'
+import type { Request, Response } from 'express'
+import type { database } from 'firebase-admin'
 import Deck from './deck.js'
 import { calculateLeader, isLegal } from './helpers.js'
+import type { Card, Player } from './types.js'
 
-const uid = new ShortUniqueId.default({ length: 4 })
+const uid = new ShortUniqueId({ length: 4 })
 
-export const newGame = async (req, res) => {
+interface RequestWithRef extends Request {
+  ref: (path?: string) => database.Reference
+}
+
+export const newGame = async (req: RequestWithRef, res: Response): Promise<Response> => {
   try {
     const { ref, body } = req
     const { game, name, numCards, bidPoints, dirty, timeLimit } = body
-    let gameId = uid()
+    let gameId = uid.rnd()
     let unique = false
     while (!unique) {
       // eslint-disable-next-line no-await-in-loop
@@ -16,12 +23,12 @@ export const newGame = async (req, res) => {
         .once('value')
         .then((snap) => !snap.exists())
       if (!unique) {
-        gameId = uid()
+        gameId = uid.rnd()
       }
     }
     const playerRef = ref(`games/${gameId}/players`).push()
-    const playerId = playerRef.key
-    const updateObj = {}
+    const playerId = playerRef.key as string
+    const updateObj: Record<string, unknown> = {}
     // Metadata
     updateObj[`games/${gameId}/metadata/timestamp`] = new Date()
     updateObj[`games/${gameId}/metadata/name`] = game
@@ -46,7 +53,10 @@ export const newGame = async (req, res) => {
   }
 }
 
-export const replayGame = async (req, res) => {
+export const replayGame = async (
+  req: RequestWithRef,
+  res: Response
+): Promise<Response> => {
   try {
     const { ref, body } = req
     const { oldGameId, newGameId } = body
@@ -58,7 +68,10 @@ export const replayGame = async (req, res) => {
   }
 }
 
-export const startGame = async (req, res) => {
+export const startGame = async (
+  req: RequestWithRef,
+  res: Response
+): Promise<Response> => {
   try {
     const {
       ref,
@@ -72,7 +85,7 @@ export const startGame = async (req, res) => {
         .once('value')
         .then((snap) => snap.val()),
     ])
-    players = Object.values(players)
+    players = Object.values(players) as Player[]
     const deckSize = 52
     const numPlayers = players.length
     // reserve 1 for trump
@@ -81,33 +94,39 @@ export const startGame = async (req, res) => {
     }
     const deck = new Deck()
 
-    const hands = {}
+    const hands: Record<string, Card[]> = {}
     for (let i = numCards; i > 0; i--) {
-      players.forEach((player) => {
+      players.forEach((player: Player) => {
         const card = deck.deal()
-        if (hands[player.playerId]) {
-          hands[player.playerId].push(card)
-        } else {
-          hands[player.playerId] = [card]
+        if (card) {
+          if (hands[player.playerId]) {
+            hands[player.playerId].push(card)
+          } else {
+            hands[player.playerId] = [card]
+          }
         }
       })
     }
 
-    const trump = deck.deal().suit
+    const trumpCard = deck.deal()
+    if (!trumpCard) {
+      return res.status(500).json({ error: 'Failed to draw trump card' })
+    }
+    const trump = trumpCard.suit
 
     const roundRef = ref(`games/${gameId}/rounds`).push()
-    const roundKey = roundRef.key
+    const roundKey = roundRef.key as string
 
     const trickRef = ref(`games/${gameId}/rounds/${roundKey}/tricks`).push()
-    const trickKey = trickRef.key
+    const trickKey = trickRef.key as string
 
     const randomIndex = Math.floor(Math.random() * numPlayers)
     const dealerIndex = randomIndex
 
     // Build player order array
-    const playerOrder = players.map((p) => p.playerId)
+    const playerOrder = players.map((p: Player) => p.playerId)
 
-    const updateObj = {}
+    const updateObj: Record<string, unknown> = {}
 
     // State updates
     updateObj[`games/${gameId}/state/numPlayers`] = numPlayers
@@ -135,7 +154,7 @@ export const startGame = async (req, res) => {
         const cardRef = ref(
           `games/${gameId}/players/${playerId}/hands/${roundKey}/cards`
         ).push()
-        const cardId = cardRef.key
+        const cardId = cardRef.key as string
         updateObj[
           `games/${gameId}/players/${playerId}/hands/${roundKey}/cards/${cardId}`
         ] = Object.assign({}, card, {
@@ -153,11 +172,14 @@ export const startGame = async (req, res) => {
   }
 }
 
-export const submitBid = async (req, res) => {
+export const submitBid = async (
+  req: RequestWithRef,
+  res: Response
+): Promise<Response> => {
   try {
     const { ref, body } = req
     const { playerId, bid, gameId, roundId } = body
-    const updateObj = {}
+    const updateObj: Record<string, unknown> = {}
 
     const [playerOrder, currentPlayerIndex, currentBids] = await Promise.all([
       ref(`games/${gameId}/state/playerOrder`)
@@ -198,7 +220,7 @@ export const submitBid = async (req, res) => {
   }
 }
 
-export const playCard = async (req, res) => {
+export const playCard = async (req: RequestWithRef, res: Response): Promise<Response> => {
   try {
     const { ref, body } = req
     const { playerId, card, gameId, roundId, trickId } = body
@@ -224,7 +246,7 @@ export const playCard = async (req, res) => {
           .once('value')
           .then((snap) => {
             const cards = snap.val() || {}
-            return Object.values(cards)
+            return Object.values(cards) as Card[]
           }),
       ])
 
@@ -233,12 +255,12 @@ export const playCard = async (req, res) => {
       return res.status(400).json({ error: 'Not your turn' })
     }
 
-    const cardInHand = playerHand.find((c) => c.cardId === card.cardId)
+    const cardInHand = playerHand.find((c: Card) => c.cardId === card.cardId)
     if (!cardInHand) {
       return res.status(400).json({ error: 'Card not in hand' })
     }
 
-    const trickCards = Object.values(currentTrick.cards ?? {})
+    const trickCards = Object.values(currentTrick.cards ?? {}) as Card[]
     let leadSuit = currentTrick.leadSuit
     if (!leadSuit && trickCards.length === 0) {
       leadSuit = card.suit
@@ -261,7 +283,7 @@ export const playCard = async (req, res) => {
 
     const nextPlayerIndex = (currentPlayerIndex + 1) % playerOrder.length
 
-    const updateObj = {}
+    const updateObj: Record<string, unknown> = {}
     if (leadSuit && !currentTrick.leadSuit) {
       updateObj[`games/${gameId}/rounds/${roundId}/tricks/${trickId}/leadSuit`] = leadSuit
     }
@@ -281,7 +303,7 @@ export const playCard = async (req, res) => {
 
       if (!isNextRound) {
         const trickRef = ref(`games/${gameId}/rounds/${roundId}/tricks`).push()
-        const trickKey = trickRef.key
+        const trickKey = trickRef.key as string
         updateObj[`games/${gameId}/rounds/${roundId}/tricks/${trickKey}/trickId`] =
           trickKey
       }
@@ -299,9 +321,12 @@ export const playCard = async (req, res) => {
   }
 }
 
-const advanceToNextRound = async (ref, gameId) => {
-  const updateObj = {}
-  const promiseArray = []
+const advanceToNextRound = async (
+  ref: (path?: string) => database.Reference,
+  gameId: string
+): Promise<void> => {
+  const updateObj: Record<string, unknown> = {}
+  const promiseArray: Promise<unknown>[] = []
 
   const gameState = await ref(`games/${gameId}/state`)
     .once('value')
@@ -339,7 +364,7 @@ const advanceToNextRound = async (ref, gameId) => {
     ref(`games/${gameId}/rounds/${roundId}/bids`).once('value'),
     ref(`games/${gameId}/rounds/${roundId}/tricks`).orderByKey().once('value'),
   ])
-  const scoreObj = {}
+  const scoreObj: Record<string, { bid: number; won: number }> = {}
   const bidObj = bidSnap.val()
   Object.keys(bidObj).forEach((key) => {
     scoreObj[key] = { bid: bidObj[key], won: 0 }
@@ -372,16 +397,18 @@ const advanceToNextRound = async (ref, gameId) => {
 
     const playersSnap = await ref(`games/${gameId}/players`).once('value')
     const playersObj = playersSnap.val()
-    const players = Object.values(playersObj)
+    const players = Object.values(playersObj) as Player[]
 
-    const hands = {}
+    const hands: Record<string, Card[]> = {}
     for (let i = numCards; i > 0; i--) {
       players.forEach((player) => {
         const card = deck.deal()
-        if (hands[player.playerId]) {
-          hands[player.playerId].push(card)
-        } else {
-          hands[player.playerId] = [card]
+        if (card) {
+          if (hands[player.playerId]) {
+            hands[player.playerId].push(card)
+          } else {
+            hands[player.playerId] = [card]
+          }
         }
       })
     }
@@ -390,12 +417,16 @@ const advanceToNextRound = async (ref, gameId) => {
     const newDealerIndex = (currentDealerIndex + 1) % numPlayers
     const newCurrentPlayerIndex = (newDealerIndex + 1) % numPlayers
 
-    const trump = deck.deal().suit
+    const trumpCard = deck.deal()
+    if (!trumpCard) {
+      throw new Error('Failed to draw trump card')
+    }
+    const trump = trumpCard.suit
     const roundRef = ref(`games/${gameId}/rounds`).push()
-    const roundKey = roundRef.key
+    const roundKey = roundRef.key as string
 
     const trickRef = ref(`games/${gameId}/rounds/${roundKey}/tricks`).push()
-    const trickKey = trickRef.key
+    const trickKey = trickRef.key as string
 
     updateObj[`games/${gameId}/state/roundId`] = roundKey
     updateObj[`games/${gameId}/state/roundNum`] = roundNum
@@ -417,7 +448,7 @@ const advanceToNextRound = async (ref, gameId) => {
         const cardRef = ref(
           `games/${gameId}/players/${playerId}/hands/${roundKey}/cards`
         ).push()
-        const cardId = cardRef.key
+        const cardId = cardRef.key as string
         updateObj[
           `games/${gameId}/players/${playerId}/hands/${roundKey}/cards/${cardId}`
         ] = Object.assign({}, card, {
@@ -432,12 +463,15 @@ const advanceToNextRound = async (ref, gameId) => {
   await Promise.all(promiseArray)
 }
 
-export const addPlayer = async (req, res) => {
+export const addPlayer = async (
+  req: RequestWithRef,
+  res: Response
+): Promise<Response> => {
   try {
     const { ref, body } = req
     const { playerName, gameId } = body
     const playerRef = ref(`games/${gameId}/players`).push()
-    const playerId = playerRef.key
+    const playerId = playerRef.key as string
     await playerRef.update({
       name: playerName,
       playerId,
@@ -450,7 +484,10 @@ export const addPlayer = async (req, res) => {
   }
 }
 
-export const updatePlayer = async (req, res) => {
+export const updatePlayer = async (
+  req: RequestWithRef,
+  res: Response
+): Promise<Response> => {
   try {
     const { ref, params } = req
     const { playerId, gameId, present } = params

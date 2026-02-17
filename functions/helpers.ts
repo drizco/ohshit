@@ -1,16 +1,30 @@
 /**
  * Server-side game logic helpers
- * Copied from src/utils/helpers.js to ensure consistent game logic
+ * Copied from src/utils/helpers.ts to ensure consistent game logic
  */
+
+import type { Suit, Card } from './types.js'
+
+interface CalculateLeaderParams {
+  cards: Card[]
+  trump: Suit
+  leadSuit: Suit
+}
+
+interface IsLegalParams {
+  hand: Card[]
+  card: Card
+  leadSuit: Suit | null
+}
 
 /**
  * Determines which card is winning the trick
- * @param {Array} cards - Array of card objects with suit, rank, playerId
- * @param {string} trump - Trump suit (C, H, S, D)
- * @param {string} leadSuit - Lead suit for this trick
- * @returns {Object} The winning card
  */
-export const calculateLeader = ({ cards, trump, leadSuit }) =>
+export const calculateLeader = ({
+  cards,
+  trump,
+  leadSuit,
+}: CalculateLeaderParams): Card =>
   cards.sort((a, b) => {
     // Trump beats non-trump
     if (a.suit === trump && b.suit !== trump) {
@@ -32,12 +46,8 @@ export const calculateLeader = ({ cards, trump, leadSuit }) =>
 
 /**
  * Checks if a card is legal to play given the current hand and lead suit
- * @param {Array} hand - Player's current hand
- * @param {Object} card - Card being played
- * @param {string} leadSuit - Lead suit for this trick (null if first card)
- * @returns {boolean} True if the card can be legally played
  */
-export const isLegal = ({ hand, card, leadSuit }) => {
+export const isLegal = ({ hand, card, leadSuit }: IsLegalParams): boolean => {
   if (!leadSuit) return true
   const hasSuit = hand.some((c) => c.suit === leadSuit)
   if (hasSuit) {

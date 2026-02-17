@@ -1,7 +1,9 @@
 import functions from 'firebase-functions'
 import express from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import admin from 'firebase-admin'
+import type { database } from 'firebase-admin'
 import {
   addPlayer,
   startGame,
@@ -12,6 +14,12 @@ import {
   updatePlayer,
 } from './game.js'
 
+// Extend Express Request to include custom properties
+interface RequestWithAuth extends Request {
+  ref: (path?: string) => database.Reference
+  uid?: string
+}
+
 // Use emulator in development - MUST be set BEFORE admin.initializeApp()
 if (process.env.FUNCTIONS_EMULATOR === 'true') {
   process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099'
@@ -20,19 +28,20 @@ if (process.env.FUNCTIONS_EMULATOR === 'true') {
 
 admin.initializeApp()
 
-const ref = (path) => (path ? admin.database().ref(path) : admin.database().ref())
+const ref = (path?: string): database.Reference =>
+  path ? admin.database().ref(path) : admin.database().ref()
 
 const app = express()
 
 app.use(cors({ origin: true }))
 
-app.use((req, res, next) => {
-  req.ref = ref
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  ;(req as RequestWithAuth).ref = ref
   next()
 })
 
 // Authentication middleware - require valid token
-app.use(async (req, res, next) => {
+app.use(async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -43,7 +52,7 @@ app.use(async (req, res, next) => {
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(token)
-    req.uid = decodedToken.uid
+    ;(req as RequestWithAuth).uid = decodedToken.uid
     return next()
   } catch (error) {
     console.error('Error verifying auth token:', error)
@@ -51,20 +60,26 @@ app.use(async (req, res, next) => {
   }
 })
 
-app.post('/add-player', addPlayer)
-app.post('/new-game', newGame)
-app.post('/start-game', startGame)
-app.post('/replay-game', replayGame)
-app.post('/submit-bid', submitBid)
-app.post('/play-card', playCard)
-app.put('/update-player/:playerId/:gameId/:present', updatePlayer)
+// Type assertion via unknown - Express/Firebase Functions have incompatible handler signatures
+// but are compatible at runtime. The handlers use RequestWithAuth which extends Request.
+app.post('/add-player', addPlayer as unknown as express.RequestHandler)
+app.post('/new-game', newGame as unknown as express.RequestHandler)
+app.post('/start-game', startGame as unknown as express.RequestHandler)
+app.post('/replay-game', replayGame as unknown as express.RequestHandler)
+app.post('/submit-bid', submitBid as unknown as express.RequestHandler)
+app.post('/play-card', playCard as unknown as express.RequestHandler)
+app.put(
+  '/update-player/:playerId/:gameId/:present',
+  updatePlayer as unknown as express.RequestHandler
+)
 
-export const api = functions.https.onRequest(app)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const api = functions.https.onRequest(app as any)
 
 export const clearOldGameData = functions.pubsub
   .schedule('0 0 * * 1')
   .timeZone('America/Denver')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     const date = new Date()
     date.setDate(date.getDate() - 7)
     const gameSnap = await ref('games')
@@ -75,7 +90,7 @@ export const clearOldGameData = functions.pubsub
     if (gameSnap.exists()) {
       console.log(`DELETING ${gameSnap.numChildren()} OLD GAMES`)
 
-      const promiseArray = []
+      const promiseArray: Promise<void>[] = []
       gameSnap.forEach((snap) => {
         // With nested schema, deleting game node removes everything:
         // players, rounds, tricks, bids, hands all cascade
