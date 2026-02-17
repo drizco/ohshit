@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import type { MutableRefObject } from 'react'
 import {
   newGame,
   replayGame,
@@ -9,30 +10,34 @@ import {
 } from '../utils/api'
 import { isLegal } from '../utils/helpers'
 import { calculateAdjustedBid } from '../utils/bidHelpers'
+import type { Card, Game, Trick, LocalGameState } from '../types'
+
+interface UseGameActionsOptions {
+  gameId: string
+  playerId: string
+  playerName: string
+  game: Game | null
+  hand: Card[]
+  bid: number
+  bids: Record<string, number>
+  tricks: Trick[]
+  trickIndex: number
+  queuedCard: Card | null
+  visible: boolean
+  setError: (error: string | null) => void
+  setLoading: (loading: boolean) => void
+  updateState: (
+    updates:
+      | Partial<LocalGameState>
+      | ((prevState: LocalGameState) => Partial<LocalGameState>)
+  ) => void
+  autoPlayTimeoutRef: MutableRefObject<NodeJS.Timeout | null>
+}
 
 /**
  * Custom hook for game actions
  *
  * Encapsulates all user actions: playing cards, bidding, starting games, etc.
- *
- * @param {Object} options
- * @param {string} options.gameId - The game ID
- * @param {string} options.playerId - Current player's ID
- * @param {string} options.playerName - Current player's name
- * @param {Object} options.game - Game state
- * @param {Object} options.players - Players state
- * @param {Array} options.hand - Player's hand
- * @param {number} options.bid - Current bid value
- * @param {Object} options.bids - All bids
- * @param {Array} options.tricks - Array of tricks
- * @param {number} options.trickIndex - Current trick index
- * @param {Object} options.queuedCard - Queued card for auto-play
- * @param {boolean} options.visible - Page visibility state
- * @param {Function} options.setState - Context setState function
- * @param {Function} options.updateState - State updater
- * @param {Function} options.dispatchRound - Round dispatch
- * @param {Object} options.autoPlayTimeoutRef - Ref for auto-play timeout
- * @returns {Object} Action functions
  */
 const useGameActions = ({
   gameId,
@@ -46,13 +51,14 @@ const useGameActions = ({
   trickIndex,
   queuedCard,
   visible,
-  setState,
+  setError,
+  setLoading,
   updateState,
   autoPlayTimeoutRef,
-}) => {
+}: UseGameActionsOptions) => {
   // Play card - handles playing a card or queuing it for later
   const playCard = useCallback(
-    async (card) => {
+    async (card: Card) => {
       try {
         if (autoPlayTimeoutRef.current) {
           clearTimeout(autoPlayTimeoutRef.current)
@@ -65,10 +71,14 @@ const useGameActions = ({
         const trick = tricks[trickIndex]
         const currentPlayerId = game.state.playerOrder?.[game.state.currentPlayerIndex]
 
+        if (!game.state.roundId || !trick?.trickId) {
+          return
+        }
+
         if (currentPlayerId !== playerId) {
           // Not our turn - queue the card for later auto-play
           updateState((prevState) => {
-            let newCard = card
+            let newCard: Card | null = card
             if (prevState.queuedCard && prevState.queuedCard.cardId === card.cardId) {
               newCard = null
             }
@@ -87,15 +97,17 @@ const useGameActions = ({
           trickId: trick.trickId,
         }
 
-        setState({ loading: true })
+        setLoading(true)
         await playCardApi(body)
-        setState({ loading: false })
+        setLoading(false)
       } catch (error) {
-        setState({ loading: false, error: true })
+        setLoading(false)
+        setError('Failed to submit bid')
         console.error(`playCard error:`, error)
       }
     },
-    [setState, tricks, trickIndex, game, playerId, updateState, autoPlayTimeoutRef]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setLoading, setError, tricks, trickIndex, game, playerId, updateState] // autoPlayTimeoutRef is a ref
   )
 
   // Your turn handler - auto-plays queued card when it's player's turn
@@ -110,17 +122,18 @@ const useGameActions = ({
         updateState({ showYourTurn: true })
       }
     }
-  }, [visible, queuedCard, playCard, updateState, autoPlayTimeoutRef])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, queuedCard, playCard, updateState]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
 
   // Submit bid - submits the player's bid for the round
   const submitBid = useCallback(
-    async (optionalBid) => {
+    async (optionalBid?: number) => {
       try {
-        setState({ loading: true })
+        setLoading(true)
 
         const bidValue = optionalBid !== undefined ? optionalBid : bid
 
-        if (!game || !game.state) return
+        if (!game || !game.state || !game.state.roundId) return
 
         const { roundId } = game.state
 
@@ -132,13 +145,14 @@ const useGameActions = ({
         }
 
         await submitBidApi(body)
-        setState({ loading: false })
+        setLoading(false)
       } catch (error) {
-        setState({ loading: false, error: true })
+        setLoading(false)
+        setError('Failed to submit bid')
         console.error(`submitBid error:`, error)
       }
     },
-    [bid, game, playerId, gameId, setState]
+    [bid, game, playerId, gameId, setLoading, setError]
   )
 
   // Random play - plays a random legal card or bids randomly
@@ -146,14 +160,10 @@ const useGameActions = ({
     if (!game) return
 
     const status = game.state?.status
-
     if (status === 'play') {
-      let handCopy = [...hand]
-      let leadSuit
+      const handCopy = [...hand]
       const trick = tricks[trickIndex]
-      if (trick && trick.leadSuit) {
-        leadSuit = trick.leadSuit
-      }
+      const leadSuit = trick?.leadSuit || null
       let randomIndex = Math.floor(Math.random() * handCopy.length)
       let card = handCopy[randomIndex]
       while (!isLegal({ hand, leadSuit, card: handCopy[randomIndex] })) {
@@ -174,7 +184,7 @@ const useGameActions = ({
   const playAgain = useCallback(async () => {
     try {
       if (!game || !game.metadata || !game.settings) return
-      setState({ loading: true })
+      setLoading(true)
 
       const {
         metadata: { name, gameId: currentGameId },
@@ -199,46 +209,54 @@ const useGameActions = ({
           newGameId: gameIdResponse,
         })
       }
-      setState({ loading: false })
+      setLoading(false)
     } catch (error) {
-      setState({ loading: false, error: true })
+      setLoading(false)
+      setError('An error occurred')
       console.error(`playAgain error:`, error)
     }
-  }, [setState, game, playerName])
+  }, [setLoading, setError, game, playerName])
 
   // Add player - adds the current player to the game
   const addPlayer = useCallback(async () => {
     try {
-      setState({ loading: true })
+      setLoading(true)
       const response = await addPlayerApi({ playerName, gameId })
       if (response.ok) {
         const { playerId: newPlayerId } = await response.json()
         localStorage.setItem(`oh-shit-${gameId}-player-id`, newPlayerId)
         localStorage.setItem('player-name', playerName)
         updateState({ playerId: newPlayerId })
-        setState({ loading: false })
+        setLoading(false)
       }
     } catch (error) {
-      setState({ loading: false, error: true })
+      setLoading(false)
+      setError('An error occurred')
       console.error(`addPlayer error:`, error)
     }
-  }, [setState, playerName, gameId, updateState])
+  }, [setLoading, setError, playerName, gameId, updateState])
 
   // Start game - starts the game (host only)
   const startGameHandler = useCallback(async () => {
     try {
-      setState({ loading: true })
-      await startGame({ gameId })
-      setState({ loading: false })
+      if (!game?.settings?.numCards || !game.players) return
+      setLoading(true)
+      await startGame({
+        gameId,
+        players: game.players,
+        numCards: game.settings.numCards,
+      })
+      setLoading(false)
     } catch (error) {
-      setState({ loading: false, error: true })
+      setLoading(false)
+      setError('Failed to start game')
       console.error(`startGame error:`, error)
     }
-  }, [setState, gameId])
+  }, [setLoading, setError, gameId, game])
 
   // Handle input change - updates state for form inputs
   const handleChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value, name } = e.target
       updateState({ [name]: value })
     },
@@ -247,14 +265,21 @@ const useGameActions = ({
 
   // Handle bid toggle - increments or decrements bid with auto-adjustment
   const handleToggle = useCallback(
-    (inc) => {
+    (inc: boolean) => {
       updateState((prevState) => {
         const { game, players, bid } = prevState
         if (!game) return {}
 
         // Increment/decrement first, then auto-adjust if needed
         const adjustedBid = inc ? Number(bid) + 1 : Number(bid) - 1
-        const newBid = calculateAdjustedBid(adjustedBid, bids, game, players, inc)
+        // calculateAdjustedBid handles null/undefined game.settings gracefully
+        const newBid = calculateAdjustedBid(
+          adjustedBid,
+          bids,
+          game.settings,
+          players,
+          inc
+        )
 
         return { bid: newBid }
       })

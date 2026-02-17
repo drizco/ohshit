@@ -1,16 +1,17 @@
 import { useMemo } from 'react'
 import { getScore } from '../utils/helpers'
+import type { Trick, Player } from '../types'
+
+interface UseGameComputedOptions {
+  tricks?: Trick[]
+  players?: Record<string, Player>
+  playerId?: string | null
+}
 
 /**
  * Custom hook for computed/derived values from game state
- *
- * @param {Object} options
- * @param {Array} options.tricks - Array of trick objects
- * @param {Object} options.players - Object mapping playerId to player data
- * @param {string} options.playerId - Current player's ID
- * @returns {Object} Computed values: { trickIndex, roundScore, isHost, winner, trick, leadSuit }
  */
-const useGameComputed = ({ tricks = [], players = {}, playerId = null }) => {
+const useGameComputed = ({ tricks = [], players = {}, playerId = null }: UseGameComputedOptions) => {
   // Calculate the index of the current trick (most recent)
   const trickIndex = useMemo(() => {
     return tricks.length > 0 ? tricks.length - 1 : 0

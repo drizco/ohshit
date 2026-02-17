@@ -1,7 +1,14 @@
 import { useState, useCallback, useReducer, useRef, useEffect } from 'react'
+import type { Trick, Suit, LocalGameState, RoundAction } from '../types'
+
+interface RoundState {
+  tricks: Trick[]
+  bids: Record<string, number>
+  trump: Suit | null
+}
 
 // Round state reducer for managing tricks, bids, trump, and winner modal
-function roundReducer(state, action) {
+function roundReducer(state: RoundState, action: RoundAction): RoundState {
   switch (action.type) {
     case 'LOAD_INITIAL':
       return {
@@ -14,14 +21,27 @@ function roundReducer(state, action) {
         ...state,
         tricks: action.tricks,
       }
-    case 'ADD_TRICK':
+    case 'ADD_TRICK': {
+      const isDuplicate = state.tricks.some((t) => t.trickId === action.trick.trickId)
+      if (isDuplicate) {
+        console.error('[BUG] Attempted to add duplicate trick!', action.trick.trickId)
+        return state // Don't add duplicates
+      }
       return {
         ...state,
         tricks: [...state.tricks, action.trick],
       }
+    }
     case 'UPDATE_TRICK': {
+      const idx = state.tricks.findIndex((t) => t.trickId === action.trick.trickId)
+      if (idx === -1) {
+        console.error(
+          '[BUG] Trick not found in array during UPDATE_TRICK!',
+          action.trick.trickId
+        )
+        return state // Trick not found, don't modify state
+      }
       const updatedTricks = [...state.tricks]
-      const idx = updatedTricks.findIndex((t) => t.trickId === action.trick.trickId)
       updatedTricks[idx] = action.trick
       return {
         ...state,
@@ -57,7 +77,7 @@ function roundReducer(state, action) {
   }
 }
 
-const INITIAL_STATE = {
+const INITIAL_STATE: LocalGameState = {
   game: null,
   players: {},
   playerId: null,
@@ -66,10 +86,10 @@ const INITIAL_STATE = {
   bid: 0,
   showYourTurn: false,
   queuedCard: null,
-  lastWinner: null, // Store winner playerId to show modal (cleared when modal closes)
+  lastWinner: null,
 }
 
-const INITIAL_ROUND_STATE = {
+const INITIAL_ROUND_STATE: RoundState = {
   tricks: [],
   bids: {},
   trump: null,
@@ -77,12 +97,8 @@ const INITIAL_ROUND_STATE = {
 
 /**
  * Custom hook for managing game state and initialization
- *
- * @param {Object} options
- * @param {string} options.gameId - The game ID
- * @returns {Object} State management object
  */
-const useGameState = ({ gameId }) => {
+const useGameState = ({ gameId }: { gameId: string }) => {
   // Local state
   const [state, setState] = useState(INITIAL_STATE)
 
@@ -102,12 +118,19 @@ const useGameState = ({ gameId }) => {
   const currentBidsRef = useRef(roundState.bids)
 
   // Update state helper - supports both object and function updates
-  const updateState = useCallback((updates) => {
-    setState((prev) => {
-      const newUpdates = typeof updates === 'function' ? updates(prev) : updates
-      return { ...prev, ...newUpdates }
-    })
-  }, [])
+  const updateState = useCallback(
+    (
+      updates:
+        | Partial<LocalGameState>
+        | ((prevState: LocalGameState) => Partial<LocalGameState>)
+    ) => {
+      setState((prev) => {
+        const newUpdates = typeof updates === 'function' ? updates(prev) : updates
+        return { ...prev, ...newUpdates }
+      })
+    },
+    []
+  )
 
   // Keep bids ref in sync with reducer state
   useEffect(() => {
