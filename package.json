@@ -12,6 +12,12 @@
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules FIREBASE_EMULATOR=true jest --config jest.functions.config.mjs __tests__/integration",
     "test:all": "npm run test && npm run test:functions",
     "test:all:coverage": "npm run test:coverage && NODE_OPTIONS=--experimental-vm-modules jest --config jest.functions.config.mjs --coverage",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "type-check:functions": "cd functions && tsc --noEmit",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "build:verify": "yarn type-check && yarn lint && yarn build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -37,12 +43,22 @@
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.5.1",
+    "@types/classnames": "^2.3.4",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/reactstrap": "^8.7.2",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "firebase-admin": "^13.6.1",
     "firebase-functions-test": "^3.4.1",
     "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0"
+    "jest-environment-jsdom": "^30.2.0",
+    "typescript": "^5.9.3"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

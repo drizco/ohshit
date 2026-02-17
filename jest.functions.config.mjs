@@ -6,16 +6,38 @@ export default {
   // Inject globals automatically (no need to import from '@jest/globals')
   injectGlobals: true,
 
-  // Enable ES modules (functions/package.json has "type": "module")
-  transform: {},
+  // Enable ES modules and TypeScript support
+  extensionsToTreatAsEsm: ['.ts'],
+
+  // Map .js imports to .ts files for TypeScript ES modules
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+
+  transform: {
+    '^.+\\.ts$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: false,
+          },
+        },
+        module: {
+          type: 'es6',
+        },
+      },
+    ],
+  },
 
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup/jest.functions.setup.js'],
 
-  // Only test functions directory
+  // Only test functions directory (include TypeScript)
   testMatch: [
-    '**/__tests__/functions/**/*.test.js',
-    '**/__tests__/integration/**/*.test.js',
+    '**/__tests__/functions/**/*.test.[jt]s',
+    '**/__tests__/integration/**/*.test.[jt]s',
   ],
 
   // Ignore frontend tests
@@ -26,10 +48,10 @@ export default {
     '/__tests__/setup/',
   ],
 
-  // Coverage for functions
+  // Coverage for functions (include TypeScript)
   collectCoverageFrom: [
-    'functions/**/*.js',
-    '!functions/index.js', // Mostly boilerplate
+    'functions/**/*.{js,ts}',
+    '!functions/index.{js,ts}', // Mostly boilerplate
     '!functions/node_modules/**',
   ],
   coverageDirectory: 'coverage-functions',

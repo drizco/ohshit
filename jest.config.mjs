@@ -6,11 +6,20 @@ export default {
   // Inject globals automatically (no need to import from '@jest/globals')
   injectGlobals: true,
 
+  // Module file extensions
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node'],
+
+  // Treat TypeScript files as ES modules
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup/jest.setup.js'],
 
-  // Test match patterns
-  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.spec.js'],
+  // Test match patterns (include TypeScript)
+  testMatch: [
+    '**/__tests__/**/*.test.[jt]s?(x)',
+    '**/__tests__/**/*.spec.[jt]s?(x)',
+  ],
 
   // Ignore functions tests (they have their own config)
   testPathIgnorePatterns: [
@@ -22,12 +31,12 @@ export default {
     '/__tests__/setup/',
   ],
 
-  // Coverage configuration
+  // Coverage configuration (include TypeScript)
   collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    '!src/pages/_app.js',
-    '!src/pages/_document.js',
-    '!**/*.stories.js',
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/pages/_app.{js,tsx}',
+    '!src/pages/_document.{js,tsx}',
+    '!**/*.stories.{js,tsx}',
     '!**/node_modules/**',
   ],
   coverageDirectory: 'coverage',
@@ -49,6 +58,7 @@ export default {
     '^@/pages/(.*)$': '<rootDir>/src/pages/$1',
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
+    '^@/types/(.*)$': '<rootDir>/src/types/$1',
     // Mock Firebase SDK
     '^firebase/database$': '<rootDir>/__tests__/setup/firebaseMock.js',
     '^firebase/auth$': '<rootDir>/__tests__/setup/firebaseMock.js',
@@ -59,7 +69,7 @@ export default {
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__tests__/setup/fileMock.js',
   },
 
-  // Use SWC for JSX transformation while preserving ES modules
+  // Use SWC for JSX/TSX transformation while preserving ES modules
   transform: {
     '^.+\\.(js|jsx)$': [
       '@swc/jest',
@@ -68,6 +78,30 @@ export default {
           parser: {
             syntax: 'ecmascript',
             jsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
+          },
+          experimental: {
+            plugins: [['@swc/plugin-styled-jsx', {}]],
+          },
+        },
+        module: {
+          type: 'es6',
+        },
+      },
+    ],
+    '^.+\\.(ts|tsx)$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+            decorators: false,
+            dynamicImport: true,
           },
           transform: {
             react: {
