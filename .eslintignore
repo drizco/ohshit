@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+functions
+coverage
+coverage-functions
+.goosehints
