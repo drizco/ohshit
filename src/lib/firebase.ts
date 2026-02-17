@@ -30,4 +30,4 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   connectDatabaseEmulator(db, '127.0.0.1', 9000)
 }
 
-export const ref = (path) => (path ? dbRef(db, path) : dbRef(db))
+export const ref = (path?: string) => (path ? dbRef(db, path) : dbRef(db))
