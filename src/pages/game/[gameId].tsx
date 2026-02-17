@@ -1,10 +1,11 @@
 import { useEffect, useRef, useContext } from 'react'
 import { useRouter } from 'next/router'
+import type { GetServerSidePropsContext } from 'next'
 import Link from 'next/link'
 import { Container, Button, Row, Col, Modal, ModalBody, ModalHeader } from 'reactstrap'
-import { onAuthStateChanged } from 'firebase/auth'
-import CombinedContext from '../../context/CombinedContext'
-import { auth } from '../../lib/firebase'
+import AppStateContext from '../../context/AppStateContext'
+import SettingsContext from '../../context/SettingsContext'
+import TimerContext from '../../context/TimerContext'
 import styles from '../../styles/pages/game.module.scss'
 import CardRow from '../../components/CardRow'
 import { getSource, getAvailableTricks, getWinner } from '../../utils/helpers'
@@ -20,21 +21,34 @@ import useGameState from '../../hooks/useGameState'
 import useGameComputed from '../../hooks/useGameComputed'
 import useGameListeners from '../../hooks/useGameListeners'
 import useGameActions from '../../hooks/useGameActions'
-import useInterval from '../../hooks/useInterval'
 
-function Game({ gameId, isMobile }) {
+interface GameProps {
+  gameId: string
+  isMobile: boolean
+}
+
+function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
-  const context = useContext(CombinedContext)
-  const { visible, setState } = context
+  const { visible, setError, setLoading } = useContext(AppStateContext)
+  const { dark } = useContext(SettingsContext)
+  const { timer } = useContext(TimerContext)
 
   // Hook #1: State Management
   const { state, updateState, dispatchRound, roundState, initializeGame } = useGameState({
     gameId,
-    context,
   })
 
-  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard, lastWinner } =
-    state
+  const {
+    game,
+    players,
+    playerId,
+    playerName,
+    hand,
+    bid,
+    showYourTurn,
+    queuedCard,
+    lastWinner,
+  } = state
   const { tricks, bids, trump } = roundState
 
   // Hook #2: Computed Values
@@ -52,16 +66,16 @@ function Game({ gameId, isMobile }) {
   const { removeListeners } = useGameListeners({
     gameId,
     playerId,
-    roundId: game?.state?.roundId,
+    roundId: game?.state?.roundId || null,
     updateState,
     dispatchRound,
-    context,
+    setError,
   })
 
   // Hook #4: Game Actions
   const actions = useGameActions({
     gameId,
-    playerId,
+    playerId: playerId || '',
     playerName,
     game,
     hand,
@@ -71,7 +85,8 @@ function Game({ gameId, isMobile }) {
     trickIndex,
     queuedCard,
     visible,
-    setState,
+    setError,
+    setLoading,
     updateState,
     autoPlayTimeoutRef,
   })
@@ -89,28 +104,15 @@ function Game({ gameId, isMobile }) {
     closeModal,
   } = actions
 
-  // Initialize game and set up auth listener
-  // Effect: Initialize game once auth is ready
+  // Effect: Initialize game on mount and when gameId changes
   useEffect(() => {
-    // Wait for auth to be ready before initializing
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        initializeGame()
-        unsubscribe() // Only initialize once
-      }
-    })
+    initializeGame()
 
     return () => {
-      unsubscribe()
       removeListeners()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Effect: Reset state when gameId changes (new game)
-  useEffect(() => {
-    initializeGame()
-  }, [gameId, initializeGame])
+  }, [gameId])
 
   // Handle "your turn" logic
   useEffect(() => {
@@ -119,20 +121,6 @@ function Game({ gameId, isMobile }) {
       yourTurn()
     }
   }, [game, playerId, yourTurn])
-
-  // Interval for random play (if needed)
-  useInterval(
-    () => {
-      const currentPlayerId = game?.state?.playerOrder?.[game.state.currentPlayerIndex]
-      if (game && currentPlayerId === playerId) {
-        randomPlay()
-      }
-    },
-    game?.state?.autoPlay &&
-      game?.state?.playerOrder?.[game.state.currentPlayerIndex] === playerId
-      ? 1000
-      : null
-  )
 
   // Render logic
   if (!game) {
@@ -149,21 +137,19 @@ function Game({ gameId, isMobile }) {
   const currentPlayerIndex = game.state?.currentPlayerIndex
   const playerOrder = game.state?.playerOrder || []
   const currentPlayer = playerOrder[currentPlayerIndex]
-  const dark = game.state?.dark
-  const dealerIndex = game.state?.dealerIndex
+  const dealerIndex = game.state?.dealerIndex ?? 0
   const dealer = playerOrder[dealerIndex]
   const roundNum = game.state?.roundNum
   const numRounds = game.state?.numRounds
   const numCards = game.state?.numCards || game.settings?.numCards
   const name = game.metadata?.name
-  const timer = game.state?.timer
   const nextGame = game.state?.nextGame
   const timeLimit = game.settings?.timeLimit
 
-  const timerShowMax = timeLimit > 10 ? 10 : 5
+  const timerShowMax = timeLimit && timeLimit > 10 ? 10 : 5
 
   // Score is now under players
-  const score = {}
+  const score: Record<string, number> = {}
   if (players) {
     Object.values(players).forEach((player) => {
       if (player.score !== undefined) {
@@ -177,7 +163,12 @@ function Game({ gameId, isMobile }) {
       <div className={styles.game_page}>
         <CountdownOverlay
           timeRemaining={timer}
-          isVisible={playerId === currentPlayer && timer >= 0 && timer <= timerShowMax}
+          isVisible={
+            !!timeLimit &&
+            playerId === currentPlayer &&
+            timer >= 0 &&
+            timer <= timerShowMax
+          }
         />
         <Row className={styles.info_row}>
           <Col xs="4">
@@ -233,12 +224,11 @@ function Game({ gameId, isMobile }) {
           roundScore={roundScore}
           trick={trick}
           bid={bid}
-          setBid={(bid) => updateState({ bid })}
           dealer={dealer}
           handleToggle={handleToggle}
           submitBid={submitBid}
           afterBid={() => updateState({ bid: 0 })}
-          thisPlayer={playerId}
+          thisPlayer={playerId || ''}
           score={score}
           timeLimit={timeLimit}
           winnerModalShowing={Boolean(lastWinner)}
@@ -249,7 +239,7 @@ function Game({ gameId, isMobile }) {
         cards={hand}
         playCard={playCard}
         queuedCard={queuedCard}
-        leadSuit={leadSuit}
+        leadSuit={leadSuit || null}
       />
       <Modal
         centered
@@ -342,9 +332,9 @@ function Game({ gameId, isMobile }) {
       {(status === 'play' || status === 'bid') && (
         <TurnChange
           timeLimit={timeLimit}
-          playerId={playerId}
+          playerId={playerId || ''}
           currentPlayer={currentPlayer}
-          winner={winner}
+          winner={winner || null}
           randomPlay={randomPlay}
           yourTurn={yourTurn}
         />
@@ -360,8 +350,8 @@ function Game({ gameId, isMobile }) {
   )
 }
 
-export async function getServerSideProps(context) {
-  const { gameId } = context.params
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const { gameId } = context.params as { gameId: string }
   const userAgent = context.req.headers['user-agent'] || ''
   const isMobile = Boolean(
     userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i)

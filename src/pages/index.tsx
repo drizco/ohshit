@@ -1,4 +1,5 @@
 import { useState, useRef, useContext, useEffect } from 'react'
+import type { ChangeEvent, MouseEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
@@ -19,7 +20,7 @@ import {
 import { newGame } from '../utils/api'
 import styles from '../styles/pages/home.module.scss'
 import { CopyIcon } from '../components/Icons'
-import CombinedContext from '../context/CombinedContext'
+import AppStateContext from '../context/AppStateContext'
 import classnames from 'classnames'
 
 const CreateGame = () => {
@@ -37,9 +38,9 @@ const CreateGame = () => {
   const [create, setCreate] = useState(true)
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
-  const gameUrlRef = useRef(null)
+  const gameUrlRef = useRef<HTMLInputElement>(null)
 
-  const { setState } = useContext(CombinedContext)
+  const { setLoading, setError } = useContext(AppStateContext)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -51,7 +52,7 @@ const CreateGame = () => {
     setDropdownOpen((prevState) => !prevState)
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     switch (name) {
       case 'name':
@@ -68,15 +69,15 @@ const CreateGame = () => {
     }
   }
 
-  const handleNumCards = (inc) => {
+  const handleNumCards = (inc: boolean) => {
     const newNumCards = inc ? numCards + 1 : numCards - 1
     if (newNumCards <= 10 && newNumCards >= 1) {
       setNumCards(newNumCards)
     }
   }
 
-  const handleDropDown = (e, val) => {
-    setTimeLimit(val || null)
+  const handleDropDown = (e: MouseEvent, val?: string | number) => {
+    setTimeLimit(val ? String(val) : '')
     setTimeout(() => {
       setDropdownOpen(false)
     }, 10)
@@ -84,7 +85,7 @@ const CreateGame = () => {
 
   const initializeGame = async () => {
     try {
-      setState({ loading: true })
+      setLoading(true)
       const body = {
         game,
         name,
@@ -104,9 +105,10 @@ const CreateGame = () => {
         setName('')
         setGame('')
       }
-      setState({ loading: false })
+      setLoading(false)
     } catch (error) {
-      setState({ loading: false, error: true })
+      setLoading(false)
+      setError('Failed to create game')
       console.error(`$$>>>>: initializeGame -> error`, error)
     }
   }
@@ -115,10 +117,10 @@ const CreateGame = () => {
     router.push(`/game/${gameCode}`)
   }
 
-  const copyToClipboard = (e) => {
-    gameUrlRef.current.select()
+  const copyToClipboard = (e: MouseEvent) => {
+    gameUrlRef.current?.select()
     document.execCommand('copy')
-    e.target.focus()
+    ;(e.target as HTMLElement)?.focus()
     setCopySuccess('Copied!')
   }
 

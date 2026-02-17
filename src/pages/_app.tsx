@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/main.scss'
-import { CombinedProvider } from '../context/CombinedContext'
+import { AppStateProvider } from '../context/AppStateContext'
 import { SettingsProvider } from '../context/SettingsContext'
 import { TimerProvider } from '../context/TimerContext'
 import { auth } from '../lib/firebase'
@@ -22,19 +23,30 @@ import {
 import ErrorModal from '../components/ErrorModal'
 import Spinner from '../components/Spinner'
 
-export default function MyApp({ Component, pageProps }) {
+type AppState = {
+  loading: boolean
+  error: string | null
+  visible: boolean
+}
+
+export default function MyApp({ Component, pageProps }: AppProps) {
   // Global app state (loading, error, visible)
-  const [appState, setAppStateInternal] = useState({
+  const [appState, setAppStateInternal] = useState<AppState>({
     loading: false,
-    error: false,
+    error: null,
     visible: true,
   })
 
-  const setState = useCallback((updates) => {
-    setAppStateInternal((prev) =>
-      typeof updates === 'function' ? updates(prev) : { ...prev, ...updates }
-    )
-  }, [])
+  const setState = useCallback(
+    (updates: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) => {
+      setAppStateInternal((prev) =>
+        typeof updates === 'function'
+          ? { ...prev, ...updates(prev) }
+          : { ...prev, ...updates }
+      )
+    },
+    []
+  )
 
   // Settings state (dark mode, mute) - changes infrequently
   const [dark, setDark] = useState(
@@ -44,13 +56,14 @@ export default function MyApp({ Component, pageProps }) {
   const [mute, setMute] = useState(true)
 
   // Timer state - changes frequently, isolated
-  const [timer, setTimer] = useState(null)
+  const [timer, setTimer] = useState(0)
 
-  // Context values with proper memoization
-  const combinedValue = useMemo(
+  // App state
+  const appStateValue = useMemo(
     () => ({
       ...appState,
-      setState,
+      setLoading: (loading: boolean) => setState({ loading }),
+      setError: (error: string | null) => setState({ error }),
     }),
     [appState, setState]
   )
@@ -102,6 +115,7 @@ export default function MyApp({ Component, pageProps }) {
       mediaQuery.addEventListener('change', handleChange)
       return () => mediaQuery.removeEventListener('change', handleChange)
     }
+    return undefined
   }, [])
 
   // page visibility listener
@@ -117,7 +131,7 @@ export default function MyApp({ Component, pageProps }) {
   const { loading } = appState
 
   return (
-    <CombinedProvider value={combinedValue}>
+    <AppStateProvider value={appStateValue}>
       <SettingsProvider value={settingsValue}>
         <TimerProvider value={timerValue}>
           <Head>
@@ -197,6 +211,6 @@ export default function MyApp({ Component, pageProps }) {
           `}</style>
         </TimerProvider>
       </SettingsProvider>
-    </CombinedProvider>
+    </AppStateProvider>
   )
 }
