@@ -41,3 +41,4 @@ serviceKey.json
 
 /functions/node_modules
 /functions/emulator-data
+/functions/lib
