@@ -1,89 +1,60 @@
-import { useState, useEffect, useRef, useContext, useCallback } from 'react'
-import dynamic from 'next/dynamic'
+import { useEffect, useRef, useContext } from 'react'
 import SettingsContext from '../context/SettingsContext'
+import { useNotification } from '../hooks/useNotification'
 
-const Notification = dynamic(
-  () => import('react-web-notification').then((mod) => mod.default || mod),
-  {
-    ssr: false,
-    loading: () => null,
-  }
-)
+interface NotificationControllerProps {
+  showNotification: boolean
+  userName: string
+  onClose: () => void
+}
 
-function NotificationController({ showNotification, userName, onClose }) {
-  const [ignore, setIgnore] = useState(false)
-  const soundRef = useRef(null)
+function NotificationController({
+  showNotification,
+  userName,
+  onClose,
+}: NotificationControllerProps) {
   const { mute } = useContext(SettingsContext)
+  const { showNotification: show, requestPermission } = useNotification()
+  const soundRef = useRef<HTMLAudioElement>(null)
 
+  // Request permission on mount
   useEffect(() => {
-    if (navigator) {
-      navigator.serviceWorker.register('/sw.js')
+    requestPermission()
+  }, [requestPermission])
+
+  // Show notification when triggered
+  useEffect(() => {
+    if (showNotification) {
+      const notification = show('oopsie poopsie...', {
+        body: `your turn, ${userName}`,
+        icon: '/images/poop.png',
+        tag: 'your-turn',
+      })
+
+      if (notification) {
+        notification.onclick = () => {
+          window.focus()
+          notification.close()
+        }
+        notification.onclose = onClose
+
+        setTimeout(() => notification.close(), 2000)
+      }
+
+      // Play sound
+      if (!mute && soundRef.current) {
+        soundRef.current.play().catch((error) => {
+          // Ignore autoplay errors (user hasn't interacted with page yet)
+          console.log('Audio play failed:', error.message)
+        })
+      }
     }
-  }, [])
-
-  const handlePermissionGranted = useCallback(() => {
-    console.log('Permission Granted')
-    setIgnore(false)
-  }, [])
-
-  const handlePermissionDenied = useCallback(() => {
-    console.log('Permission Denied')
-    setIgnore(true)
-  }, [])
-
-  const handleNotSupported = useCallback(() => {
-    console.log('Web Notification not Supported')
-    setIgnore(true)
-  }, [])
-
-  const handleNotificationOnClose = useCallback(() => {
-    onClose()
-  }, [onClose])
-
-  const playSound = useCallback(() => {
-    if (soundRef.current) {
-      soundRef.current.play()
-    }
-  }, [])
-
-  const handleNotificationOnShow = useCallback(() => {
-    if (!mute) {
-      playSound()
-    }
-  }, [mute, playSound])
-
-  if (!showNotification) {
-    return null
-  }
+  }, [showNotification, userName, show, onClose, mute])
 
   return (
-    <div>
-      <Notification
-        ignore={ignore}
-        askAgain={true}
-        notSupported={handleNotSupported}
-        onPermissionGranted={handlePermissionGranted}
-        onPermissionDenied={handlePermissionDenied}
-        onShow={handleNotificationOnShow}
-        onClose={handleNotificationOnClose}
-        timeout={2000}
-        title={'oopsie poopsie...'}
-        options={{
-          body: `your turn, ${userName}`,
-          icon: '/images/poop.png',
-          tag: 'your-turn',
-        }}
-      />
-      <audio id="sound" preload="auto" ref={soundRef}>
-        <source src="/audio/notification.mp3" type="audio/mpeg" />
-        <embed
-          hidden={true}
-          autostart="false"
-          loop={false}
-          src="/audio/notification.mp3"
-        />
-      </audio>
-    </div>
+    <audio ref={soundRef} preload="auto">
+      <source src="/audio/notification.mp3" type="audio/mpeg" />
+    </audio>
   )
 }
 
