@@ -43,7 +43,11 @@ interface CalculateLeaderParams {
   leadSuit: Suit
 }
 
-export const calculateLeader = ({ cards, trump, leadSuit }: CalculateLeaderParams): Card =>
+export const calculateLeader = ({
+  cards,
+  trump,
+  leadSuit,
+}: CalculateLeaderParams): Card =>
   cards.sort((a, b) => {
     if (a.suit === trump && b.suit !== trump) {
       return -1
@@ -61,27 +65,36 @@ export const calculateLeader = ({ cards, trump, leadSuit }: CalculateLeaderParam
   })[0]
 
 export const getScore = (tricks: Trick[]): Record<string, number> =>
-  tricks.reduce((scoreObj, tr) => {
-    const newScoreObj = { ...scoreObj }
-    if (tr.winner) {
-      if (!newScoreObj[tr.winner]) {
-        newScoreObj[tr.winner] = 0
+  tricks.reduce(
+    (scoreObj, tr) => {
+      const newScoreObj = { ...scoreObj }
+      if (tr.winner) {
+        if (!newScoreObj[tr.winner]) {
+          newScoreObj[tr.winner] = 0
+        }
+        newScoreObj[tr.winner] += 1
       }
-      newScoreObj[tr.winner] += 1
-    }
-    return newScoreObj
-  }, {} as Record<string, number>)
+      return newScoreObj
+    },
+    {} as Record<string, number>
+  )
 
 interface PlayerIndexParams {
   currentPlayerIndex: number
   playerOrder: string[]
 }
 
-export const getNextPlayerIndex = ({ currentPlayerIndex, playerOrder }: PlayerIndexParams): number => {
+export const getNextPlayerIndex = ({
+  currentPlayerIndex,
+  playerOrder,
+}: PlayerIndexParams): number => {
   return (currentPlayerIndex + 1) % playerOrder.length
 }
 
-export const getNextPlayerId = ({ currentPlayerIndex, playerOrder }: PlayerIndexParams): string => {
+export const getNextPlayerId = ({
+  currentPlayerIndex,
+  playerOrder,
+}: PlayerIndexParams): string => {
   const nextIndex = getNextPlayerIndex({ currentPlayerIndex, playerOrder })
   return playerOrder[nextIndex]
 }
@@ -91,7 +104,8 @@ interface GetWinnerParams {
   players: Record<string, Player>
 }
 
-export const getWinner = ({ winner, players }: GetWinnerParams): string => players[winner].name
+export const getWinner = ({ winner, players }: GetWinnerParams): string =>
+  players[winner].name
 
 interface CalculateGameScoreParams {
   players: Record<string, Player>
@@ -111,7 +125,7 @@ export const calculateGameScore = ({
   const newGameScore = { ...score }
   Object.values(players).forEach((player) => {
     const bidsMade = bids[player.playerId]
-    let tricksWon = roundScore[player.playerId] || 0
+    const tricksWon = roundScore[player.playerId] || 0
     let newScore = tricksWon && !noBidPoints ? tricksWon : 0
     if (bidsMade === tricksWon) {
       if (noBidPoints) {
@@ -143,7 +157,12 @@ interface HandleDirtyGameParams {
   players: Record<string, Player> | null
 }
 
-export const handleDirtyGame = ({ value, numCards, bids, players }: HandleDirtyGameParams): boolean => {
+export const handleDirtyGame = ({
+  value,
+  numCards,
+  bids,
+  players,
+}: HandleDirtyGameParams): boolean => {
   const lastPlayer =
     Object.keys(bids || {}).length + 1 === Object.keys(players || {}).length
   if (lastPlayer) {

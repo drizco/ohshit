@@ -1,32 +1,30 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 
 export function useNotification() {
-  const permissionRef = useRef<NotificationPermission>('default')
+  const [permission, setPermission] = useState<NotificationPermission>('default')
 
   useEffect(() => {
     if ('Notification' in window) {
-      permissionRef.current = Notification.permission
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPermission(Notification.permission)
     }
   }, [])
 
   const requestPermission = useCallback(async () => {
     if ('Notification' in window && Notification.permission === 'default') {
-      const permission = await Notification.requestPermission()
-      permissionRef.current = permission
-      return permission
+      const newPermission = await Notification.requestPermission()
+      setPermission(newPermission)
+      return newPermission
     }
-    return permissionRef.current
+    return Notification.permission
   }, [])
 
-  const showNotification = useCallback(
-    (title: string, options?: NotificationOptions) => {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        return new Notification(title, options)
-      }
-      return null
-    },
-    []
-  )
+  const showNotification = useCallback((title: string, options?: NotificationOptions) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      return new Notification(title, options)
+    }
+    return null
+  }, [])
 
-  return { requestPermission, showNotification, permission: permissionRef.current }
+  return { requestPermission, showNotification, permission }
 }

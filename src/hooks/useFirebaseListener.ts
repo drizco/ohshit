@@ -160,6 +160,7 @@ const useFirebaseListener = ({
       unsubscribesRef.current = []
     }
     // Only re-run when ref, enabled, or eventType change - NOT when callbacks change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, enabled, eventType])
 
   return { error }
