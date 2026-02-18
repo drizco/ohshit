@@ -75,6 +75,30 @@ export const createRoundAndTrick = (
 }
 
 /**
+ * Computes the number of cards to deal for the next round and whether the game is
+ * still descending. Handles the turnaround point where dealing switches from
+ * decreasing to increasing card counts.
+ * @param currentNumCards - The number of cards dealt in the current round (null if first advance)
+ * @param defaultNumCards - The starting card count from game settings (used as fallback)
+ * @param descending - Whether the game is currently in the descending phase
+ * @returns The next numCards and descending values
+ */
+export const computeNextNumCards = (
+  currentNumCards: number | null,
+  defaultNumCards: number,
+  descending: boolean
+): { numCards: number; descending: boolean } => {
+  const prevNumCards = currentNumCards ?? defaultNumCards
+  let numCards = descending ? prevNumCards - 1 : prevNumCards + 1
+  let newDescending = descending
+  if (numCards < 1) {
+    newDescending = false
+    numCards = 2
+  }
+  return { numCards, descending: newDescending }
+}
+
+/**
  * Rebuilds the player order array, maintaining existing order and adding new players at the end
  * @param oldPlayerOrder - The previous player order
  * @param allPlayers - All current players in the game

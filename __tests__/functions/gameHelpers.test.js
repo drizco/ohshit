@@ -3,6 +3,7 @@ import { jest } from '@jest/globals'
 import {
   dealHandsToPlayers,
   rebuildPlayerOrder,
+  computeNextNumCards,
 } from '../../functions/gameHelpers'
 import Deck from '../../functions/deck'
 
@@ -140,6 +141,45 @@ describe('gameHelpers', () => {
       const newOrder = rebuildPlayerOrder(oldOrder, players)
 
       expect(newOrder).toEqual(['p1', 'p2', 'p3', 'p4'])
+    })
+  })
+
+  describe('computeNextNumCards', () => {
+    test('first advance uses defaultNumCards as baseline (descending)', () => {
+      // currentNumCards is null on first advance since startGame doesn't write it to state
+      const result = computeNextNumCards(null, 10, true)
+      expect(result).toEqual({ numCards: 9, descending: true })
+    })
+
+    test('decrements each round while descending', () => {
+      expect(computeNextNumCards(9, 10, true)).toEqual({ numCards: 8, descending: true })
+      expect(computeNextNumCards(5, 10, true)).toEqual({ numCards: 4, descending: true })
+      expect(computeNextNumCards(2, 10, true)).toEqual({ numCards: 1, descending: true })
+    })
+
+    test('turnaround: after 1-card round, flips to ascending at 2', () => {
+      // currentNumCards = 1, descending → would compute 0, so flips
+      const result = computeNextNumCards(1, 10, true)
+      expect(result).toEqual({ numCards: 2, descending: false })
+    })
+
+    test('increments each round while ascending', () => {
+      expect(computeNextNumCards(2, 10, false)).toEqual({ numCards: 3, descending: false })
+      expect(computeNextNumCards(6, 10, false)).toEqual({ numCards: 7, descending: false })
+      expect(computeNextNumCards(9, 10, false)).toEqual({ numCards: 10, descending: false })
+    })
+
+    test('full 10-card game sequence matches expected pattern', () => {
+      const expected = [9, 8, 7, 6, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      let currentNumCards = null
+      let descending = true
+
+      for (const expectedCount of expected) {
+        const result = computeNextNumCards(currentNumCards, 10, descending)
+        expect(result.numCards).toBe(expectedCount)
+        currentNumCards = result.numCards
+        descending = result.descending
+      }
     })
   })
 })

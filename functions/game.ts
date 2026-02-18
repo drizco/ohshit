@@ -9,6 +9,7 @@ import {
   writeHandsToDatabase,
   createRoundAndTrick,
   rebuildPlayerOrder,
+  computeNextNumCards,
 } from './gameHelpers.js'
 import {
   sendError,
@@ -309,17 +310,12 @@ const advanceToNextRound = async (
   } = gameState
   const { noBidPoints } = gameSettings
 
-  let descending = currentDescending
   const roundNum = currentRoundNum + 1
-  let numCards = descending
-    ? (currentNumCards ?? gameSettings.numCards - 1)
-    : (currentNumCards ?? gameSettings.numCards + 1)
-
-  // Handle turnaround point (when cards go back up)
-  if (numCards < 1) {
-    descending = false
-    numCards = 2
-  }
+  const { numCards, descending } = computeNextNumCards(
+    currentNumCards,
+    gameSettings.numCards,
+    currentDescending
+  )
 
   const gameOver = roundNum > numRounds
 
