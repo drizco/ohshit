@@ -7,12 +7,14 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .js,.ts",
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "emulator": "firebase emulators:start --project=demo-oopsie-poopsie --only database,auth,functions --import=./emulator-data --export-on-exit=./emulator-data"
+    "emulator": "firebase emulators:start --project=demo-oopsie-poopsie --only database,auth,functions --import=./emulator-data --export-on-exit=./emulator-data",
+    "dev": "concurrently --kill-others-on-fail \"tsc --watch\" \"yarn emulator\""
   },
   "engines": {
     "node": "20"
@@ -28,6 +30,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.3",
+    "concurrently": "^9.2.1",
     "eslint": "^8.57.0",
     "eslint-plugin-promise": "^6.1.1",
     "firebase-functions-test": "^0.1.6",
