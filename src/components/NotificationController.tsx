@@ -25,7 +25,7 @@ function NotificationController({
   // Show notification when triggered
   useEffect(() => {
     if (showNotification) {
-      const notification = show('oopsie poopsie...', {
+      const notification = show('oh shit...', {
         body: `your turn, ${userName}`,
         icon: '/images/poop.png',
         tag: 'your-turn',

@@ -26,13 +26,13 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
-      // Fake Firebase config for emulator mode. In dev mode (NODE_ENV=development),
-      // firebase.ts hard-codes emulator URLs, so these values are never sent to
-      // real Firebase and the SDK only requires them to be non-empty strings.
+      // Fake/local Firebase config for emulator mode. These values point to the
+      // local Firebase emulator suite and are never sent to real Firebase.
       NEXT_PUBLIC_FB_API_KEY: 'fake-api-key-for-e2e-tests',
-      NEXT_PUBLIC_AUTH_DOMAIN: 'demo-oopsie-poopsie.firebaseapp.com',
-      NEXT_PUBLIC_PROJECT_ID: 'demo-oopsie-poopsie',
-      NEXT_PUBLIC_DB_URL: '',
+      NEXT_PUBLIC_AUTH_DOMAIN: 'dev-oh-shit.firebaseapp.com',
+      NEXT_PUBLIC_PROJECT_ID: 'dev-oh-shit',
+      NEXT_PUBLIC_DB_URL: 'http://localhost:9000?ns=dev-oh-shit',
+      NEXT_PUBLIC_CLOUD_FUNCTION_URL: 'http://localhost:5001/dev-oh-shit/us-central1/api',
       NEXT_PUBLIC_STORAGE_BUCKET: '',
       NEXT_PUBLIC_MESSAGING_SENDER_ID: '',
       NEXT_PUBLIC_APP_ID: 'fake-app-id',

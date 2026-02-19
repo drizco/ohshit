@@ -33,7 +33,7 @@ const Header = () => {
         <Link href="/" className={styles.img_container}>
           <img src="/images/poop.png" alt="Oh Shit Logo" />
         </Link>
-        <h1>oopsie poopsie...</h1>
+        <h1>oh shit...</h1>
 
         <div className={styles.rules}>
           {mounted && (
@@ -74,7 +74,7 @@ const Header = () => {
         </ModalHeader>
         <ModalBody>
           <p>
-            oopsie poopsie is a version of the classic card game, oh shit. it can be
+            oh shit is a classic card game. it can be
             played with anywhere from 2 to 51 players (technically), but it&apos;s best
             with 4 to 10.
           </p>

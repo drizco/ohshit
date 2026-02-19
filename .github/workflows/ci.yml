@@ -75,7 +75,7 @@ jobs:
         # Run from project root (where firebase.json lives), in background.
         run: |
           ./functions/node_modules/.bin/firebase emulators:start \
-            --project=demo-oopsie-poopsie \
+            --project=dev-oh-shit \
             --only database,auth,functions &
 
       - name: Wait for emulators to be ready

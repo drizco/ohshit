@@ -22,8 +22,8 @@ describeIfEmulator('Firebase Emulator Integration Tests', () => {
     // Initialize Firebase Admin with emulator settings
     if (!admin.apps.length) {
       admin.initializeApp({
-        projectId: 'demo-oopsie-poopsie',
-        databaseURL: 'http://localhost:9000?ns=demo-oopsie-poopsie',
+        projectId: 'dev-oh-shit',
+        databaseURL: 'http://localhost:9000?ns=dev-oh-shit',
       })
     }
     db = admin.database()

@@ -13,7 +13,7 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "emulator": "firebase emulators:start --project=demo-oopsie-poopsie --only database,auth,functions --import=./emulator-data --export-on-exit=./emulator-data",
+    "emulator": "firebase emulators:start --project=dev-oh-shit --only database,auth,functions --import=./emulator-data --export-on-exit=./emulator-data",
     "dev": "concurrently --kill-others-on-fail \"tsc --watch\" \"yarn emulator\""
   },
   "engines": {

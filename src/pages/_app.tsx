@@ -135,25 +135,25 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <SettingsProvider value={settingsValue}>
         <TimerProvider value={timerValue}>
           <Head>
-            <title>oopsie poopsie</title>
+            <title>oh shit</title>
             <link rel="icon" type="image/png" href="/images/favicon.ico" />
-            <meta property="og:site_name" content="oopsie poopsie" />
-            <meta property="og:title" content="oopsie poopsie" />
+            <meta property="og:site_name" content="oh shit" />
+            <meta property="og:title" content="oh shit" />
             <meta
               property="og:description"
-              content="oopsie poopsie is a fun card game you play in real time with friends!"
+              content="oh shit is a fun card game you play in real time with friends!"
             />
             <meta
               property="og:image"
-              content="https://oopsie-poopsie.app/images/poop.png"
+              content={`${process.env.NEXT_PUBLIC_BASE_URL}/images/poop.png`}
             />
-            <meta property="og:image:alt" content="oopsie poopsie logo" />
+            <meta property="og:image:alt" content="oh shit logo" />
             <meta property="og:image:height" content="1200" />
             <meta property="og:image:width" content="1200" />
-            <meta property="og:url" content="https://oopsie-poopsie.app" />
+            <meta property="og:url" content={process.env.NEXT_PUBLIC_BASE_URL} />
             <meta property="og:type" content="website" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:image:alt" content="oopsie poopsie logo" />
+            <meta name="twitter:image:alt" content="oh shit logo" />
           </Head>
           <Layout>
             <Component {...pageProps} />

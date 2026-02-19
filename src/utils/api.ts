@@ -10,10 +10,7 @@ import type {
   UpdatePlayerRequest,
 } from '../types/api'
 
-const API_BASE_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5001/demo-oopsie-poopsie/us-central1/api'
-    : 'https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_CLOUD_FUNCTION_URL
 
 // Wait for auth to be ready
 const waitForAuth = (): Promise<User | null> => {

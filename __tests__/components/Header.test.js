@@ -19,7 +19,7 @@ describe('Header Component', () => {
     render(<Header />)
 
     expect(screen.getByAltText('Oh Shit Logo')).toBeInTheDocument()
-    expect(screen.getByText('oopsie poopsie...')).toBeInTheDocument()
+    expect(screen.getByText('oh shit...')).toBeInTheDocument()
   })
 
   test('shows rules button', () => {
@@ -36,7 +36,7 @@ describe('Header Component', () => {
     fireEvent.click(rulesButton)
 
     // Modal should be open
-    expect(screen.getByText(/oopsie poopsie is a version/i)).toBeInTheDocument()
+    expect(screen.getByText(/oh shit is a classic card game/i)).toBeInTheDocument()
   })
 
   test('closes rules modal when toggle is clicked', () => {
@@ -46,7 +46,7 @@ describe('Header Component', () => {
     const rulesButton = screen.getByRole('button', { name: /rules/i })
     fireEvent.click(rulesButton)
 
-    expect(screen.getByText(/oopsie poopsie is a version/i)).toBeInTheDocument()
+    expect(screen.getByText(/oh shit is a classic card game/i)).toBeInTheDocument()
 
     // Close modal - find the close button in the modal header
     const closeButtons = screen.getAllByRole('button')

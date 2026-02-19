@@ -1,6 +1,6 @@
 # Testing Guide
 
-Comprehensive testing setup for Oopsie Poopsie, covering Firebase Functions, React components, utilities, and integration tests with the Firebase emulator.
+Comprehensive testing setup for Oh Shit, covering Firebase Functions, React components, utilities, and integration tests with the Firebase emulator.
 
 ## Table of Contents
 
