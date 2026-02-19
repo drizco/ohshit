@@ -220,6 +220,7 @@ function Game({ gameId, isMobile }: GameProps) {
         )}
         <Players
           players={players}
+          playerOrder={playerOrder}
           currentPlayer={currentPlayer}
           bids={bids}
           roundScore={roundScore}

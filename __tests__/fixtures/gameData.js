@@ -32,7 +32,6 @@ export const mockPlayer = {
   present: true,
   bid: null,
   score: 0,
-  nextPlayer: null,
 }
 
 export const mockPlayers = [
@@ -42,7 +41,6 @@ export const mockPlayers = [
     name: 'Alice',
     host: true,
     present: true,
-    nextPlayer: 'player-2',
     bid: null,
     score: 0,
   },
@@ -52,7 +50,6 @@ export const mockPlayers = [
     name: 'Bob',
     host: false,
     present: true,
-    nextPlayer: 'player-3',
     bid: null,
     score: 0,
   },
@@ -62,7 +59,6 @@ export const mockPlayers = [
     name: 'Charlie',
     host: false,
     present: true,
-    nextPlayer: 'player-1',
     bid: null,
     score: 0,
   },

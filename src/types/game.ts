@@ -5,7 +5,6 @@ export interface Player {
   name: string
   host?: boolean
   present: boolean
-  nextPlayer?: string // Linked list for turn order
   score?: number // Total game score
   hands?: Record<string, { cards: Record<string, Card> }> // roundId -> hand data
 }

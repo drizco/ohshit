@@ -304,7 +304,7 @@ describe('useGameActions Hook', () => {
             },
           },
           players: {
-            p1: { nextPlayer: 'p2' },
+            p1: {},
           },
           hand: [],
           bid: 3,
@@ -346,7 +346,7 @@ describe('useGameActions Hook', () => {
             },
           },
           players: {
-            p1: { nextPlayer: 'p2' },
+            p1: {},
           },
           hand: [],
           bid: 3,

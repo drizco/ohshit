@@ -19,6 +19,7 @@ import type { Player, Trick, GameStatus } from '../types'
 
 interface PlayersProps {
   players: Record<string, Player>
+  playerOrder: string[]
   currentPlayer: string
   bids: Record<string, number> | null
   roundScore: Record<string, number>
@@ -37,6 +38,7 @@ interface PlayersProps {
 
 const Players = ({
   players,
+  playerOrder,
   currentPlayer,
   bids,
   roundScore,
@@ -54,21 +56,9 @@ const Players = ({
 }: PlayersProps) => {
   const { dark } = useContext(SettingsContext)
   const { timer } = useContext(TimerContext)
-  let newPlayers = []
-  let nextPlayer = thisPlayer
-  const haveNextPlayer =
-    Object.values(players).length > 0 && Object.values(players).every((p) => p.nextPlayer)
-  if (haveNextPlayer) {
-    for (let i = 0; i < Object.keys(players).length; i++) {
-      const player = players[nextPlayer]
-      if (player) {
-        newPlayers.push(player)
-        nextPlayer = player.nextPlayer || thisPlayer
-      }
-    }
-  } else {
-    newPlayers = Object.values(players)
-  }
+  const newPlayers = playerOrder.length > 0
+    ? playerOrder.map((id) => players[id]).filter(Boolean)
+    : Object.values(players)
 
   return (
     <ul className={styles.players}>
