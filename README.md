@@ -1,122 +1,150 @@
-### /Users/ryan/Projects/oopsie-poopsie/./README.md
+# Oopsie Poopsie
 
-````markdown
-1: This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/zeit/next.js/tree/canary/packages/create-next-app).
-2:
-3: ## Getting Started
-4:
-5: First, run the development server:
-6:
-7: `bash
-8: npm run dev
-9: # or
-10: yarn dev
-11: `
-12:
-13: Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-14:
-15: You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
-16:
-17: ## Learn More
-18:
-19: To learn more about Next.js, take a look at the following resources:
-20:
-21: - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-22: - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-23:
-24: You can check out [the Next.js GitHub repository](https://github.com/zeit/next.js/) - your feedback and contributions are welcome!
-25:
-26: ## Deploy on ZEIT Now
-27:
-28: The easiest way to deploy your Next.js app is to use the [ZEIT Now Platform](https://zeit.co/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-29:
-30: Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-````
+A real-time multiplayer trick-taking card game based on "Oh Shit". Players bid on the number of tricks they'll win each round, and score points based on accuracy. Live at [oopsie-poopsie.app](https://oopsie-poopsie.app).
 
-# Oopsie Poopsie - Integration Tests
+## Tech Stack
 
-This project includes integration tests using Jest and Firebase Functions Test SDK to ensure proper functionality with the Firebase Emulator Suite.
+- **Frontend:** Next.js 14 (Pages Router), React 18, TypeScript, SCSS modules, Bootstrap/Reactstrap
+- **Backend:** Firebase Cloud Functions (Node 20) with Express
+- **Database:** Firebase Realtime Database
+- **Testing:** Jest, React Testing Library, Playwright E2E, Firebase Functions Test SDK
+- **CI/CD:** GitHub Actions
+- **Deployment:** Vercel (frontend), Firebase (functions)
 
-## Testing Setup
+## Local Development
 
 ### Prerequisites
 
-- Node.js installed
-- Firebase CLI installed
-- Yarn package manager
+- Node 20 (via nvm)
+- Yarn (via Corepack)
 
-### Running Tests
-
-To run all tests:
+### Setup
 
 ```bash
-yarn test
+# Install root dependencies
+yarn install
+
+# Install functions dependencies
+cd functions && yarn install && cd ..
 ```
 
-To run tests in watch mode:
+### Running the app
 
 ```bash
-yarn test:watch
+# Start the frontend dev server (localhost:3000)
+yarn dev
+
+# In a separate terminal, start the Firebase Emulator Suite (localhost:4000 for UI)
+cd functions && yarn emulator
 ```
 
-To generate test coverage:
+The emulator starts:
+
+- Auth on port 9099
+- Realtime Database on port 9000
+- Functions on port 5001
+- Emulator UI on port 4000
+
+## Commands
+
+### Frontend (root directory)
 
 ```bash
-yarn test:coverage
+yarn dev              # Dev server on localhost:3000
+yarn build            # Production build
+yarn start            # Start production server
+yarn lint             # ESLint
+yarn lint:fix         # ESLint with auto-fix
+yarn type-check       # TypeScript type check
 ```
 
-## Firebase Emulator Integration
-
-The tests are designed to work with Firebase Emulator Suite. To use:
-
-1. Start Firebase Emulators:
+### Testing
 
 ```bash
-firebase emulators:start
+yarn test                   # Frontend unit tests
+yarn test:watch             # Frontend tests in watch mode
+yarn test:coverage          # Frontend tests with coverage report
+yarn test:functions         # Firebase Functions unit tests
+yarn test:functions:watch   # Functions tests in watch mode
+yarn test:integration       # Integration tests (requires running emulator)
+yarn test:all               # All tests (frontend + functions)
+yarn test:e2e               # Playwright E2E tests (requires running emulator)
+yarn test:e2e:ui            # Playwright with interactive UI
+yarn test:e2e:report        # View last Playwright report
 ```
 
-2. Run tests in a separate terminal:
+### Firebase Functions (functions/ directory)
 
 ```bash
-yarn test
+cd functions
+yarn build            # Compile TypeScript
+yarn build:watch      # Compile TypeScript in watch mode
+yarn dev              # TypeScript watch + emulator (concurrent)
+yarn serve            # Functions emulator only
+yarn deploy           # Deploy functions to Firebase
+yarn lint             # ESLint
+yarn type-check       # TypeScript type check
 ```
+
+## Architecture
+
+### Data model
+
+Game state lives in Firebase Realtime Database under a single `/games/{gameId}` node:
+
+```
+/games/{gameId}/
+  metadata/        — game name, timestamp, gameId
+  settings/        — numCards, timeLimit, dirty, noBidPoints
+  state/           — status, currentPlayerIndex, playerOrder, roundId, dealerIndex, …
+  players/{id}/    — name, playerId, present, score, hands/{roundId}/cards/{cardId}
+  rounds/{id}/     — trump, bids/{playerId}, tricks/{id}/cards + leader + winner
+```
+
+### Game states
+
+`pending` → `bid` → `play` → _(next round)_ → `over`
+
+### API endpoints
+
+All functions are deployed as a single Express app. Endpoints are POST unless noted.
+
+| Endpoint                                        | Description                        |
+| ----------------------------------------------- | ---------------------------------- |
+| `POST /new-game`                                | Create a new game                  |
+| `POST /add-player`                              | Add a player to a game             |
+| `POST /start-game`                              | Start the game (pending → bid)     |
+| `POST /submit-bid`                              | Submit a bid for the current round |
+| `POST /play-card`                               | Play a card                        |
+| `POST /replay-game`                             | Restart the game                   |
+| `PUT /update-player/:playerId/:gameId/:present` | Update player presence             |
+
+### Key source files
+
+| Path                              | Description                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| `src/pages/game/[gameId].tsx`     | Main game page                                                                  |
+| `src/hooks/`                      | Custom hooks for game state, Firebase listeners, actions                        |
+| `src/utils/helpers.ts`            | Core game logic: `calculateLeader()`, `isLegal()`, `calculateGameScore()`, etc. |
+| `src/utils/api.ts`                | Wrappers for all API calls                                                      |
+| `src/context/AppStateContext.tsx` | Global state (mute, dark mode, timer)                                           |
+| `functions/game.ts`               | Server-side game logic                                                          |
+| `functions/index.ts`              | Express API routing                                                             |
 
 ## Test Structure
 
-- `__tests__/index.test.js` - Tests for the homepage
-- `__tests__/functions.test.js` - Tests for Firebase functions
-- `__tests__/setup.js` - Test setup and cleanup
-- `__tests__/firebase-mock.js` - Firebase mock utilities
+```
+__tests__/
+├── components/     # Component unit tests
+├── hooks/          # Hook unit tests
+├── utils/          # Utility function tests
+├── functions/      # Firebase Functions unit tests
+├── integration/    # Integration tests (require Firebase Emulator)
+├── fixtures/       # Shared test fixtures
+├── helpers/        # Test helper utilities
+└── setup/          # Jest setup files and mocks
 
-## Firebase Functions Test
+e2e/                # Playwright end-to-end tests
+```
 
-The `firebase-functions-test` library provides:
-
-- Mock Firebase functions environment
-- Emulator support for integration testing
-- Proper cleanup of test resources
-- Testing of database operations and functions
-
-## Adding New Tests
-
-To add new tests:
-
-1. Create a new test file in `__tests__/` directory
-2. Follow the existing test patterns
-3. Use appropriate mocks for external dependencies
-4. Run `yarn test` to verify new tests work
-
-## Test Coverage
-
-Tests currently cover:
-
-- Main page rendering
-- Firebase function existence and structure
-- Basic component functionality
-
-To improve coverage:
-
-- Add tests for user interactions
-- Add tests for Firebase database operations
-- Add tests for API endpoints
-- Add tests for edge cases and error handling
+Coverage thresholds are enforced at 50% for branches, functions, lines, and statements.
