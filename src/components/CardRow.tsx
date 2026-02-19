@@ -36,6 +36,7 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
                 [styles.shake]: illegalCard === card.cardId,
                 [styles.selected]: queuedCard && queuedCard.cardId === card.cardId,
               })}
+              data-card-id={card.cardId}
               key={card.cardId}
               onClick={(e) => {
                 e.preventDefault()

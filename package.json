@@ -20,7 +20,10 @@
     "build:verify": "yarn type-check && yarn lint && yarn build",
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
+    "@playwright/test": "^1.58.2",
     "@swc/core": "^1.15.11",
     "@swc/jest": "^0.2.39",
     "@swc/plugin-styled-jsx": "^13.5.0",

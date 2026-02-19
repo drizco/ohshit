@@ -15,6 +15,7 @@ import CustomTrump from '../../components/CustomTrump'
 import TurnChange from '../../components/TurnChange'
 import CountdownOverlay from '../../components/CountdownOverlay'
 import JoinGameForm from '../../components/JoinGameForm'
+import YourTurnIndicator from '../../components/YourTurnIndicator'
 
 // Custom hooks
 import useGameState from '../../hooks/useGameState'
@@ -235,6 +236,7 @@ function Game({ gameId, isMobile }: GameProps) {
           status={status}
         />
       </div>
+      <YourTurnIndicator isYourTurn={playerId === currentPlayer && status === 'play'} />
       <CardRow
         cards={hand}
         playCard={playCard}

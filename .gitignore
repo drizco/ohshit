@@ -8,6 +8,8 @@
 # testing
 /coverage
 /coverage-functions
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -44,3 +46,8 @@ serviceKey.json
 /functions/lib
 
 *.tsbuildinfo
+
+# AI agents
+CLAUDE.md
+GEMINI.md
+.goosehints
