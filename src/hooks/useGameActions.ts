@@ -7,6 +7,7 @@ import {
   playCard as playCardApi,
   submitBid as submitBidApi,
   addPlayer as addPlayerApi,
+  parseApiError,
 } from '../utils/api'
 import { isLegal } from '../utils/helpers'
 import { calculateAdjustedBid } from '../utils/bidHelpers'
@@ -98,12 +99,15 @@ const useGameActions = ({
         }
 
         setLoading(true)
-        await playCardApi(body)
+        const response = await playCardApi(body)
+        if (!response.ok) {
+          const message = await parseApiError(response, 'Failed to play card')
+          setError(message)
+        }
         setLoading(false)
-      } catch (error) {
+      } catch {
         setLoading(false)
-        setError('Failed to submit bid')
-        console.error(`playCard error:`, error)
+        setError('Failed to play card')
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,11 +133,12 @@ const useGameActions = ({
   const submitBid = useCallback(
     async (optionalBid?: number) => {
       try {
-        setLoading(true)
-
-        const bidValue = optionalBid !== undefined ? optionalBid : bid
+        const bidValue = optionalBid ?? bid
 
         if (!game || !game.state || !game.state.roundId) return
+
+        const currentPlayerId = game.state.playerOrder?.[game.state.currentPlayerIndex]
+        if (currentPlayerId !== playerId) return
 
         const { roundId } = game.state
 
@@ -144,12 +149,16 @@ const useGameActions = ({
           roundId,
         }
 
-        await submitBidApi(body)
+        setLoading(true)
+        const response = await submitBidApi(body)
+        if (!response.ok) {
+          const message = await parseApiError(response, 'Failed to submit bid')
+          setError(message)
+        }
         setLoading(false)
-      } catch (error) {
+      } catch {
         setLoading(false)
         setError('Failed to submit bid')
-        console.error(`submitBid error:`, error)
       }
     },
     [bid, game, playerId, gameId, setLoading, setError]
@@ -210,10 +219,9 @@ const useGameActions = ({
         })
       }
       setLoading(false)
-    } catch (error) {
+    } catch {
       setLoading(false)
-      setError('An error occurred')
-      console.error(`playAgain error:`, error)
+      setError('Failed to start new game')
     }
   }, [setLoading, setError, game, playerName])
 
@@ -229,10 +237,9 @@ const useGameActions = ({
         updateState({ playerId: newPlayerId })
         setLoading(false)
       }
-    } catch (error) {
+    } catch {
       setLoading(false)
-      setError('An error occurred')
-      console.error(`addPlayer error:`, error)
+      setError('Failed to join game')
     }
   }, [setLoading, setError, playerName, gameId, updateState])
 
@@ -247,10 +254,9 @@ const useGameActions = ({
         numCards: game.settings.numCards,
       })
       setLoading(false)
-    } catch (error) {
+    } catch {
       setLoading(false)
       setError('Failed to start game')
-      console.error(`startGame error:`, error)
     }
   }, [setLoading, setError, gameId, game])
 

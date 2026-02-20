@@ -71,6 +71,6 @@ export const handleFunctionError = (
   functionName: string,
   error: unknown
 ): Response => {
-  console.error(`${functionName}`, error)
-  return res.sendStatus(500)
+  console.log(`${functionName} error:`, error)
+  return res.status(500).json({ error: 'Internal server error' })
 }

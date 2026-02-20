@@ -12,6 +12,18 @@ import type {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_CLOUD_FUNCTION_URL
 
+export const parseApiError = async (response: Response, fallback: string): Promise<string> => {
+  try {
+    const data = await response.json()
+    if (typeof data?.error === 'string' && data.error.length > 0) {
+      return data.error
+    }
+  } catch {
+    // Response body was not JSON
+  }
+  return fallback
+}
+
 // Wait for auth to be ready
 const waitForAuth = (): Promise<User | null> => {
   return new Promise((resolve) => {
@@ -46,8 +58,9 @@ const getAuthHeaders = async (forceRefresh = false): Promise<Record<string, stri
         headers.Authorization = `Bearer ${token}`
       }
     }
-  } catch (error) {
-    console.error('Error getting auth token:', error)
+  } catch {
+    // Auth token unavailable; request will proceed without Authorization header
+    // and will be retried via the 401 handler if needed
   }
 
   return headers
@@ -63,8 +76,6 @@ const authenticatedFetch = async (
 
   // If 401 and we haven't retried yet, sign out and sign back in
   if (response.status === 401 && retryCount === 0) {
-    console.log('Got 401, signing out and creating new session...')
-
     try {
       // Sign out the old (revoked) user and sign in as a new anonymous user
       await signOut(auth)
@@ -75,8 +86,8 @@ const authenticatedFetch = async (
 
       // Retry the request with new headers
       return authenticatedFetch(url, { ...options, headers: newHeaders }, retryCount + 1)
-    } catch (error) {
-      console.error('Error refreshing authentication:', error)
+    } catch {
+      // If re-auth fails, fall through and return the original response
     }
   }
 

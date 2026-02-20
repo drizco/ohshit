@@ -16,6 +16,7 @@ interface CardRowProps {
 const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
   const { dark } = useContext(SettingsContext)
   const [illegalCard, setIllegalCard] = useState<string | null>(null)
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIllegalCard(null)
@@ -24,7 +25,9 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
       clearTimeout(timer)
     }
   }, [illegalCard])
+
   const cardWidth = 100 / (cards.length || 1)
+
   return (
     <>
       <ul className={styles.card_row}>
@@ -43,12 +46,15 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
                 const legal = isLegal({ hand: cards, card, leadSuit })
                 if (!legal) {
                   setIllegalCard(card.cardId || null)
+                  return
                 }
                 playCard(card)
               }}
             >
               <div>
-                <span style={{ color: getColor(card.suit, dark) }}>{getSuitSymbol(card.suit)}</span>
+                <span style={{ color: getColor(card.suit, dark) }}>
+                  {getSuitSymbol(card.suit)}
+                </span>
                 <h2 style={{ color: getColor(card.suit, dark) }}>{card.value}</h2>
               </div>
             </li>

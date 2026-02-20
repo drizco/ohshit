@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Modal, ModalBody } from 'reactstrap'
+import { Modal, ModalBody, Button } from 'reactstrap'
 import AppStateContext from '../context/AppStateContext'
 
 const ErrorModal = () => {
@@ -13,6 +13,10 @@ const ErrorModal = () => {
     >
       <ModalBody>
         <h2>Uh oh, something went wrong...</h2>
+        {error && <p>{error}</p>}
+        <Button color="secondary" onClick={() => setError(null)}>
+          Dismiss
+        </Button>
       </ModalBody>
     </Modal>
   )

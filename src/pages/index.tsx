@@ -17,7 +17,7 @@ import {
   Row,
   Col,
 } from 'reactstrap'
-import { newGame } from '../utils/api'
+import { newGame, parseApiError } from '../utils/api'
 import styles from '../styles/pages/home.module.scss'
 import { CopyIcon } from '../components/Icons'
 import AppStateContext from '../context/AppStateContext'
@@ -104,12 +104,14 @@ const CreateGame = () => {
         setUrl(`${origin}/game/${gameIdResponse}`)
         setName('')
         setGame('')
+      } else {
+        const message = await parseApiError(response, 'Failed to create game')
+        setError(message)
       }
       setLoading(false)
-    } catch (error) {
+    } catch {
       setLoading(false)
       setError('Failed to create game')
-      console.error(`$$>>>>: initializeGame -> error`, error)
     }
   }
 
