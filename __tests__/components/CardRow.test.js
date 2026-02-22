@@ -90,9 +90,8 @@ describe('CardRow Component', () => {
 
     defaultProps.playCard.mockClear()
 
-    // Click an illegal card (Club when Hearts were led)
-    // Component still calls playCard but sets illegalCard state for shake animation
+    // Click an illegal card (Club when Hearts were led) - should NOT call playCard
     fireEvent.click(cardElements[2])
-    expect(defaultProps.playCard).toHaveBeenCalledWith(cardsWithMixedSuits[2])
+    expect(defaultProps.playCard).not.toHaveBeenCalled()
   })
 })

@@ -50,6 +50,7 @@ describe('Game Functions - newGame', () => {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
       sendStatus: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     }
   })
 
@@ -123,7 +124,8 @@ describe('Game Functions - newGame', () => {
 
     await newGame(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
   })
 })
 
@@ -289,7 +291,8 @@ describe('Game Functions - addPlayer', () => {
 
     await addPlayer(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
   })
 })
 
@@ -427,7 +430,8 @@ describe('Game Functions - submitBid', () => {
 
     await submitBid(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
   })
 })
 
@@ -452,6 +456,8 @@ describe('Game Functions - updatePlayer', () => {
 
     mockRes = {
       sendStatus: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     }
   })
 
@@ -486,7 +492,8 @@ describe('Game Functions - updatePlayer', () => {
 
     await updatePlayer(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
   })
 })
 
@@ -510,6 +517,8 @@ describe('Game Functions - replayGame', () => {
 
     mockRes = {
       sendStatus: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     }
   })
 
@@ -530,6 +539,7 @@ describe('Game Functions - replayGame', () => {
 
     await replayGame(mockReq, mockRes)
 
-    expect(mockRes.sendStatus).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
   })
 })

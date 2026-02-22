@@ -85,7 +85,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToPlayers error:', error)
       },
       [setError]
     ),
@@ -126,7 +125,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToGame (child_added/changed) error:', error)
       },
       [setError]
     ),
@@ -148,7 +146,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToGame (child_removed) error:', error)
       },
       [setError]
     ),
@@ -185,7 +182,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToHand (child_added) error:', error)
       },
       [setError]
     ),
@@ -207,7 +203,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToHand (child_removed) error:', error)
       },
       [setError]
     ),
@@ -233,7 +228,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToTrump error:', error)
       },
       [setError]
     ),
@@ -267,7 +261,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToTrick error:', error)
       },
       [setError]
     ),
@@ -306,7 +299,6 @@ const useGameListeners = ({
     onError: useCallback(
       (error: Error) => {
         setError(error.message)
-        console.error('listenToBid error:', error)
       },
       [setError]
     ),

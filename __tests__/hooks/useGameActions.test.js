@@ -26,6 +26,8 @@ Object.defineProperty(global, 'localStorage', {
   configurable: true,
 })
 
+const mockParseApiError = jest.fn()
+
 // Mock API module
 jest.unstable_mockModule('@/utils/api', () => ({
   newGame: mockNewGame,
@@ -35,6 +37,7 @@ jest.unstable_mockModule('@/utils/api', () => ({
   submitBid: mockSubmitBidApi,
   updatePlayer: mockUpdatePlayer,
   addPlayer: mockAddPlayerApi,
+  parseApiError: mockParseApiError,
 }))
 
 // Mock helpers
@@ -82,8 +85,9 @@ describe('useGameActions Hook', () => {
     mockIsLegal.mockReturnValue(true)
     mockCalculateLeader.mockReturnValue({ playerId: 'p1' })
     mockCalculateAdjustedBid.mockReturnValue(3)
-    mockPlayCardApi.mockResolvedValue({})
-    mockSubmitBidApi.mockResolvedValue({})
+    mockParseApiError.mockResolvedValue('mock error')
+    mockPlayCardApi.mockResolvedValue({ ok: true })
+    mockSubmitBidApi.mockResolvedValue({ ok: true })
     mockNextRoundApi.mockResolvedValue({})
     mockStartGame.mockResolvedValue({})
     mockNewGame.mockResolvedValue({
@@ -287,7 +291,7 @@ describe('useGameActions Hook', () => {
       })
 
       expect(mockSetLoading).toHaveBeenCalledWith(false)
-      expect(mockSetError).toHaveBeenCalledWith('Failed to submit bid')
+      expect(mockSetError).toHaveBeenCalledWith('Failed to play card')
     })
   })
 
@@ -301,6 +305,8 @@ describe('useGameActions Hook', () => {
           game: {
             state: {
               roundId: 'round-1',
+              playerOrder: ['p1', 'p2', 'p3'],
+              currentPlayerIndex: 0,
             },
           },
           players: {
@@ -343,6 +349,8 @@ describe('useGameActions Hook', () => {
           game: {
             state: {
               roundId: 'round-1',
+              playerOrder: ['p1', 'p2', 'p3'],
+              currentPlayerIndex: 0,
             },
           },
           players: {

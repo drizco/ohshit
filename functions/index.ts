@@ -54,8 +54,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = await admin.auth().verifyIdToken(token)
     ;(req as RequestWithAuth).uid = decodedToken.uid
     return next()
-  } catch (error) {
-    console.error('Error verifying auth token:', error)
+  } catch {
     return res.status(401).json({ error: 'Unauthorized: Invalid auth token' })
   }
 })
