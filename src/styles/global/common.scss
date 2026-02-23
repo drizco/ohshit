@@ -200,3 +200,34 @@ header {
   opacity: 0.01;
   transition: opacity 100ms ease-out;
 }
+
+// Dark mode: override Bootstrap's default dark palette with our custom colors
+[data-bs-theme='dark'] {
+  --bs-body-bg: #282c35;
+  --bs-body-bg-rgb: 40, 44, 53;
+  --bs-body-color: rgba(255, 255, 255, 0.88);
+  --bs-modal-bg: #282c35;
+  --bs-link-color: #faa7c4;
+  --bs-link-hover-color: #faa7c4;
+  --bs-link-color-rgb: 250, 167, 196;
+}
+
+// Dark mode: custom non-Bootstrap classes
+[data-color-scheme='dark'] {
+  .playing-card {
+    background-color: #000 !important;
+    border-color: #282c35 !important;
+  }
+
+  header {
+    border-bottom-color: #000;
+  }
+
+  a,
+  .red-text,
+  .player-row::before,
+  .player-score::before,
+  .player-name::after {
+    color: #faa7c4 !important;
+  }
+}
