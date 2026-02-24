@@ -1,6 +1,9 @@
 {
   "functions": {
-    "predeploy": ["npm --prefix functions run lint", "npm --prefix functions run build"],
+    "predeploy": [
+      "yarn --prefix functions run lint",
+      "yarn --prefix functions run build"
+    ],
     "source": "functions"
   },
   "database": {
