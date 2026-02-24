@@ -4,6 +4,14 @@
     margin: 1rem;
   }
 
+  .suit_red {
+    color: $red;
+
+    :global([data-color-scheme='dark']) & {
+      color: $pink;
+    }
+  }
+
   .enter_game_button {
     text-decoration: none;
     font-family: $font-bold;

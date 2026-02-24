@@ -123,7 +123,7 @@ const CreateGame = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', m: 4 }}>
             <Box sx={{ width: { xs: '83.33%', sm: '58.33%' } }}>
               <h2>Game Code</h2>
-              <h2 className={classnames('red-text', styles.game_code)}>{gameId}</h2>
+              <h2 className={classnames(styles.suit_red, styles.game_code)}>{gameId}</h2>
             </Box>
           </Box>
           <Box sx={{ textAlign: 'center', m: 4 }}>

@@ -217,10 +217,9 @@ header {
   }
 
   a,
-  .red-text,
   .player-row::before,
   .player-score::before,
-  h2.player-name::after {
-    color: $pink !important;
+  .player-name::after {
+    color: $pink;
   }
 }

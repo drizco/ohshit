@@ -1,8 +1,14 @@
 import ShortUniqueId from 'short-unique-id'
 import type { Request, Response } from 'express'
 import type { database } from 'firebase-admin'
+import { ServerValue } from 'firebase-admin/database'
 import Deck from './deck.js'
-import { calculateLeader, isLegal, calculateScore, getNextPlayerIndex } from './helpers.js'
+import {
+  calculateLeader,
+  isLegal,
+  calculateScore,
+  getNextPlayerIndex,
+} from './helpers.js'
 import type { Card, Player } from './types.js'
 import {
   dealHandsToPlayers,
@@ -131,6 +137,7 @@ export const startGame = async (
       dealerIndex,
       numPlayers
     )
+    updateObj[`games/${gameId}/state/turnStartedAt`] = ServerValue.TIMESTAMP
     updateObj[`games/${gameId}/state/playerOrder`] = playerOrder
     updateObj[`games/${gameId}/state/status`] = 'bid'
 
@@ -185,6 +192,7 @@ export const submitBid = async (
 
     updateObj[`games/${gameId}/rounds/${roundId}/bids/${playerId}`] = Number(bid)
     updateObj[`games/${gameId}/state/currentPlayerIndex`] = nextPlayerIndex
+    updateObj[`games/${gameId}/state/turnStartedAt`] = ServerValue.TIMESTAMP
     if (allBidsIn) {
       updateObj[`games/${gameId}/state/status`] = 'play'
     }
@@ -260,6 +268,7 @@ export const playCard = async (req: RequestWithRef, res: Response): Promise<Resp
       card
     updateObj[`games/${gameId}/rounds/${roundId}/tricks/${trickId}/leader`] = leader
     updateObj[`games/${gameId}/state/currentPlayerIndex`] = nextPlayerIndex
+    updateObj[`games/${gameId}/state/turnStartedAt`] = ServerValue.TIMESTAMP
     updateObj[
       `games/${gameId}/players/${playerId}/hands/${roundId}/cards/${card.cardId}`
     ] = null
@@ -268,6 +277,7 @@ export const playCard = async (req: RequestWithRef, res: Response): Promise<Resp
       // Set currentPlayerIndex to the winner (leader)
       const winnerIndex = playerOrder.indexOf(leader)
       updateObj[`games/${gameId}/state/currentPlayerIndex`] = winnerIndex
+      updateObj[`games/${gameId}/state/turnStartedAt`] = ServerValue.TIMESTAMP
       updateObj[`games/${gameId}/rounds/${roundId}/tricks/${trickId}/winner`] = leader
 
       if (!isNextRound) {
@@ -346,6 +356,7 @@ const advanceToNextRound = async (
 
   if (gameOver) {
     updateObj[`games/${gameId}/state/status`] = 'over'
+    updateObj[`games/${gameId}/state/turnStartedAt`] = null
   } else {
     const deck = new Deck()
 
@@ -381,6 +392,7 @@ const advanceToNextRound = async (
     updateObj[`games/${gameId}/state/descending`] = descending
     updateObj[`games/${gameId}/state/dealerIndex`] = newDealerIndex
     updateObj[`games/${gameId}/state/currentPlayerIndex`] = newCurrentPlayerIndex
+    updateObj[`games/${gameId}/state/turnStartedAt`] = ServerValue.TIMESTAMP
     updateObj[`games/${gameId}/state/playerOrder`] = updatedPlayerOrder
     updateObj[`games/${gameId}/state/numPlayers`] = numPlayers
     updateObj[`games/${gameId}/rounds/${roundKey}/roundId`] = roundKey

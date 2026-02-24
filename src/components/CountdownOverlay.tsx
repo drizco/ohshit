@@ -17,7 +17,7 @@ const CountdownOverlay = ({ timeRemaining, isVisible }: CountdownOverlayProps) =
 
   return (
     <div className={styles.countdown}>
-      <h1 className="red-text">{timeRemaining}</h1>
+      <div className={styles.suit_red}>{timeRemaining}</div>
     </div>
   )
 }

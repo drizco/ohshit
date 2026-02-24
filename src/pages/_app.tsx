@@ -4,7 +4,6 @@ import Head from 'next/head'
 import '../styles/main.scss'
 import { AppStateProvider } from '../context/AppStateContext'
 import { SettingsProvider } from '../context/SettingsContext'
-import { TimerProvider } from '../context/TimerContext'
 import { auth } from '../lib/firebase'
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 import { AppCacheProvider } from '@mui/material-nextjs/v14-pagesRouter'
@@ -48,9 +47,6 @@ export default function MyApp(props: AppProps) {
   const [dark, setDark] = useState(true)
   const [mute, setMute] = useState(true)
 
-  // Timer state - changes frequently, isolated
-  const [timer, setTimer] = useState(0)
-
   // App state
   const appStateValue = useMemo(
     () => ({
@@ -69,14 +65,6 @@ export default function MyApp(props: AppProps) {
       setMute,
     }),
     [dark, mute]
-  )
-
-  const timerValue = useMemo(
-    () => ({
-      timer,
-      setTimer,
-    }),
-    [timer]
   )
 
   // Firebase anonymous auth
@@ -154,7 +142,6 @@ export default function MyApp(props: AppProps) {
         <CssBaseline />
         <AppStateProvider value={appStateValue}>
           <SettingsProvider value={settingsValue}>
-            <TimerProvider value={timerValue}>
               <Head>
                 <title>oh shit</title>
                 <link rel="icon" type="image/png" href="/images/favicon.ico" />
@@ -181,7 +168,6 @@ export default function MyApp(props: AppProps) {
                 <ErrorModal />
                 <Spinner loading={loading} />
               </Layout>
-            </TimerProvider>
           </SettingsProvider>
         </AppStateProvider>
       </ThemeProvider>

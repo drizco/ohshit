@@ -7,10 +7,6 @@ export interface SettingsContextValue {
   setDark: Dispatch<SetStateAction<boolean>>
 }
 
-export interface TimerContextValue {
-  timer: number
-  setTimer: Dispatch<SetStateAction<number>>
-}
 
 export interface AppStateContextValue {
   loading: boolean

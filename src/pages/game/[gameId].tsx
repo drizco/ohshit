@@ -1,4 +1,5 @@
 import { useEffect, useRef, useContext } from 'react'
+import { useTimer } from '../../hooks/useTimer'
 import { useRouter } from 'next/router'
 import type { GetServerSidePropsContext } from 'next'
 import Link from 'next/link'
@@ -11,7 +12,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import AppStateContext from '../../context/AppStateContext'
-import TimerContext from '../../context/TimerContext'
 import styles from '../../styles/pages/game.module.scss'
 import CardRow from '../../components/CardRow'
 import {
@@ -23,7 +23,6 @@ import {
 import Players from '../../components/Players'
 import NotificationController from '../../components/NotificationController'
 import CustomTrump from '../../components/CustomTrump'
-import TurnChange from '../../components/TurnChange'
 import CountdownOverlay from '../../components/CountdownOverlay'
 import JoinGameForm from '../../components/JoinGameForm'
 import YourTurnIndicator from '../../components/YourTurnIndicator'
@@ -42,7 +41,6 @@ interface GameProps {
 function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
   const { visible, setError, setLoading } = useContext(AppStateContext)
-  const { timer } = useContext(TimerContext)
 
   // Hook #1: State Management
   const { state, updateState, dispatchRound, roundState, initializeGame } = useGameState({
@@ -68,7 +66,7 @@ function Game({ gameId, isMobile }: GameProps) {
     players: state.players,
     playerId: state.playerId,
   })
-  const { trickIndex, roundScore, isHost, winner, trick, leadSuit } = computed
+  const { trickIndex, roundScore, isHost, trick, leadSuit } = computed
 
   // Refs for actions
   const autoPlayTimeoutRef = useRef(null)
@@ -128,34 +126,33 @@ function Game({ gameId, isMobile }: GameProps) {
   // Handle "your turn" logic
   useEffect(() => {
     const currentPlayerId = game?.state?.playerOrder?.[game.state.currentPlayerIndex]
-    if (game && currentPlayerId === playerId && game.state?.status === 'play') {
+    const status = game?.state?.status
+    if (game && currentPlayerId === playerId && (status === 'play' || status === 'bid')) {
       yourTurn()
     }
   }, [game, playerId, yourTurn])
 
-  // Render logic
-  if (!game) {
-    return (
-      <div className={styles.game_page}>
-        <Container>
-          <h2>Loading game...</h2>
-        </Container>
-      </div>
-    )
-  }
+  const status = game?.state?.status ?? null
+  const currentPlayerIndex = game?.state?.currentPlayerIndex ?? null
+  const playerOrder = (game?.state?.playerOrder || []) ?? null
+  const currentPlayer = currentPlayerIndex !== null ? playerOrder[currentPlayerIndex] : ''
+  const dealerIndex = game?.state?.dealerIndex ?? 0
+  const dealer = playerOrder[dealerIndex] ?? null
+  const roundNum = game?.state?.roundNum ?? null
+  const numRounds = game?.state?.numRounds ?? null
+  const numCards = (game?.state?.numCards || game?.settings?.numCards) ?? 0
+  const name = game?.metadata?.name ?? null
+  const nextGame = game?.state?.nextGame ?? null
+  const timeLimit = game?.settings?.timeLimit ?? null
+  const turnStartedAt = game?.state?.turnStartedAt ?? null
 
-  const status = game.state?.status
-  const currentPlayerIndex = game.state?.currentPlayerIndex
-  const playerOrder = game.state?.playerOrder || []
-  const currentPlayer = playerOrder[currentPlayerIndex]
-  const dealerIndex = game.state?.dealerIndex ?? 0
-  const dealer = playerOrder[dealerIndex]
-  const roundNum = game.state?.roundNum
-  const numRounds = game.state?.numRounds
-  const numCards = game.state?.numCards || game.settings?.numCards
-  const name = game.metadata?.name
-  const nextGame = game.state?.nextGame
-  const timeLimit = game.settings?.timeLimit
+  const { timeRemaining } = useTimer({
+    timeLimit: timeLimit ?? null,
+    turnStartedAt,
+    playerId: playerId || '',
+    currentPlayer,
+    randomPlay,
+  })
 
   const timerShowMax = timeLimit && timeLimit > 10 ? 10 : 5
 
@@ -169,16 +166,27 @@ function Game({ gameId, isMobile }: GameProps) {
     })
   }
 
+  // Render logic
+  if (!game) {
+    return (
+      <div className={styles.game_page}>
+        <Container>
+          <h2>Loading game...</h2>
+        </Container>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className={styles.game_page}>
         <CountdownOverlay
-          timeRemaining={timer}
+          timeRemaining={timeRemaining ?? 0}
           isVisible={
             !!timeLimit &&
             playerId === currentPlayer &&
-            timer >= 0 &&
-            timer <= timerShowMax
+            timeRemaining !== null &&
+            timeRemaining <= timerShowMax
           }
         />
         <Grid container className={styles.info_row}>
@@ -255,6 +263,7 @@ function Game({ gameId, isMobile }: GameProps) {
           thisPlayer={playerId || ''}
           score={score}
           timeLimit={timeLimit}
+          timeRemaining={timeRemaining}
           winnerModalShowing={Boolean(lastWinner)}
           status={status}
         />
@@ -356,16 +365,6 @@ function Game({ gameId, isMobile }: GameProps) {
           </Box>
         </DialogContent>
       </Dialog>
-      {(status === 'play' || status === 'bid') && (
-        <TurnChange
-          timeLimit={timeLimit}
-          playerId={playerId || ''}
-          currentPlayer={currentPlayer}
-          winner={winner || null}
-          randomPlay={randomPlay}
-          yourTurn={yourTurn}
-        />
-      )}
       {!isMobile && (
         <NotificationController
           showNotification={showYourTurn}

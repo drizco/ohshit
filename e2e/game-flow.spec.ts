@@ -19,7 +19,9 @@ async function createGame(page: Page, playerName: string, numCards = 1): Promise
   await page.getByRole('button', { name: 'NEW GAME' }).click()
 
   await expect(page.getByRole('heading', { name: 'Game Code' })).toBeVisible()
-  const gameId = (await page.locator('h2.red-text').textContent())?.trim()
+  const gameId = (
+    await page.locator('h2:has-text("Game Code") + h2').textContent()
+  )?.trim()
   if (!gameId) throw new Error('Game ID not found after creating game')
   return gameId
 }
@@ -70,7 +72,9 @@ async function playRound(pages: Page[], numTricks: number): Promise<void> {
   // Wait until every bid modal is dismissed before touching cards
   await Promise.all(
     pages.map((p) =>
-      p.getByRole('button', { name: 'BID', exact: true }).waitFor({ state: 'hidden', timeout: 10000 })
+      p
+        .getByRole('button', { name: 'BID', exact: true })
+        .waitFor({ state: 'hidden', timeout: 10000 })
     )
   )
   // Pause so the video shows the hand before play begins
@@ -107,6 +111,33 @@ async function playRound(pages: Page[], numTricks: number): Promise<void> {
       })
     )
   }
+}
+
+/** Create a new game and return to the lobby screen, with an optional time limit. */
+async function createGameWithTimer(
+  page: Page,
+  playerName: string,
+  timeLimitLabel: string
+): Promise<string> {
+  await page.goto('/')
+
+  // Reduce cards to 1 (minimum)
+  const decBtn = page.getByRole('button', { name: '-' })
+  for (let i = 0; i < 4; i++) await decBtn.click()
+
+  // Set time limit via MUI Select
+  await page.getByRole('combobox', { name: 'Time limit' }).click()
+  await page.getByRole('option', { name: timeLimitLabel }).click()
+
+  await page.locator('#name').fill(playerName)
+  await page.getByRole('button', { name: 'NEW GAME' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Game Code' })).toBeVisible()
+  const gameId = (
+    await page.locator('h2:has-text("Game Code") + h2').textContent()
+  )?.trim()
+  if (!gameId) throw new Error('Game ID not found after creating game')
+  return gameId
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +183,9 @@ test.describe('Game Creation', () => {
     await expect(page.getByRole('link', { name: 'ENTER GAME' })).toBeVisible()
 
     // Game ID should be a non-empty string
-    const gameId = (await page.locator('h2.red-text').textContent())?.trim()
+    const gameId = (
+      await page.locator('h2:has-text("Game Code") + h2').textContent()
+    )?.trim()
     expect(gameId).toBeTruthy()
     expect(gameId!.length).toBeGreaterThan(0)
   })
@@ -255,6 +288,65 @@ test.describe('Multiplayer Game', () => {
     )
     await Promise.all(
       pages.map((p) => expect(p.getByRole('button', { name: 'HOME' })).toBeVisible())
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Tests: Timer Auto-Play
+// ---------------------------------------------------------------------------
+
+test.describe('Timer Auto-Play', () => {
+  let ctx1: BrowserContext
+  let ctx2: BrowserContext
+  let page1: Page
+  let page2: Page
+
+  test.beforeEach(async ({ browser }) => {
+    // eslint-disable-next-line no-extra-semi
+    ;[ctx1, ctx2] = await Promise.all([
+      browser.newContext({ recordVideo: { dir: 'test-results/' } }),
+      browser.newContext({ recordVideo: { dir: 'test-results/' } }),
+    ])
+    ;[page1, page2] = await Promise.all([ctx1.newPage(), ctx2.newPage()])
+  })
+
+  // eslint-disable-next-line no-empty-pattern
+  test.afterEach(async ({}, testInfo) => {
+    await Promise.all([ctx1.close(), ctx2.close()])
+
+    const pages = [page1, page2]
+    for (const [i, page] of pages.entries()) {
+      const video = page.video()
+      if (!video) continue
+      const path = await video.path()
+      await testInfo.attach(`video-player-${i + 1}`, {
+        path,
+        contentType: 'video/webm',
+      })
+    }
+  })
+
+  test('auto-submits bid and card when timer expires', async () => {
+    test.setTimeout(90_000)
+
+    // ── Setup: 1-card game with 10s timer ──────────────────────────────
+    const gameId = await createGameWithTimer(page1, 'Alice', '10 seconds')
+    await page1.getByRole('link', { name: 'ENTER GAME' }).click()
+    await expect(page1).toHaveURL(new RegExp(`/game/${gameId}`))
+
+    await goToJoinPage(page2, gameId)
+    await joinGameOnPage(page2, 'Bob')
+
+    await page1.getByRole('button', { name: 'START GAME' }).click()
+
+    // Game should auto-play on it's own through bid and play rounds
+
+    // After the auto-play the game ends (1-card round = 1 trick = game over)
+    await Promise.all(
+      [page1, page2].map((p) =>
+        expect(p.getByText('game over')).toBeVisible({ timeout: 90_000 })
+      )
     )
   })
 })

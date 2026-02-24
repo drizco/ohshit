@@ -156,9 +156,13 @@ ul.players {
             bottom: 0;
             display: flex;
             align-items: center;
-            color: $red;
             font-family: $font-bold;
             font-size: 2vw;
+            color: $red;
+
+            :global([data-color-scheme='dark']) & {
+              color: $pink;
+            }
           }
         }
       }

@@ -39,6 +39,7 @@ export interface GameState {
   roundNum?: number // Current round number
   numRounds?: number // Total rounds in game
   numCards?: number // Cards per hand in current round (added during advanceToNextRound)
+  turnStartedAt?: number // Server timestamp (ms since epoch) when current turn began
 }
 
 export interface GameSettings {

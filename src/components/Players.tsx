@@ -1,11 +1,9 @@
 import classNames from 'classnames'
-import { useContext } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import Grid from '@mui/material/Grid'
-import TimerContext from '../context/TimerContext'
 import styles from '../styles/components/players.module.scss'
 import { getSuitSymbol, getSuitColorClass } from '../utils/helpers'
 import type { Player, Trick, GameStatus } from '../types'
@@ -25,6 +23,7 @@ interface PlayersProps {
   thisPlayer: string
   score: Record<string, number> | null
   timeLimit: number | null
+  timeRemaining: number | null
   winnerModalShowing: boolean
   status: GameStatus | null
 }
@@ -44,10 +43,10 @@ const Players = ({
   thisPlayer,
   score,
   timeLimit,
+  timeRemaining,
   winnerModalShowing,
   status,
 }: PlayersProps) => {
-  const { timer } = useContext(TimerContext)
   const newPlayers =
     playerOrder.length > 0
       ? playerOrder.map((id) => players[id]).filter(Boolean)
@@ -80,15 +79,20 @@ const Players = ({
                     {timeLimit &&
                       thisPlayer !== currentPlayer &&
                       currentPlayer === playerId &&
-                      timer >= 0 &&
-                      timer <= timerShowMax && (
+                      timeRemaining !== null &&
+                      timeRemaining <= timerShowMax && (
                         <div
                           className={styles.countdown}
                           aria-live="polite"
-                          aria-label={`${timer} seconds remaining`}
+                          aria-label={`${timeRemaining} seconds remaining`}
                         >
-                          <span className={`red-text ${styles.countdown_number}`}>
-                            {timer}
+                          <span
+                            className={classNames(
+                              styles.countdown_number,
+                              styles.suit_red
+                            )}
+                          >
+                            {timeRemaining}
                           </span>
                         </div>
                       )}
@@ -127,10 +131,17 @@ const Players = ({
                 {trick && trick.cards && trick.cards[playerId] && (
                   <Grid size={{ xs: 5, sm: 4 }}>
                     <div className={styles.card}>
-                      <span className={styles[getSuitColorClass(trick.cards[playerId].suit)]}>
+                      <span
+                        className={styles[getSuitColorClass(trick.cards[playerId].suit)]}
+                      >
                         {getSuitSymbol(trick.cards[playerId].suit)}
                       </span>
-                      <span className={classNames(styles.card_value, styles[getSuitColorClass(trick.cards[playerId].suit)])}>
+                      <span
+                        className={classNames(
+                          styles.card_value,
+                          styles[getSuitColorClass(trick.cards[playerId].suit)]
+                        )}
+                      >
                         {trick.cards[playerId].value}
                       </span>
                     </div>
