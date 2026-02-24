@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --ext .js,.ts",
+    "lint": "eslint \"**/*.{js,ts}\"",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "firebase serve --only functions",
