@@ -1,5 +1,21 @@
 @import '../global/variables.scss';
 
+.suit_black {
+  color: $black;
+
+  :global([data-color-scheme='dark']) & {
+    color: $blue;
+  }
+}
+
+.suit_red {
+  color: $red;
+
+  :global([data-color-scheme='dark']) & {
+    color: $pink;
+  }
+}
+
 .game_page {
   padding: 0 5vw;
   position: relative;

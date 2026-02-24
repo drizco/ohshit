@@ -5,10 +5,9 @@ import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import Grid from '@mui/material/Grid'
-import SettingsContext from '../context/SettingsContext'
 import TimerContext from '../context/TimerContext'
 import styles from '../styles/components/players.module.scss'
-import { getColor, getSuitSymbol } from '../utils/helpers'
+import { getSuitSymbol, getSuitColorClass } from '../utils/helpers'
 import type { Player, Trick, GameStatus } from '../types'
 
 interface PlayersProps {
@@ -48,7 +47,6 @@ const Players = ({
   winnerModalShowing,
   status,
 }: PlayersProps) => {
-  const { dark } = useContext(SettingsContext)
   const { timer } = useContext(TimerContext)
   const newPlayers =
     playerOrder.length > 0
@@ -129,15 +127,10 @@ const Players = ({
                 {trick && trick.cards && trick.cards[playerId] && (
                   <Grid size={{ xs: 5, sm: 4 }}>
                     <div className={styles.card}>
-                      <span style={{ color: getColor(trick.cards[playerId].suit, dark) }}>
+                      <span className={styles[getSuitColorClass(trick.cards[playerId].suit)]}>
                         {getSuitSymbol(trick.cards[playerId].suit)}
                       </span>
-                      <span
-                        className={styles.card_value}
-                        style={{
-                          color: getColor(trick.cards[playerId].suit, dark),
-                        }}
-                      >
+                      <span className={classNames(styles.card_value, styles[getSuitColorClass(trick.cards[playerId].suit)])}>
                         {trick.cards[playerId].value}
                       </span>
                     </div>
@@ -163,7 +156,7 @@ const Players = ({
                         newPlayers
                           .filter((p) => !!bids && bids[p.playerId] != null)
                           .map(({ playerId: pid, name: pname }) => (
-                            <p style={{ marginBottom: '0.5rem' }} key={pid}>
+                            <p className={styles.bid_list_item} key={pid}>
                               {`${pname}: ${bids?.[pid]}`}
                             </p>
                           ))}

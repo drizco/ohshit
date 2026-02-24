@@ -1,3 +1,21 @@
+@import '../global/variables';
+
+.suit_black {
+  color: $black;
+
+  :global([data-color-scheme='dark']) & {
+    color: $blue;
+  }
+}
+
+.suit_red {
+  color: $red;
+
+  :global([data-color-scheme='dark']) & {
+    color: $pink;
+  }
+}
+
 .card_row {
   position: fixed;
   bottom: 0;

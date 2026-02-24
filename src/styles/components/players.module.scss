@@ -166,6 +166,26 @@ ul.players {
   }
 }
 
+.bid_list_item {
+  margin-bottom: 0.5rem;
+}
+
+.suit_black {
+  color: $black;
+
+  :global([data-color-scheme='dark']) & {
+    color: $blue;
+  }
+}
+
+.suit_red {
+  color: $red;
+
+  :global([data-color-scheme='dark']) & {
+    color: $pink;
+  }
+}
+
 form {
   .toggle_results {
     padding-left: 0;

@@ -1,9 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 
 import styles from '../styles/components/card-row.module.scss'
-import { getSuitSymbol, getColor, isLegal } from '../utils/helpers'
-import SettingsContext from '../context/SettingsContext'
+import { getSuitSymbol, getSuitColorClass, isLegal } from '../utils/helpers'
 import classNames from 'classnames'
 import type { Card, Suit } from '../types'
 
@@ -15,7 +14,6 @@ interface CardRowProps {
 }
 
 const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
-  const { dark } = useContext(SettingsContext)
   const [illegalCard, setIllegalCard] = useState<string | null>(null)
 
   useEffect(() => {
@@ -81,13 +79,10 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
                 }}
               >
                 <div aria-hidden="true">
-                  <span style={{ color: getColor(card.suit, dark) }}>
+                  <span className={styles[getSuitColorClass(card.suit)]}>
                     {getSuitSymbol(card.suit)}
                   </span>
-                  <span
-                    className={styles.card_value}
-                    style={{ color: getColor(card.suit, dark) }}
-                  >
+                  <span className={classNames(styles.card_value, styles[getSuitColorClass(card.suit)])}>
                     {card.value}
                   </span>
                 </div>
