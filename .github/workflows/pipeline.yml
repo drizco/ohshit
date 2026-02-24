@@ -1,0 +1,88 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # 1. UNIT TESTS & LINTING
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Install Dependencies
+        run: |
+          yarn install --frozen-lockfile
+          cd functions && yarn install --frozen-lockfile
+      - name: Lint & Type Check
+        run: |
+          yarn lint
+          yarn type-check
+      - name: Run All Tests
+        run: |
+          yarn test --ci
+          yarn test:functions --ci
+
+  # 2. END-TO-END TESTS
+  e2e:
+    needs: test # Only run E2E if Unit Tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Setup Java (for Emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install All Dependencies
+        run: |
+          yarn install --frozen-lockfile
+          cd functions && yarn install --frozen-lockfile && yarn build
+      - name: Playwright
+        run: yarn playwright install chromium --with-deps
+      - name: Run E2E in Emulators
+        run: |
+          ./functions/node_modules/.bin/firebase emulators:start --project=dev-oh-shit --only database,auth,functions &
+          npx wait-on tcp:127.0.0.1:9099 tcp:127.0.0.1:9000 tcp:127.0.0.1:5001 --timeout 60000
+          yarn test:e2e
+        env:
+          CI: true
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # 3. DEPLOY (Only on Main + After Tests Pass)
+  deploy:
+    name: Deploy Firebase Functions
+    needs: [test, e2e] # <--- THE MAGIC LINE: Wait for both test jobs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        # FIXED: Changed npm ci to yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
+        working-directory: ./functions
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@v15.7.0
+        with:
+          args: deploy --only functions,database
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
