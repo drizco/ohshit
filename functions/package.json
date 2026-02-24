@@ -17,7 +17,7 @@
     "dev": "concurrently --kill-others-on-fail \"tsc --watch\" \"yarn emulator\""
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "cors": "^2.8.5",
