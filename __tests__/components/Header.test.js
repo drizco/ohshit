@@ -14,53 +14,44 @@ jest.mock('next/link', () => {
   }
 })
 
+const openDrawer = () => {
+  fireEvent.click(screen.getByRole('button', { name: /menu/i }))
+}
+
 describe('Header Component', () => {
   test('renders header with logo and title', () => {
     render(<Header />)
 
     expect(screen.getByAltText('Oh Shit Logo')).toBeInTheDocument()
-    expect(screen.getByText('oh shit...')).toBeInTheDocument()
+    expect(screen.getByText('oh shit')).toBeInTheDocument()
   })
 
-  test('shows rules button', () => {
+  test('shows rules button in drawer', () => {
     render(<Header />)
+    openDrawer()
 
-    const rulesButton = screen.getByRole('button', { name: /rules/i })
-    expect(rulesButton).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /rules/i })).toBeInTheDocument()
   })
 
   test('opens rules modal when rules button is clicked', () => {
     render(<Header />)
+    openDrawer()
+    fireEvent.click(screen.getByRole('button', { name: /rules/i }))
 
-    const rulesButton = screen.getByRole('button', { name: /rules/i })
-    fireEvent.click(rulesButton)
-
-    // Modal should be open
     expect(screen.getByText(/oh shit is a classic card game/i)).toBeInTheDocument()
   })
 
-  test('closes rules modal when toggle is clicked', () => {
+  test('closes rules modal when close button is clicked', () => {
     render(<Header />)
-
-    // Open modal
-    const rulesButton = screen.getByRole('button', { name: /rules/i })
-    fireEvent.click(rulesButton)
+    openDrawer()
+    fireEvent.click(screen.getByRole('button', { name: /rules/i }))
 
     expect(screen.getByText(/oh shit is a classic card game/i)).toBeInTheDocument()
 
-    // Close modal - find the close button in the modal header
-    const closeButtons = screen.getAllByRole('button')
-    const modalCloseButton = closeButtons.find(
-      (btn) =>
-        btn.className.includes('btn-close') || btn.getAttribute('aria-label') === 'Close'
-    )
-
-    if (modalCloseButton) {
-      fireEvent.click(modalCloseButton)
-    }
+    fireEvent.click(screen.getByRole('button', { name: /close/i }))
   })
 
-  test('toggles sound mute when sound icon is clicked', () => {
+  test('toggles sound mute when sound item is clicked', () => {
     const setMuteMock = jest.fn((updater) => {
       if (typeof updater === 'function') {
         updater(false)
@@ -73,14 +64,14 @@ describe('Header Component', () => {
         setMute: setMuteMock,
       },
     })
+    openDrawer()
 
-    const soundButton = screen.getByRole('button', { name: /Mute sounds/i })
-    fireEvent.click(soundButton)
+    fireEvent.click(screen.getByRole('button', { name: /Mute Sounds/i }))
 
     expect(setMuteMock).toHaveBeenCalled()
   })
 
-  test('toggles dark mode when theme icon is clicked', () => {
+  test('toggles dark mode when theme item is clicked', () => {
     const setDarkMock = jest.fn((updater) => {
       if (typeof updater === 'function') {
         updater(false)
@@ -93,31 +84,33 @@ describe('Header Component', () => {
         setDark: setDarkMock,
       },
     })
+    openDrawer()
 
-    const themeButton = screen.getByRole('button', { name: /Switch to dark mode/i })
-    fireEvent.click(themeButton)
+    fireEvent.click(screen.getByRole('button', { name: /Dark Mode/i }))
 
     expect(setDarkMock).toHaveBeenCalled()
   })
 
-  test('shows correct icon for muted state', () => {
+  test('shows unmute option when muted', () => {
     render(<Header />, {
       contextValue: {
         mute: true,
       },
     })
+    openDrawer()
 
-    expect(screen.getByRole('button', { name: /Unmute sounds/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Unmute Sounds/i })).toBeInTheDocument()
   })
 
-  test('shows correct icon for dark mode', () => {
+  test('shows light mode option when in dark mode', () => {
     render(<Header />, {
       contextValue: {
         dark: true,
       },
     })
+    openDrawer()
 
-    expect(screen.getByRole('button', { name: /Switch to light mode/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Light Mode/i })).toBeInTheDocument()
   })
 
   test('logo links to home page', () => {
