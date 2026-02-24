@@ -1,13 +1,7 @@
-import { BLUE, PINK } from './constants'
 import type { Card, Suit, Player, Trick } from '../types'
 
-export const getColor = (suit: Suit, dark: boolean): string => {
-  if (suit === 'C' || suit === 'S') {
-    return dark ? BLUE : '#000'
-  } else {
-    return dark ? PINK : '#db0007'
-  }
-}
+export const getSuitColorClass = (suit: Suit): 'suit_black' | 'suit_red' =>
+  suit === 'C' || suit === 'S' ? 'suit_black' : 'suit_red'
 
 export const getSuitSymbol = (suit: Suit): string => {
   switch (suit) {

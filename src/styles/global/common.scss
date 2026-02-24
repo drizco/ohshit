@@ -1,5 +1,5 @@
 :focus-visible {
-  outline: 3px solid #008ac4;
+  outline: 3px solid $blue;
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -123,9 +123,10 @@ header {
   padding: 2vw;
   text-align: center;
   margin-bottom: 3vw;
+  border-bottom: 1px solid $black;
 
   @media only screen and (min-width: 768px) {
-    margin-bottom: 1.5vw;
+    margin-bottom: 2.5vw;
   }
 
   .logo {
@@ -174,6 +175,11 @@ header {
   justify-content: center;
   align-items: center;
   z-index: 10;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  [data-color-scheme='dark'] & {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
 }
 
 .spinner-anim-enter {
@@ -202,19 +208,19 @@ header {
 // Dark mode overrides for custom classes (MUI handles component theming via ThemeProvider)
 [data-color-scheme='dark'] {
   .playing-card {
-    background-color: #000 !important;
-    border-color: #282c35 !important;
+    background-color: $black;
+    border-color: $light-black;
   }
 
   header {
-    border-bottom-color: #000;
+    border-bottom-color: $dark-gray;
   }
 
   a,
   .red-text,
   .player-row::before,
   .player-score::before,
-  .player-name::after {
-    color: #faa7c4 !important;
+  h2.player-name::after {
+    color: $pink !important;
   }
 }

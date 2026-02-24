@@ -15,32 +15,6 @@ describe('Spinner Component', () => {
     expect(container.querySelector('.spinner-container')).not.toBeInTheDocument()
   })
 
-  test('applies dark mode styles when dark context is true', () => {
-    const { container } = render(<SpinnerComponent loading={true} />, {
-      contextValue: {
-        dark: true,
-      },
-    })
-
-    const spinnerContainer = container.querySelector('.spinner-container')
-    expect(spinnerContainer).toHaveStyle({
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    })
-  })
-
-  test('applies light mode styles when dark context is false', () => {
-    const { container } = render(<SpinnerComponent loading={true} />, {
-      contextValue: {
-        dark: false,
-      },
-    })
-
-    const spinnerContainer = container.querySelector('.spinner-container')
-    expect(spinnerContainer).toHaveStyle({
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    })
-  })
-
   test('renders MUI CircularProgress component', () => {
     const { container } = render(<SpinnerComponent loading={true} />)
 

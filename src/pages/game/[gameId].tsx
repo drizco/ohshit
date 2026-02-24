@@ -11,13 +11,12 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import AppStateContext from '../../context/AppStateContext'
-import SettingsContext from '../../context/SettingsContext'
 import TimerContext from '../../context/TimerContext'
 import styles from '../../styles/pages/game.module.scss'
 import CardRow from '../../components/CardRow'
 import {
   getSuitSymbol,
-  getColor,
+  getSuitColorClass,
   getAvailableTricks,
   getWinner,
 } from '../../utils/helpers'
@@ -43,7 +42,6 @@ interface GameProps {
 function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
   const { visible, setError, setLoading } = useContext(AppStateContext)
-  const { dark } = useContext(SettingsContext)
   const { timer } = useContext(TimerContext)
 
   // Hook #1: State Management
@@ -218,9 +216,9 @@ function Game({ gameId, isMobile }: GameProps) {
             {leadSuit && (
               <>
                 <p className={styles.game_info}>LEAD</p>
-                <Box component="span" sx={{ color: getColor(leadSuit, dark) }}>
+                <span className={styles[getSuitColorClass(leadSuit)]}>
                   {getSuitSymbol(leadSuit)}
-                </Box>
+                </span>
               </>
             )}
           </Grid>
@@ -228,9 +226,9 @@ function Game({ gameId, isMobile }: GameProps) {
             {trump && (
               <>
                 <CustomTrump className={styles.game_info} />
-                <Box component="span" sx={{ color: getColor(trump, dark) }}>
+                <span className={styles[getSuitColorClass(trump)]}>
                   {getSuitSymbol(trump)}
-                </Box>
+                </span>
               </>
             )}
           </Grid>

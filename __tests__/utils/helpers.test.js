@@ -8,7 +8,7 @@ import {
   calculateGameScore,
   getAvailableTricks,
   handleDirtyGame,
-  getColor,
+  getSuitColorClass,
   getSuitSymbol,
 } from '@/utils/helpers'
 
@@ -399,31 +399,15 @@ describe('Utility Helpers', () => {
     })
   })
 
-  describe('getColor', () => {
-    test('should return black for clubs in light mode', () => {
-      expect(getColor('C', false)).toBe('#000')
+  describe('getSuitColorClass', () => {
+    test('should return suit_black for clubs and spades', () => {
+      expect(getSuitColorClass('C')).toBe('suit_black')
+      expect(getSuitColorClass('S')).toBe('suit_black')
     })
 
-    test('should return black for spades in light mode', () => {
-      expect(getColor('S', false)).toBe('#000')
-    })
-
-    test('should return red for hearts in light mode', () => {
-      expect(getColor('H', false)).toBe('#db0007')
-    })
-
-    test('should return red for diamonds in light mode', () => {
-      expect(getColor('D', false)).toBe('#db0007')
-    })
-
-    test('should return blue for black suits in dark mode', () => {
-      expect(getColor('C', true)).toBe('#008ac4')
-      expect(getColor('S', true)).toBe('#008ac4')
-    })
-
-    test('should return pink for red suits in dark mode', () => {
-      expect(getColor('H', true)).toBe('#faa7c4')
-      expect(getColor('D', true)).toBe('#faa7c4')
+    test('should return suit_red for hearts and diamonds', () => {
+      expect(getSuitColorClass('H')).toBe('suit_red')
+      expect(getSuitColorClass('D')).toBe('suit_red')
     })
   })
 

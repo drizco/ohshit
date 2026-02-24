@@ -14,9 +14,9 @@ import MenuItem from '@mui/material/MenuItem'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { newGame, parseApiError } from '../utils/api'
 import styles from '../styles/pages/home.module.scss'
-import { CopyIcon } from '../components/Icons'
 import AppStateContext from '../context/AppStateContext'
 import classnames from 'classnames'
 
@@ -123,7 +123,9 @@ const CreateGame = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', m: 4 }}>
             <Box sx={{ width: { xs: '83.33%', sm: '58.33%' } }}>
               <h2>Game Code</h2>
-              <h2 className="red-text" style={{ margin: '1rem' }}>{gameId}</h2>
+              <h2 className={classnames('red-text', styles.game_code)}>
+                {gameId}
+              </h2>
             </Box>
           </Box>
           <Box sx={{ textAlign: 'center', m: 4 }}>
@@ -143,9 +145,9 @@ const CreateGame = () => {
                       type="button"
                       onClick={copyToClipboard}
                       aria-label="Copy game URL"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      className={styles.copy_button}
                     >
-                      <CopyIcon style={{ width: 18 }} />
+                      <ContentCopyIcon sx={{ fontSize: 18 }} />
                     </button>
                   </InputAdornment>
                 }
@@ -241,11 +243,18 @@ const CreateGame = () => {
                 />
 
                 <Box sx={{ mb: 2 }}>
-                  <label htmlFor="num-cards" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  <label
+                    htmlFor="num-cards"
+                    className={styles.num_cards_label}
+                  >
                     Number of cards
                   </label>
                   <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-                    <Button variant="contained" color="error" onClick={() => handleNumCards(false)}>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleNumCards(false)}
+                    >
                       -
                     </Button>
                     <input
@@ -257,7 +266,11 @@ const CreateGame = () => {
                       className={styles.num_cards}
                       readOnly
                     />
-                    <Button variant="contained" color="success" onClick={() => handleNumCards(true)}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleNumCards(true)}
+                    >
                       +
                     </Button>
                   </Box>
@@ -303,7 +316,12 @@ const CreateGame = () => {
                 />
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                  <Button variant="contained" disabled={!name} color="primary" onClick={initializeGame}>
+                  <Button
+                    variant="contained"
+                    disabled={!name}
+                    color="primary"
+                    onClick={initializeGame}
+                  >
                     NEW GAME
                   </Button>
                 </Box>
