@@ -163,7 +163,7 @@ const Players = ({
                     </div>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <form>
+                    <div>
                       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
                         <Button
                           variant="contained"
@@ -175,7 +175,6 @@ const Players = ({
                           -
                         </Button>
                         <input
-                          data-lpignore="true"
                           type="text"
                           value={bid}
                           name="bid"
@@ -194,7 +193,7 @@ const Players = ({
                           +
                         </Button>
                       </Box>
-                    </form>
+                    </div>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
                     <Button
