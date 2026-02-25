@@ -1,6 +1,6 @@
 # Oh Shit
 
-A real-time multiplayer trick-taking card game. Players bid on the number of tricks they'll win each round, and score points based on accuracy. Live at [oopsie-poopsie.app](https://oopsie-poopsie.app).
+A real-time multiplayer trick-taking card game. Players bid on the number of tricks they'll win each round, and score points based on accuracy. Live at [ohshit.cards](https://ohshit.cards).
 
 ## Tech Stack
 
