@@ -167,13 +167,18 @@ export const submitBid = async (
     const { playerId, bid, gameId, roundId } = body
     const updateObj: Record<string, unknown> = {}
 
-    const [playerOrder, currentPlayerIndex, currentBids] = await Promise.all([
-      getFirebaseValue(ref, `games/${gameId}/state/playerOrder`),
-      getFirebaseValue(ref, `games/${gameId}/state/currentPlayerIndex`),
+    const [gameState, currentBids] = await Promise.all([
+      getFirebaseValue(ref, `games/${gameId}/state`),
       getFirebaseValue(ref, `games/${gameId}/rounds/${roundId}/bids`).then(
         (val) => val || {}
       ),
     ])
+
+    const { playerOrder, currentPlayerIndex, status: gameStatus } = gameState
+
+    if (gameStatus !== 'bid') {
+      return sendError(res, 400, 'Not in bid phase')
+    }
 
     try {
       validatePlayerTurn(playerOrder, currentPlayerIndex, playerId)
@@ -208,23 +213,25 @@ export const playCard = async (req: RequestWithRef, res: Response): Promise<Resp
     const { ref, body } = req
     const { playerId, card, gameId, roundId, trickId } = body
 
-    const [playerOrder, currentPlayerIndex, gameState, trump, currentTrick, playerHand] =
-      await Promise.all([
-        getFirebaseValue(ref, `games/${gameId}/state/playerOrder`),
-        getFirebaseValue(ref, `games/${gameId}/state/currentPlayerIndex`),
-        getFirebaseValue(ref, `games/${gameId}/state`),
-        getFirebaseValue(ref, `games/${gameId}/rounds/${roundId}/trump`),
-        getFirebaseValue(ref, `games/${gameId}/rounds/${roundId}/tricks/${trickId}`).then(
-          (val) => val || {}
-        ),
-        getFirebaseValue(
-          ref,
-          `games/${gameId}/players/${playerId}/hands/${roundId}/cards`
-        ).then((cards) => {
-          cards = cards || {}
-          return Object.values(cards) as Card[]
-        }),
-      ])
+    const [gameState, round, playerHand] = await Promise.all([
+      getFirebaseValue(ref, `games/${gameId}/state`),
+      getFirebaseValue(ref, `games/${gameId}/rounds/${roundId}`),
+      getFirebaseValue(
+        ref,
+        `games/${gameId}/players/${playerId}/hands/${roundId}/cards`
+      ).then((cards) => {
+        cards = cards || {}
+        return Object.values(cards) as Card[]
+      }),
+    ])
+
+    const { playerOrder, currentPlayerIndex } = gameState
+    const trump = round.trump
+    const currentTrick = round.tricks?.[trickId] || {}
+
+    if (gameState.status !== 'play') {
+      return sendError(res, 400, 'Not in play phase')
+    }
 
     try {
       validatePlayerTurn(playerOrder, currentPlayerIndex, playerId)

@@ -123,6 +123,13 @@ function Game({ gameId, isMobile }: GameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId])
 
+  // Clear queued card when entering bid phase (new round)
+  useEffect(() => {
+    if (game?.state?.status === 'bid' && queuedCard) {
+      updateState({ queuedCard: null })
+    }
+  }, [game?.state?.status, queuedCard, updateState])
+
   // Handle "your turn" logic
   useEffect(() => {
     const currentPlayerId = game?.state?.playerOrder?.[game.state.currentPlayerIndex]

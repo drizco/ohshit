@@ -4,6 +4,7 @@ import {
   newGame,
   addPlayer,
   submitBid,
+  playCard,
   replayGame,
   updatePlayer,
 } from '../../functions/game'
@@ -11,6 +12,33 @@ import { TEST_ERROR } from '../setup/constants'
 
 // Mock the deck
 jest.mock('../../functions/deck')
+
+/**
+ * Creates a mock ref implementation that maps paths to values.
+ * - pathValues: path → value, wrapped in once/val boilerplate automatically.
+ * - mockUpdate: returned as { update: mockUpdate } when ref() is called with no path.
+ * - overrides: path → raw return object (not wrapped), checked before pathValues.
+ * - fallback: custom catch-all for unmatched paths (default: once(null) + push).
+ */
+function mockRefImpl(pathValues, mockUpdate, { overrides, fallback } = {}) {
+  return (path) => {
+    if (overrides?.[path] !== undefined) {
+      return overrides[path]
+    }
+    if (pathValues[path] !== undefined) {
+      return {
+        once: jest.fn(() => Promise.resolve({ val: () => pathValues[path] })),
+      }
+    }
+    if (!path && mockUpdate) {
+      return { update: mockUpdate }
+    }
+    return fallback || {
+      once: jest.fn(() => Promise.resolve({ val: () => null })),
+      push: jest.fn(() => ({ key: 'new-1' })),
+    }
+  }
+}
 
 describe('Game Functions - newGame', () => {
   let mockRef
@@ -135,26 +163,19 @@ describe('Game Functions - addPlayer', () => {
   let mockReq
   let mockRes
 
-  beforeEach(() => {
-    const mockPush = {
-      key: 'new-player-id',
-      update: jest.fn(() => Promise.resolve()),
-    }
+  const pushWith = (key, extraMethods = {}) => ({
+    push: jest.fn(() => ({ key, ...extraMethods })),
+  })
 
-    mockRef = jest.fn((path) => {
-      if (path === 'games/TEST/state') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({
-              val: () => ({ status: 'pending' }),
-            })
-          ),
-        }
-      }
-      return {
-        push: jest.fn(() => mockPush),
-      }
-    })
+  beforeEach(() => {
+    mockRef = jest.fn(
+      mockRefImpl({ 'games/TEST/state': { status: 'pending' } }, null, {
+        fallback: pushWith('new-player-id', {
+          set: jest.fn(() => Promise.resolve()),
+          update: jest.fn(() => Promise.resolve()),
+        }),
+      })
+    )
 
     mockReq = {
       ref: mockRef,
@@ -183,23 +204,11 @@ describe('Game Functions - addPlayer', () => {
 
   test('should set present flag to true', async () => {
     const mockPushUpdate = jest.fn(() => Promise.resolve())
-    mockRef.mockImplementation((path) => {
-      if (path === 'games/TEST/state') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({
-              val: () => ({ status: 'pending' }),
-            })
-          ),
-        }
-      }
-      return {
-        push: () => ({
-          key: 'new-player-id',
-          update: mockPushUpdate,
-        }),
-      }
-    })
+    mockRef.mockImplementation(
+      mockRefImpl({ 'games/TEST/state': { status: 'pending' } }, null, {
+        fallback: pushWith('new-player-id', { update: mockPushUpdate }),
+      })
+    )
 
     await addPlayer(mockReq, mockRes)
 
@@ -211,20 +220,11 @@ describe('Game Functions - addPlayer', () => {
   })
 
   test('should return 404 when game does not exist', async () => {
-    mockRef.mockImplementation((path) => {
-      if (path === 'games/TEST/state') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({
-              val: () => null,
-            })
-          ),
-        }
-      }
-      return {
-        push: jest.fn(),
-      }
-    })
+    mockRef.mockImplementation(
+      mockRefImpl({ 'games/TEST/state': null }, null, {
+        fallback: pushWith('new-player-id'),
+      })
+    )
 
     await addPlayer(mockReq, mockRes)
 
@@ -233,20 +233,11 @@ describe('Game Functions - addPlayer', () => {
   })
 
   test('should return 400 when game is over', async () => {
-    mockRef.mockImplementation((path) => {
-      if (path === 'games/TEST/state') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({
-              val: () => ({ status: 'over' }),
-            })
-          ),
-        }
-      }
-      return {
-        push: jest.fn(),
-      }
-    })
+    mockRef.mockImplementation(
+      mockRefImpl({ 'games/TEST/state': { status: 'over' } }, null, {
+        fallback: pushWith('new-player-id'),
+      })
+    )
 
     await addPlayer(mockReq, mockRes)
 
@@ -261,23 +252,11 @@ describe('Game Functions - addPlayer', () => {
       jest.clearAllMocks()
 
       const mockPushUpdate = jest.fn(() => Promise.resolve())
-      mockRef.mockImplementation((path) => {
-        if (path === 'games/TEST/state') {
-          return {
-            once: jest.fn(() =>
-              Promise.resolve({
-                val: () => ({ status }),
-              })
-            ),
-          }
-        }
-        return {
-          push: () => ({
-            key: 'new-player-id',
-            update: mockPushUpdate,
-          }),
-        }
-      })
+      mockRef.mockImplementation(
+        mockRefImpl({ 'games/TEST/state': { status } }, null, {
+          fallback: pushWith('new-player-id', { update: mockPushUpdate }),
+        })
+      )
 
       await addPlayer(mockReq, mockRes)
 
@@ -303,31 +282,24 @@ describe('Game Functions - submitBid', () => {
   let mockRes
   let mockUpdate
 
+  const bidState = {
+    status: 'bid',
+    playerOrder: ['player-1', 'player-2', 'player-3'],
+    currentPlayerIndex: 0,
+  }
+
   beforeEach(() => {
     mockUpdate = jest.fn(() => Promise.resolve())
 
-    // Mock ref to return different values based on path
-    mockRef = jest.fn((path) => {
-      if (path === 'games/TEST/state/playerOrder') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({ val: () => ['player-1', 'player-2', 'player-3'] })
-          ),
-        }
-      }
-      if (path === 'games/TEST/state/currentPlayerIndex') {
-        return {
-          once: jest.fn(() => Promise.resolve({ val: () => 0 })),
-        }
-      }
-      if (path === 'games/TEST/rounds/round-1/bids') {
-        return {
-          once: jest.fn(() => Promise.resolve({ val: () => ({}) })),
-        }
-      }
-      // Default case - ref() with no args
-      return { update: mockUpdate }
-    })
+    mockRef = jest.fn(
+      mockRefImpl(
+        {
+          'games/TEST/state': bidState,
+          'games/TEST/rounds/round-1/bids': {},
+        },
+        mockUpdate
+      )
+    )
 
     mockReq = {
       ref: mockRef,
@@ -364,29 +336,15 @@ describe('Game Functions - submitBid', () => {
   })
 
   test('should change status to play when all bids are in', async () => {
-    // Mock bids to show 2 players have already bid (player-2 and player-3)
-    mockRef.mockImplementation((path) => {
-      if (path === 'games/TEST/state/playerOrder') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({ val: () => ['player-1', 'player-2', 'player-3'] })
-          ),
-        }
-      }
-      if (path === 'games/TEST/state/currentPlayerIndex') {
-        return {
-          once: jest.fn(() => Promise.resolve({ val: () => 0 })),
-        }
-      }
-      if (path === 'games/TEST/rounds/round-1/bids') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({ val: () => ({ 'player-2': 2, 'player-3': 1 }) })
-          ),
-        }
-      }
-      return { update: mockUpdate }
-    })
+    mockRef.mockImplementation(
+      mockRefImpl(
+        {
+          'games/TEST/state': bidState,
+          'games/TEST/rounds/round-1/bids': { 'player-2': 2, 'player-3': 1 },
+        },
+        mockUpdate
+      )
+    )
 
     await submitBid(mockReq, mockRes)
 
@@ -405,34 +363,139 @@ describe('Game Functions - submitBid', () => {
   })
 
   test('should handle errors', async () => {
-    mockRef.mockImplementation((path) => {
-      if (path === 'games/TEST/state/playerOrder') {
-        return {
-          once: jest.fn(() =>
-            Promise.resolve({ val: () => ['player-1', 'player-2', 'player-3'] })
-          ),
-        }
-      }
-      if (path === 'games/TEST/state/currentPlayerIndex') {
-        return {
-          once: jest.fn(() => Promise.resolve({ val: () => 0 })),
-        }
-      }
-      if (path === 'games/TEST/rounds/round-1/bids') {
-        return {
-          once: jest.fn(() => Promise.resolve({ val: () => ({}) })),
-        }
-      }
-      return {
-        update: jest.fn(() => Promise.reject(new Error(TEST_ERROR))),
-        once: jest.fn(() => Promise.resolve({ val: () => ({}) })),
-      }
-    })
+    const errorUpdate = jest.fn(() => Promise.reject(new Error(TEST_ERROR)))
+    mockRef.mockImplementation(
+      mockRefImpl(
+        {
+          'games/TEST/state': bidState,
+          'games/TEST/rounds/round-1/bids': {},
+        },
+        errorUpdate
+      )
+    )
 
     await submitBid(mockReq, mockRes)
 
     expect(mockRes.status).toHaveBeenCalledWith(500)
     expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' })
+  })
+
+  test('should reject bid when not in bid phase', async () => {
+    mockRef.mockImplementation(
+      mockRefImpl(
+        {
+          'games/TEST/state': { ...bidState, status: 'play' },
+          'games/TEST/rounds/round-1/bids': {},
+        },
+        mockUpdate
+      )
+    )
+
+    await submitBid(mockReq, mockRes)
+
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not in bid phase' })
+  })
+})
+
+describe('Game Functions - playCard', () => {
+  let mockRef
+  let mockReq
+  let mockRes
+  let mockUpdate
+
+  const playState = {
+    status: 'play',
+    numPlayers: 2,
+    playerOrder: ['player-1', 'player-2'],
+    currentPlayerIndex: 0,
+  }
+
+  const roundData = {
+    trump: 'H',
+    tricks: {
+      'trick-1': { trickId: 'trick-1', cards: {} },
+    },
+  }
+
+  const playerCards = {
+    'card-1': { cardId: 'card-1', playerId: 'player-1', rank: 5, suit: 'H', value: '6' },
+    'card-2': { cardId: 'card-2', playerId: 'player-1', rank: 10, suit: 'S', value: 'J' },
+  }
+
+  beforeEach(() => {
+    mockUpdate = jest.fn(() => Promise.resolve())
+
+    mockRef = jest.fn(
+      mockRefImpl(
+        {
+          'games/TEST/state': playState,
+          'games/TEST/rounds/round-1': roundData,
+          'games/TEST/players/player-1/hands/round-1/cards': playerCards,
+        },
+        mockUpdate
+      )
+    )
+
+    mockReq = {
+      ref: mockRef,
+      body: {
+        playerId: 'player-1',
+        card: {
+          cardId: 'card-1',
+          playerId: 'player-1',
+          rank: 5,
+          suit: 'H',
+          value: '6',
+        },
+        gameId: 'TEST',
+        roundId: 'round-1',
+        trickId: 'trick-1',
+      },
+    }
+
+    mockRes = {
+      sendStatus: jest.fn(),
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    }
+  })
+
+  test('should play a card successfully in play phase', async () => {
+    await playCard(mockReq, mockRes)
+
+    expect(mockRes.sendStatus).toHaveBeenCalledWith(200)
+    expect(mockUpdate).toHaveBeenCalled()
+  })
+
+  test('should reject card play when not in play phase', async () => {
+    mockRef.mockImplementation(
+      mockRefImpl(
+        {
+          'games/TEST/state': { ...playState, status: 'bid' },
+          'games/TEST/rounds/round-1': roundData,
+          'games/TEST/players/player-1/hands/round-1/cards': { 'card-1': playerCards['card-1'] },
+        },
+        mockUpdate
+      )
+    )
+
+    await playCard(mockReq, mockRes)
+
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not in play phase' })
+  })
+
+  test('should reject card play when it is not the player turn', async () => {
+    mockReq.body.playerId = 'player-2' // player-2 trying to play but currentPlayerIndex is 0 (player-1)
+
+    await playCard(mockReq, mockRes)
+
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not your turn' })
   })
 })
 

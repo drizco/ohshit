@@ -69,6 +69,10 @@ const useGameActions = ({
           return
         }
 
+        if (game.state.status !== 'play') {
+          return
+        }
+
         const trick = tricks[trickIndex]
         const currentPlayerId = game.state.playerOrder?.[game.state.currentPlayerIndex]
 

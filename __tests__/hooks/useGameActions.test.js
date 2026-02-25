@@ -154,6 +154,98 @@ describe('useGameActions Hook', () => {
       expect(mockSetLoading).toHaveBeenCalledWith(false)
     })
 
+    test('does not play or queue card during bid phase', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
+      const mockTrick = {
+        trickId: 1,
+        cards: {},
+        leadSuit: null,
+      }
+
+      const { result } = renderHook(() =>
+        useGameActions({
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
+          game: {
+            metadata: {
+              gameId: 'game-1',
+            },
+            state: {
+              status: 'bid',
+              playerOrder: ['p1', 'p2', 'p3'],
+              currentPlayerIndex: 0, // p1's turn
+              roundId: 'round-1',
+            },
+          },
+          hand: [mockCard],
+          bid: 2,
+          bids: {},
+          tricks: [mockTrick],
+          trickIndex: 0,
+          queuedCard: null,
+          visible: false,
+          setLoading: mockSetLoading,
+          setError: mockSetError,
+          updateState: mockUpdateState,
+          autoPlayTimeoutRef: mockAutoPlayTimeout,
+        })
+      )
+
+      await act(async () => {
+        await result.current.playCard(mockCard)
+      })
+
+      expect(mockPlayCardApi).not.toHaveBeenCalled()
+      expect(mockUpdateState).not.toHaveBeenCalled()
+    })
+
+    test('does not queue card during bid phase even when not player turn', async () => {
+      const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
+      const mockTrick = {
+        trickId: 1,
+        cards: {},
+        leadSuit: null,
+      }
+
+      const { result } = renderHook(() =>
+        useGameActions({
+          gameId: 'game-1',
+          playerId: 'p1',
+          playerName: 'Player 1',
+          game: {
+            metadata: {
+              gameId: 'game-1',
+            },
+            state: {
+              status: 'bid',
+              playerOrder: ['p2', 'p1', 'p3'],
+              currentPlayerIndex: 0, // p2's turn
+              roundId: 'round-1',
+            },
+          },
+          hand: [mockCard],
+          bid: 2,
+          bids: {},
+          tricks: [mockTrick],
+          trickIndex: 0,
+          queuedCard: null,
+          visible: false,
+          setLoading: mockSetLoading,
+          setError: mockSetError,
+          updateState: mockUpdateState,
+          autoPlayTimeoutRef: mockAutoPlayTimeout,
+        })
+      )
+
+      await act(async () => {
+        await result.current.playCard(mockCard)
+      })
+
+      expect(mockPlayCardApi).not.toHaveBeenCalled()
+      expect(mockUpdateState).not.toHaveBeenCalled()
+    })
+
     test('queues card when it is not player turn', async () => {
       const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
       const mockTrick = {
