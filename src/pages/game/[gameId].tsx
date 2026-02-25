@@ -27,7 +27,10 @@ import CountdownOverlay from '../../components/CountdownOverlay'
 import JoinGameForm from '../../components/JoinGameForm'
 import YourTurnIndicator from '../../components/YourTurnIndicator'
 import FlyingCard from '../../components/FlyingCard'
-import { CardAnimationProvider, useCardAnimation } from '../../context/CardAnimationContext'
+import {
+  CardAnimationProvider,
+  useCardAnimation,
+} from '../../context/CardAnimationContext'
 
 // Custom hooks
 import useGameState from '../../hooks/useGameState'
@@ -98,15 +101,14 @@ function Game({ gameId, isMobile }: GameProps) {
     lastRoundSnapshotRef.current = null
   }
 
-  const displayedTrick = lastWinner && state.lastCompletedTrick
-    ? state.lastCompletedTrick
-    : trick
-  const displayedBids = lastWinner && lastRoundSnapshotRef.current
-    ? lastRoundSnapshotRef.current.bids
-    : bids
-  const displayedRoundScore = lastWinner && lastRoundSnapshotRef.current
-    ? lastRoundSnapshotRef.current.roundScore
-    : roundScore
+  const displayedTrick =
+    lastWinner && state.lastCompletedTrick ? state.lastCompletedTrick : trick
+  const displayedBids =
+    lastWinner && lastRoundSnapshotRef.current ? lastRoundSnapshotRef.current.bids : bids
+  const displayedRoundScore =
+    lastWinner && lastRoundSnapshotRef.current
+      ? lastRoundSnapshotRef.current.roundScore
+      : roundScore
 
   // Hook #3: Firebase Listeners
   const { removeListeners } = useGameListeners({
@@ -137,7 +139,9 @@ function Game({ gameId, isMobile }: GameProps) {
     autoPlayTimeoutRef,
     onBeforeAutoPlay: (card) => {
       if (playerId && card.cardId) {
-        const el = document.querySelector(`[data-card-id="${card.cardId}"]`) as HTMLElement | null
+        const el = document.querySelector(
+          `[data-card-id="${card.cardId}"]`
+        ) as HTMLElement | null
         if (el) {
           triggerCardFly(card, el, playerId)
         }
@@ -333,7 +337,7 @@ function Game({ gameId, isMobile }: GameProps) {
         queuedCard={queuedCard}
         leadSuit={leadSuit || null}
         onCardPlayed={(card, sourceEl) => {
-          if (playerId) {
+          if (currentPlayer === playerId) {
             triggerCardFly(card, sourceEl, playerId)
           }
         }}
