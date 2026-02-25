@@ -87,6 +87,7 @@ const INITIAL_STATE: LocalGameState = {
   showYourTurn: false,
   queuedCard: null,
   lastWinner: null,
+  lastCompletedTrick: null,
 }
 
 const INITIAL_ROUND_STATE: RoundState = {

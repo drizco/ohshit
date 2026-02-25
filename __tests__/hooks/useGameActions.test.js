@@ -798,6 +798,7 @@ describe('useGameActions Hook', () => {
 
       expect(mockUpdateState).toHaveBeenCalledWith({
         lastWinner: null,
+        lastCompletedTrick: null,
       })
     })
 

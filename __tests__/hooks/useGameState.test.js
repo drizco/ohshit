@@ -62,6 +62,7 @@ describe('useGameState Hook', () => {
         showYourTurn: false,
         queuedCard: null,
         lastWinner: null,
+        lastCompletedTrick: null,
       })
     })
 
@@ -159,6 +160,7 @@ describe('useGameState Hook', () => {
         showYourTurn: false,
         queuedCard: null,
         lastWinner: null,
+        lastCompletedTrick: null,
       })
     })
   })
@@ -430,6 +432,7 @@ describe('useGameState Hook', () => {
         showYourTurn: false,
         queuedCard: null,
         lastWinner: null,
+        lastCompletedTrick: null,
       })
     })
 

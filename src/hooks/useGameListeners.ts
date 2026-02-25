@@ -252,7 +252,7 @@ const useGameListeners = ({
         } else if (eventType === 'child_changed') {
           dispatchRound({ type: 'UPDATE_TRICK', trick })
           if (trick.winner) {
-            updateState({ lastWinner: trick.winner })
+            updateState({ lastWinner: trick.winner, lastCompletedTrick: trick })
           }
         }
       },
