@@ -310,7 +310,7 @@ const useGameActions = ({
   const closeModal = useCallback(async () => {
     if (!game) return
 
-    updateState({ lastWinner: null })
+    updateState({ lastWinner: null, lastCompletedTrick: null })
   }, [game, updateState])
 
   return {

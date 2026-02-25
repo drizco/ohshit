@@ -82,6 +82,12 @@ function Game({ gameId, isMobile }: GameProps) {
   // Refs for actions
   const autoPlayTimeoutRef = useRef(null)
 
+  // While the winner modal is open, show the completed trick (snapshotted
+  // in the listener) so cards stay visible even if the round resets.
+  const displayedTrick = lastWinner && state.lastCompletedTrick
+    ? state.lastCompletedTrick
+    : trick
+
   // Hook #3: Firebase Listeners
   const { removeListeners } = useGameListeners({
     gameId,
@@ -286,7 +292,7 @@ function Game({ gameId, isMobile }: GameProps) {
           currentPlayer={currentPlayer}
           bids={bids}
           roundScore={roundScore}
-          trick={trick}
+          trick={displayedTrick}
           bid={bid}
           dealer={dealer}
           handleToggle={handleToggle}

@@ -18,6 +18,7 @@ export interface LocalGameState {
   showYourTurn: boolean
   queuedCard: Card | null
   lastWinner: string | null
+  lastCompletedTrick: Trick | null
 }
 
 export type RoundAction =
