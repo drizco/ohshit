@@ -26,6 +26,8 @@ import CustomTrump from '../../components/CustomTrump'
 import CountdownOverlay from '../../components/CountdownOverlay'
 import JoinGameForm from '../../components/JoinGameForm'
 import YourTurnIndicator from '../../components/YourTurnIndicator'
+import FlyingCard from '../../components/FlyingCard'
+import { CardAnimationProvider, useCardAnimation } from '../../context/CardAnimationContext'
 
 // Custom hooks
 import useGameState from '../../hooks/useGameState'
@@ -38,9 +40,18 @@ interface GameProps {
   isMobile: boolean
 }
 
+function GameWithAnimation(props: GameProps) {
+  return (
+    <CardAnimationProvider>
+      <Game {...props} />
+    </CardAnimationProvider>
+  )
+}
+
 function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
   const { visible, setError, setLoading } = useContext(AppStateContext)
+  const { triggerCardFly } = useCardAnimation()
 
   // Hook #1: State Management
   const { state, updateState, dispatchRound, roundState, initializeGame } = useGameState({
@@ -98,6 +109,14 @@ function Game({ gameId, isMobile }: GameProps) {
     setLoading,
     updateState,
     autoPlayTimeoutRef,
+    onBeforeAutoPlay: (card) => {
+      if (playerId && card.cardId) {
+        const el = document.querySelector(`[data-card-id="${card.cardId}"]`) as HTMLElement | null
+        if (el) {
+          triggerCardFly(card, el, playerId)
+        }
+      }
+    },
   })
 
   const {
@@ -287,7 +306,13 @@ function Game({ gameId, isMobile }: GameProps) {
         playCard={playCard}
         queuedCard={queuedCard}
         leadSuit={leadSuit || null}
+        onCardPlayed={(card, sourceEl) => {
+          if (playerId) {
+            triggerCardFly(card, sourceEl, playerId)
+          }
+        }}
       />
+      <FlyingCard />
       {/* Trick winner flash modal */}
       <Dialog
         open={Boolean(lastWinner)}
@@ -398,4 +423,4 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return { props: { gameId, isMobile } }
 }
 
-export default Game
+export default GameWithAnimation

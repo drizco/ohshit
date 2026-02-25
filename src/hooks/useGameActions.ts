@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { MutableRefObject } from 'react'
+import type { RefObject } from 'react'
 import {
   newGame,
   replayGame,
@@ -32,7 +32,8 @@ interface UseGameActionsOptions {
       | Partial<LocalGameState>
       | ((prevState: LocalGameState) => Partial<LocalGameState>)
   ) => void
-  autoPlayTimeoutRef: MutableRefObject<NodeJS.Timeout | null>
+  autoPlayTimeoutRef: RefObject<NodeJS.Timeout | null>
+  onBeforeAutoPlay?: (card: Card) => void
 }
 
 /**
@@ -56,6 +57,7 @@ const useGameActions = ({
   setLoading,
   updateState,
   autoPlayTimeoutRef,
+  onBeforeAutoPlay,
 }: UseGameActionsOptions) => {
   // Play card - handles playing a card or queuing it for later
   const playCard = useCallback(
@@ -126,6 +128,9 @@ const useGameActions = ({
     }
     if (queuedCard) {
       autoPlayTimeoutRef.current = setTimeout(async () => {
+        if (onBeforeAutoPlay) {
+          onBeforeAutoPlay(queuedCard)
+        }
         updateState({ queuedCard: null })
         await playCard(queuedCard)
       }, 700)
@@ -135,7 +140,7 @@ const useGameActions = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, queuedCard, playCard, updateState]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
+  }, [visible, queuedCard, playCard, updateState, onBeforeAutoPlay]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
 
   // Submit bid - submits the player's bid for the round
   const submitBid = useCallback(

@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import styles from '../styles/components/card-row.module.scss'
 import { getSuitSymbol, getSuitColorClass, isLegal } from '../utils/helpers'
 import classNames from 'classnames'
+import { useCardAnimation } from '../context/CardAnimationContext'
 import type { Card, Suit } from '../types'
 
 interface CardRowProps {
@@ -11,9 +12,17 @@ interface CardRowProps {
   playCard: (card: Card) => void
   queuedCard: Card | null
   leadSuit: Suit | null
+  onCardPlayed?: (card: Card, sourceEl: HTMLElement) => void
 }
 
-const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
+const CardRow = ({
+  cards,
+  playCard,
+  queuedCard,
+  leadSuit,
+  onCardPlayed,
+}: CardRowProps) => {
+  const { isCardFlying } = useCardAnimation()
   const [illegalCard, setIllegalCard] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,6 +41,14 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
     if (!legal) {
       setIllegalCard(card.cardId || null)
       return
+    }
+    if (onCardPlayed && card.cardId) {
+      const el = document.querySelector(
+        `[data-card-id="${card.cardId}"]`
+      ) as HTMLElement | null
+      if (el) {
+        onCardPlayed(card, el)
+      }
     }
     playCard(card)
   }
@@ -53,6 +70,7 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
           cards.map((card) => {
             const legal = isLegal({ hand: cards, card, leadSuit })
             const isSelected = !!(queuedCard && queuedCard.cardId === card.cardId)
+            const flying = !!(card.cardId && isCardFlying(card.cardId))
             return (
               <Box
                 component="li"
@@ -60,6 +78,7 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
                   'playing-card': true,
                   [styles.shake]: illegalCard === card.cardId,
                   [styles.selected]: isSelected,
+                  [styles.flying]: flying,
                 })}
                 data-card-id={card.cardId}
                 key={card.cardId}
@@ -82,7 +101,12 @@ const CardRow = ({ cards, playCard, queuedCard, leadSuit }: CardRowProps) => {
                   <span className={styles[getSuitColorClass(card.suit)]}>
                     {getSuitSymbol(card.suit)}
                   </span>
-                  <span className={classNames(styles.card_value, styles[getSuitColorClass(card.suit)])}>
+                  <span
+                    className={classNames(
+                      styles.card_value,
+                      styles[getSuitColorClass(card.suit)]
+                    )}
+                  >
                     {card.value}
                   </span>
                 </div>

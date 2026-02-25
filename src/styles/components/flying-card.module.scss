@@ -1,0 +1,59 @@
+@import '../global/variables';
+
+.flying_card {
+  border-width: 2px;
+  border-radius: 7px;
+  border-style: solid;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.card_content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  align-items: center;
+  border: none;
+  margin: 0;
+  height: 60%;
+  justify-content: space-around;
+
+  @media only screen and (min-width: 768px) {
+    justify-content: flex-start;
+    height: 30%;
+    padding: 10px;
+    flex-direction: row;
+  }
+
+  .card_value {
+    margin: 0;
+    padding: 0;
+    font-size: 3.5vw;
+    line-height: 0.8;
+
+    @media only screen and (min-width: 768px) {
+      margin: 0 0 0 5px;
+    }
+  }
+
+  span:first-child {
+    font-size: 4.2vw;
+    margin-bottom: 0.4vw;
+  }
+}
+
+.suit_black {
+  color: $black;
+
+  :global([data-color-scheme='dark']) & {
+    color: $blue;
+  }
+}
+
+.suit_red {
+  color: $red;
+
+  :global([data-color-scheme='dark']) & {
+    color: $pink;
+  }
+}

@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import classNames from 'classnames'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -6,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent'
 import Grid from '@mui/material/Grid'
 import styles from '../styles/components/players.module.scss'
 import { getSuitSymbol, getSuitColorClass } from '../utils/helpers'
+import { useCardAnimation } from '../context/CardAnimationContext'
 import type { Player, Trick, GameStatus } from '../types'
 
 interface PlayersProps {
@@ -47,6 +49,33 @@ const Players = ({
   winnerModalShowing,
   status,
 }: PlayersProps) => {
+  const { triggerOpponentCardFly, isCardPendingReveal } = useCardAnimation()
+  const prevTrickCardsRef = useRef<Record<string, boolean>>({})
+
+  // Detect new opponent cards and trigger fly animation
+  useLayoutEffect(() => {
+    if (!trick?.cards) {
+      prevTrickCardsRef.current = {}
+      return
+    }
+
+    const currentKeys = Object.keys(trick.cards)
+    const prevKeys = prevTrickCardsRef.current
+
+    for (const playerId of currentKeys) {
+      if (!prevKeys[playerId] && playerId !== thisPlayer) {
+        // New card from an opponent — trigger animation
+        triggerOpponentCardFly(trick.cards[playerId], playerId)
+      }
+    }
+
+    const newPrev: Record<string, boolean> = {}
+    for (const key of currentKeys) {
+      newPrev[key] = true
+    }
+    prevTrickCardsRef.current = newPrev
+  }, [trick?.cards, thisPlayer, triggerOpponentCardFly])
+
   const newPlayers =
     playerOrder.length > 0
       ? playerOrder.map((id) => players[id]).filter(Boolean)
@@ -103,6 +132,7 @@ const Players = ({
                         [styles.dealer]: isDealer,
                         'player-name': true,
                       })}
+                      data-player-name={playerId}
                     >
                       {name}
                     </h2>
@@ -128,23 +158,31 @@ const Players = ({
                     </Box>
                   </Grid>
                 )}
-                {trick && trick.cards && trick.cards[playerId] && (
-                  <Grid size={{ xs: 5, sm: 4 }}>
-                    <div className={styles.card}>
-                      <span
-                        className={styles[getSuitColorClass(trick.cards[playerId].suit)]}
+                {bids && bids[playerId] != null && (
+                  <Grid size={{ xs: 5, sm: 4 }} data-player-trick-slot={playerId}>
+                    {trick && trick.cards && trick.cards[playerId] && (
+                      <div
+                        className={classNames(styles.card, {
+                          [styles.pending_reveal]: isCardPendingReveal(playerId),
+                        })}
                       >
-                        {getSuitSymbol(trick.cards[playerId].suit)}
-                      </span>
-                      <span
-                        className={classNames(
-                          styles.card_value,
-                          styles[getSuitColorClass(trick.cards[playerId].suit)]
-                        )}
-                      >
-                        {trick.cards[playerId].value}
-                      </span>
-                    </div>
+                        <span
+                          className={
+                            styles[getSuitColorClass(trick.cards[playerId].suit)]
+                          }
+                        >
+                          {getSuitSymbol(trick.cards[playerId].suit)}
+                        </span>
+                        <span
+                          className={classNames(
+                            styles.card_value,
+                            styles[getSuitColorClass(trick.cards[playerId].suit)]
+                          )}
+                        >
+                          {trick.cards[playerId].value}
+                        </span>
+                      </div>
+                    )}
                   </Grid>
                 )}
               </Grid>

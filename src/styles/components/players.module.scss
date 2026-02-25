@@ -113,6 +113,14 @@ ul.players {
       font-style: italic;
     }
 
+    // .animated_card {
+    //   aspect-ratio: 3/4;
+    //   height: 100%;
+    //   position: absolute;
+    //   left: 100%;
+    //   top: 0;
+    // }
+
     .card {
       display: flex;
       flex-direction: row;
@@ -120,6 +128,12 @@ ul.players {
       justify-content: center;
       align-items: center;
       border: none;
+      transition: opacity 150ms ease-in-out;
+
+      &.pending_reveal {
+        opacity: 0;
+        transition: none;
+      }
 
       .card_value {
         margin: 0 0 0 5px;
