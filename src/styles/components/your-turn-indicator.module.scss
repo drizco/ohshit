@@ -1,0 +1,37 @@
+@import '../global/variables.scss';
+
+.turnFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  box-shadow: inset 0 0 40px $red;
+  border-width: 2px;
+  border-style: solid;
+  border-color: $red;
+  animation: flashFade 800ms ease-out forwards;
+
+  :global([data-color-scheme='dark']) & {
+    border-color: $pink;
+    box-shadow: inset 0 0 40px $pink;
+  }
+}
+
+@keyframes flashFade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turnFlash {
+    animation: none;
+    opacity: 0;
+  }
+}

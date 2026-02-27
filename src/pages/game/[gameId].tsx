@@ -1,4 +1,4 @@
-import { useEffect, useRef, useContext } from 'react'
+import { useEffect, useRef, useContext, useMemo } from 'react'
 import { useTimer } from '../../hooks/useTimer'
 import { useRouter } from 'next/router'
 import type { GetServerSidePropsContext } from 'next'
@@ -218,6 +218,11 @@ function Game({ gameId, isMobile }: GameProps) {
 
   const timerShowMax = timeLimit && timeLimit > 10 ? 10 : 5
 
+  const isYourTurn = useMemo(
+    () => playerId === currentPlayer && (status === 'play' || status === 'bid'),
+    [playerId, currentPlayer, status]
+  )
+
   // Score is now under players
   const score: Record<string, number> = {}
   if (players) {
@@ -330,7 +335,10 @@ function Game({ gameId, isMobile }: GameProps) {
           status={status}
         />
       </div>
-      <YourTurnIndicator isYourTurn={playerId === currentPlayer && status === 'play'} />
+      <YourTurnIndicator
+        isYourTurn={isYourTurn}
+        turnKey={`${status}-${currentPlayerIndex}-${trickIndex}`}
+      />
       <CardRow
         cards={hand}
         playCard={playCard}
