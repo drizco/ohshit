@@ -143,7 +143,6 @@ describe('useGameActions Hook', () => {
         await result.current.playCard(mockCard)
       })
 
-      expect(mockSetLoading).toHaveBeenCalledWith(true)
       expect(mockPlayCardApi).toHaveBeenCalledWith({
         playerId: 'p1',
         card: mockCard,
@@ -151,7 +150,6 @@ describe('useGameActions Hook', () => {
         roundId: 'round-1',
         trickId: 1,
       })
-      expect(mockSetLoading).toHaveBeenCalledWith(false)
     })
 
     test('does not play or queue card during bid phase', async () => {
@@ -335,7 +333,6 @@ describe('useGameActions Hook', () => {
       })
 
       expect(mockPlayCardApi).toHaveBeenCalled()
-      expect(mockSetLoading).toHaveBeenCalledWith(false)
     })
 
     test('handles errors correctly', async () => {
@@ -382,7 +379,6 @@ describe('useGameActions Hook', () => {
         await result.current.playCard(mockCard)
       })
 
-      expect(mockSetLoading).toHaveBeenCalledWith(false)
       expect(mockSetError).toHaveBeenCalledWith('Failed to play card')
     })
   })

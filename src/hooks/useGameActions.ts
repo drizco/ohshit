@@ -104,20 +104,17 @@ const useGameActions = ({
           trickId: trick.trickId,
         }
 
-        setLoading(true)
         const response = await playCardApi(body)
         if (!response.ok) {
           const message = await parseApiError(response, 'Failed to play card')
           setError(message)
         }
-        setLoading(false)
       } catch {
-        setLoading(false)
         setError('Failed to play card')
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setLoading, setError, tricks, trickIndex, game, playerId, updateState] // autoPlayTimeoutRef is a ref
+    [setError, tricks, trickIndex, game, playerId, updateState] // autoPlayTimeoutRef is a ref
   )
 
   // Your turn handler - auto-plays queued card when it's player's turn
