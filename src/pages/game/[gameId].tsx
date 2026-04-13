@@ -333,6 +333,8 @@ function Game({ gameId, isMobile }: GameProps) {
           timeRemaining={timeRemaining}
           winnerModalShowing={Boolean(lastWinner)}
           status={status}
+          numCards={numCards}
+          dirty={game?.settings?.dirty ?? false}
         />
       </div>
       <YourTurnIndicator

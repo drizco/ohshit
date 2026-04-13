@@ -3,7 +3,11 @@
 ul.players {
   list-style: none;
   padding: 0;
-  margin-bottom: 175px;
+  margin-bottom: calc(44vw + env(safe-area-inset-bottom, 0px));
+
+  @media only screen and (min-width: 768px) {
+    margin-bottom: 175px;
+  }
 
   * {
     transition: all 100ms ease-in-out;
@@ -130,11 +134,19 @@ ul.players {
       .card_value {
         margin: 0 0 0 5px;
         font-size: 3.5vw;
+
+        @media (max-width: 767px) {
+          font-size: 5vw;
+        }
       }
 
       span {
         font-size: 4.2vw;
         line-height: 0;
+
+        @media (max-width: 767px) {
+          font-size: 6vw;
+        }
       }
 
       span:first-child {
@@ -200,25 +212,18 @@ ul.players {
   }
 }
 
-.toggle_results {
-  padding-left: 0;
-  padding-right: 0;
-  text-align: center;
-  width: 100px;
-  background-color: transparent !important;
-  border: none;
-  font-size: 3rem;
-  color: inherit;
+.bids_so_far {
+  margin-bottom: 1.25rem;
 }
 
-.toggle_button {
-  width: 60px;
-  height: 60px;
-  font-size: 2rem;
+.bid_controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.bid_button {
-  height: 60px;
-  font-size: 2rem;
-  width: 100px;
+.dirty_note {
+  display: block;
+  margin-top: 0.25rem;
 }
