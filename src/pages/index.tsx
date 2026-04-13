@@ -189,7 +189,12 @@ const CreateGame = () => {
           </button>
         </div>
 
-        <div id="panel-create" role="tabpanel" aria-labelledby="tab-create" hidden={!create}>
+        <div
+          id="panel-create"
+          role="tabpanel"
+          aria-labelledby="tab-create"
+          hidden={!create}
+        >
           <form
             className={styles.form}
             onSubmit={(e) => {
@@ -221,6 +226,8 @@ const CreateGame = () => {
               label="Number of cards"
               inputId="num-cards"
               value={numCards}
+              decrementAriaLabel="Decrease number of cards"
+              incrementAriaLabel="Increase number of cards"
               onDecrement={() => handleNumCards(false)}
               onIncrement={() => handleNumCards(true)}
             />
@@ -243,7 +250,11 @@ const CreateGame = () => {
             <div className={styles.checkboxes}>
               <FormControlLabel
                 control={
-                  <Checkbox id="bid-checkbox" checked={dirty} onChange={() => setDirty(!dirty)} />
+                  <Checkbox
+                    id="bid-checkbox"
+                    checked={dirty}
+                    onChange={() => setDirty(!dirty)}
+                  />
                 }
                 label="Dirty bids only"
               />

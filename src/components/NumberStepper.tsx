@@ -8,6 +8,8 @@ interface NumberStepperProps {
   label?: string
   inputId?: string
   inputAriaLabel?: string
+  decrementAriaLabel?: string
+  incrementAriaLabel?: string
 }
 
 const NumberStepper = ({
@@ -17,6 +19,8 @@ const NumberStepper = ({
   label,
   inputId,
   inputAriaLabel,
+  decrementAriaLabel,
+  incrementAriaLabel,
 }: NumberStepperProps) => (
   <div className={styles.stepper}>
     {label && (
@@ -25,7 +29,13 @@ const NumberStepper = ({
       </label>
     )}
     <div className={styles.controls}>
-      <Button variant="outlined" color="inherit" className={styles.btn} onClick={onDecrement} aria-label={`Decrease ${label ?? 'value'}`}>
+      <Button
+        variant="outlined"
+        color="inherit"
+        className={styles.btn}
+        onClick={onDecrement}
+        aria-label={decrementAriaLabel ?? `Decrease ${label ?? 'value'}`}
+      >
         -
       </Button>
       <input
@@ -36,7 +46,13 @@ const NumberStepper = ({
         className={styles.value}
         aria-label={inputAriaLabel ?? label ?? 'value'}
       />
-      <Button variant="outlined" color="inherit" className={styles.btn} onClick={onIncrement} aria-label={`Increase ${label ?? 'value'}`}>
+      <Button
+        variant="outlined"
+        color="inherit"
+        className={styles.btn}
+        onClick={onIncrement}
+        aria-label={incrementAriaLabel ?? `Increase ${label ?? 'value'}`}
+      >
         +
       </Button>
     </div>

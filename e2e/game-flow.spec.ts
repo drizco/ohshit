@@ -10,7 +10,7 @@ async function createGame(page: Page, playerName: string, numCards = 1): Promise
   await page.goto('/')
 
   // Reduce number of cards from default (5) to the desired count
-  const decBtn = page.getByRole('button', { name: '-' })
+  const decBtn = page.getByRole('button', { name: 'Decrease number of cards' })
   for (let i = 0; i < 5 - numCards; i++) {
     await decBtn.click()
   }
@@ -57,14 +57,14 @@ async function playRound(pages: Page[], numTricks: number): Promise<void> {
   await Promise.all(
     pages.map((p) =>
       p
-        .getByRole('button', { name: 'BID', exact: true })
+        .getByRole('button', { name: 'Confirm bid' })
         .waitFor({ timeout: 20000 })
         .then(async () => {
           const bidNum = Math.floor(Math.random() * (numTricks + 1))
           for (let i = 0; i < bidNum; i++) {
             await p.getByRole('button', { name: 'Increase bid' }).click()
           }
-          await p.getByRole('button', { name: 'BID', exact: true }).click()
+          await p.getByRole('button', { name: 'Confirm bid' }).click()
         })
     )
   )
@@ -73,7 +73,7 @@ async function playRound(pages: Page[], numTricks: number): Promise<void> {
   await Promise.all(
     pages.map((p) =>
       p
-        .getByRole('button', { name: 'BID', exact: true })
+        .getByRole('button', { name: 'Confirm bid' })
         .waitFor({ state: 'hidden', timeout: 10000 })
     )
   )
@@ -122,7 +122,7 @@ async function createGameWithTimer(
   await page.goto('/')
 
   // Reduce cards to 1 (minimum)
-  const decBtn = page.getByRole('button', { name: '-' })
+  const decBtn = page.getByRole('button', { name: 'Decrease number of cards' })
   for (let i = 0; i < 4; i++) await decBtn.click()
 
   // Set time limit via MUI Select

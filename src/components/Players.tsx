@@ -235,6 +235,8 @@ const Players = ({
                       value={bid}
                       inputId="bid"
                       inputAriaLabel="Current bid"
+                      decrementAriaLabel="Decrease bid"
+                      incrementAriaLabel="Increase bid"
                       onDecrement={() => handleToggle(false)}
                       onIncrement={() => handleToggle(true)}
                     />
