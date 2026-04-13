@@ -24,13 +24,13 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
     if (!el || animatedRef.current) return
     animatedRef.current = true
 
-    // Measure the natural size of the card (based on CSS vw units)
-    const naturalWidth = el.offsetWidth
-    const naturalHeight = el.offsetHeight
-
-    // Calculate scales to fit the source/target heights
-    const startScale = sourceRect.height / naturalHeight
-    const endScale = targetRect.height / naturalHeight
+    // Both types are explicitly sized: self to the source card, opponent to the target
+    // slot height with a 2:3 aspect ratio. startScale shrinks opponent cards to match
+    // the source name label at the beginning of the animation.
+    const naturalWidth = type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)
+    const naturalHeight = type === 'self' ? sourceRect.height : targetRect.height
+    const startScale = type === 'self' ? 1 : sourceRect.height / naturalHeight
+    const endScale = type === 'self' ? targetRect.height / naturalHeight : 1
 
     // Calculate centered positions
     const startLeft = sourceRect.left + sourceRect.width / 2 - naturalWidth / 2
@@ -111,9 +111,13 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
         position: 'fixed',
         left: sourceRect.left,
         top: sourceRect.top,
+        width: type === 'self' ? sourceRect.width : targetRect.height * (2 / 3),
+        height: type === 'self' ? sourceRect.height : targetRect.height,
         opacity: 0,
         zIndex: 999999,
-      }}
+        '--fly-symbol-size': `${(type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)) * 0.5}px`,
+        '--fly-value-size': `${(type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)) * 0.44}px`,
+      } as React.CSSProperties}
     >
       <div className={styles.card_content}>
         <span className={styles[suitColorClass]}>{getSuitSymbol(card.suit)}</span>

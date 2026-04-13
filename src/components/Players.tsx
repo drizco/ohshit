@@ -4,7 +4,10 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
+import Typography from '@mui/material/Typography'
+import NumberStepper from './NumberStepper'
 import styles from '../styles/components/players.module.scss'
 import { getSuitSymbol, getSuitColorClass } from '../utils/helpers'
 import { useCardAnimation } from '../context/CardAnimationContext'
@@ -28,6 +31,8 @@ interface PlayersProps {
   timeRemaining: number | null
   winnerModalShowing: boolean
   status: GameStatus | null
+  numCards: number
+  dirty: boolean
 }
 
 const Players = ({
@@ -48,6 +53,8 @@ const Players = ({
   timeRemaining,
   winnerModalShowing,
   status,
+  numCards,
+  dirty,
 }: PlayersProps) => {
   const { triggerOpponentCardFly, isCardPendingReveal } = useCardAnimation()
   const prevTrickCardsRef = useRef<Record<string, boolean>>({})
@@ -194,66 +201,53 @@ const Players = ({
                   currentPlayer === playerId
                 }
                 slotProps={{ transition: { onExited: afterBid } }}
+                fullWidth
+                maxWidth="xs"
               >
+                <DialogTitle>
+                  <Typography variant="h6" component="span" sx={{ fontWeight: 'bold' }}>
+                    Place your bid
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.7 }}>
+                    {`How many of the ${numCards} trick${numCards !== 1 ? 's' : ''} will you win?`}
+                    {dirty && (
+                      <span className={styles.dirty_note}> Dirty bids — the total cannot equal {numCards}.</span>
+                    )}
+                  </Typography>
+                </DialogTitle>
                 <DialogContent>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <h2>Bid</h2>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                    <div>
-                      {newPlayers &&
-                        newPlayers
-                          .filter((p) => !!bids && bids[p.playerId] != null)
-                          .map(({ playerId: pid, name: pname }) => (
-                            <p className={styles.bid_list_item} key={pid}>
-                              {`${pname}: ${bids?.[pid]}`}
-                            </p>
-                          ))}
+                  {newPlayers && newPlayers.filter((p) => !!bids && bids[p.playerId] != null).length > 0 && (
+                    <div className={styles.bids_so_far}>
+                      <Typography variant="caption" sx={{ opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Bids so far
+                      </Typography>
+                      {newPlayers
+                        .filter((p) => !!bids && bids[p.playerId] != null)
+                        .map(({ playerId: pid, name: pname }) => (
+                          <p className={styles.bid_list_item} key={pid}>
+                            {`${pname}: ${bids?.[pid]}`}
+                          </p>
+                        ))}
                     </div>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <div>
-                      <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          className={styles.toggle_button}
-                          aria-label="Decrease bid"
-                          onClick={(e) => handleToggle(false, e.currentTarget.value)}
-                        >
-                          -
-                        </Button>
-                        <input
-                          type="text"
-                          value={bid}
-                          name="bid"
-                          id="bid"
-                          aria-label="Current bid"
-                          className={classNames(styles.toggle_results, 'main-text')}
-                          readOnly
-                        />
-                        <Button
-                          variant="contained"
-                          color="success"
-                          className={styles.toggle_button}
-                          aria-label="Increase bid"
-                          onClick={(e) => handleToggle(true, e.currentTarget.value)}
-                        >
-                          +
-                        </Button>
-                      </Box>
-                    </div>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+                  )}
+                  <div className={styles.bid_controls}>
+                    <NumberStepper
+                      value={bid}
+                      inputId="bid"
+                      inputAriaLabel="Current bid"
+                      decrementAriaLabel="Decrease bid"
+                      incrementAriaLabel="Increase bid"
+                      onDecrement={() => handleToggle(false)}
+                      onIncrement={() => handleToggle(true)}
+                    />
                     <Button
                       variant="contained"
                       color="primary"
-                      className={styles.bid_button}
                       onClick={submitBid}
                     >
-                      BID
+                      Confirm bid
                     </Button>
-                  </Box>
+                  </div>
                 </DialogContent>
               </Dialog>
             </li>

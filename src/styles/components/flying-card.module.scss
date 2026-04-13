@@ -28,7 +28,7 @@
   .card_value {
     margin: 0;
     padding: 0;
-    font-size: 3.5vw;
+    font-size: var(--fly-value-size, 3.5vw);
     line-height: 0.8;
 
     @media only screen and (min-width: 768px) {
@@ -37,7 +37,7 @@
   }
 
   span:first-child {
-    font-size: 4.2vw;
+    font-size: var(--fly-symbol-size, 4.2vw);
     margin-bottom: 0.4vw;
   }
 }

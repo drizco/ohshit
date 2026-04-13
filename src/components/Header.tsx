@@ -51,7 +51,7 @@ const Header = () => {
 
   return (
     <>
-      <header id={styles.header}>
+      <header className={styles.header}>
         <Link href="/" className={styles.img_container}>
           <img src="/images/poop.png" alt="Oh Shit Logo" />
         </Link>

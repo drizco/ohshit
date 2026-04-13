@@ -260,9 +260,9 @@ function Game({ gameId, isMobile }: GameProps) {
           <Grid size={4}>
             {name && (
               <Typography
-                variant="h5"
+                variant="h6"
                 component="h2"
-                sx={{ textDecoration: 'underline', fontWeight: 'bold' }}
+                sx={{ textDecoration: 'underline', fontWeight: 'bold', fontSize: { xs: '4vw', sm: '1.5vw' } }}
               >
                 {name}
               </Typography>
@@ -277,14 +277,20 @@ function Game({ gameId, isMobile }: GameProps) {
               </Box>
             )}
             {status && (status === 'bid' || status === 'play' || status === 'over') && (
-              <>
-                <p className={styles.game_info}>{`ROUND: ${roundNum} of ${numRounds}`}</p>
-                <p className={styles.game_info}>{`TOTAL TRICKS: ${numCards}`}</p>
-                <p className={styles.game_info}>{`TRICKS AVAILABLE: ${getAvailableTricks({
-                  numCards,
-                  bids,
-                })}`}</p>
-              </>
+              <div className={styles.game_stats}>
+                <div className={styles.stat}>
+                  <span className={styles.stat_label}>ROUND</span>
+                  <span className={styles.stat_value}>{`${roundNum} of ${numRounds}`}</span>
+                </div>
+                <div className={styles.stat}>
+                  <span className={styles.stat_label}>TRICKS</span>
+                  <span className={styles.stat_value}>{numCards}</span>
+                </div>
+                <div className={styles.stat}>
+                  <span className={styles.stat_label}>BID DIFF</span>
+                  <span className={styles.stat_value}>{getAvailableTricks({ numCards, bids })}</span>
+                </div>
+              </div>
             )}
           </Grid>
           <Grid size={2} className={styles.lead_trump_container}>
@@ -333,6 +339,8 @@ function Game({ gameId, isMobile }: GameProps) {
           timeRemaining={timeRemaining}
           winnerModalShowing={Boolean(lastWinner)}
           status={status}
+          numCards={numCards}
+          dirty={game?.settings?.dirty ?? false}
         />
       </div>
       <YourTurnIndicator
@@ -344,6 +352,7 @@ function Game({ gameId, isMobile }: GameProps) {
         playCard={playCard}
         queuedCard={queuedCard}
         leadSuit={leadSuit || null}
+        isMobile={isMobile}
         onCardPlayed={(card, sourceEl) => {
           if (currentPlayer === playerId) {
             triggerCardFly(card, sourceEl, playerId)

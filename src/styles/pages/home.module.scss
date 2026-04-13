@@ -1,86 +1,160 @@
 @import '../global/variables';
-#home {
-  .game_code {
-    margin: 1rem;
-  }
 
-  .suit_red {
-    color: $red;
+.home {
+  display: flex;
+  justify-content: center;
+  padding: 0 5vw;
 
-    :global([data-color-scheme='dark']) & {
-      color: $pink;
-    }
-  }
-
-  .enter_game_button {
-    text-decoration: none;
-    font-family: $font-bold;
-    font-size: 25px;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  .copied {
-    position: absolute;
-    bottom: -35px;
-    text-align: center;
-    left: 0;
-    right: 0;
-    margin: auto;
-  }
-
-  .num_cards {
-    text-align: center;
-    max-width: 50px;
-  }
-
-  input {
-    border: none;
-    &::placeholder {
-      font-style: italic;
-    }
-  }
-
-  .tab_row {
-    display: flex;
-    width: 100%;
-  }
-
-  .copy_button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    color: $black;
-
-    :global([data-color-scheme='dark']) & {
-      color: $white;
-    }
-  }
-
-  .num_cards_label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  .toggle {
-    display: block;
-    width: 100%;
-    font-size: 1.5rem;
-    font-family: $font-bold;
-    text-align: center;
-    background: transparent;
-    border: none;
+  @media only screen and (min-width: 768px) {
     padding: 0;
-    cursor: pointer;
-    color: inherit;
+  }
+}
 
-    &.selected {
-      background-color: $black;
-      color: $white;
+// Form wrapper — centered column, max width for readability
+.form_wrap {
+  width: 100%;
+  max-width: 480px;
+  padding-top: 2rem;
+}
+
+// Tab toggle row
+.tab_row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+
+  @media only screen and (min-width: 768px) {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+}
+
+.toggle {
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+  font-family: $font-bold;
+  text-align: center;
+  background: transparent;
+  border: 2px solid $black;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.45;
+  transition: opacity 100ms ease-in-out, background-color 100ms ease-in-out;
+
+  :global([data-color-scheme='dark']) & {
+    border-color: $white;
+  }
+
+  &.selected {
+    background-color: $black;
+    color: $white;
+    opacity: 1;
+
+    :global([data-color-scheme='dark']) & {
+      background-color: $white;
+      color: $black;
     }
+  }
+
+  &:not(.selected):hover {
+    opacity: 0.75;
+  }
+
+  @media only screen and (min-width: 768px) {
+    font-size: 1.1rem;
+  }
+}
+
+// Form — vertical stack with consistent gap
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// Checkboxes
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// Submit button row
+.submit_row {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+// Post-creation screen
+.game_created {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.game_code {
+  font-size: 2.5rem;
+  font-family: $font-bold;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.suit_red {
+  color: $red;
+
+  :global([data-color-scheme='dark']) & {
+    color: $pink;
+  }
+}
+
+.share_text {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.share_row {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+}
+
+.copied {
+  position: absolute;
+  bottom: -1.5rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.copy_button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: $black;
+
+  :global([data-color-scheme='dark']) & {
+    color: $white;
+  }
+}
+
+.enter_game_button {
+  text-decoration: none;
+  font-family: $font-bold;
+  font-size: 1.25rem;
+  margin-top: 0.5rem;
+
+  &:hover {
+    text-decoration: underline;
   }
 }

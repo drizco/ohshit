@@ -30,16 +30,16 @@
     > div {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
 
       .game_info {
         margin: 0;
         padding: 0;
         font-family: $font-bold;
-        font-size: 2.9vw;
+        font-size: 2.8vw;
 
         @media only screen and (min-width: 768px) {
-          font-size: 1.5vw;
+          font-size: 1.2vw;
         }
       }
     }
@@ -48,11 +48,48 @@
       margin-bottom: 2vw;
     }
 
+    .game_stats {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5vw;
+
+      @media only screen and (min-width: 768px) {
+        gap: 0.3vw;
+      }
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.1;
+    }
+
+    .stat_label {
+      font-family: $font-bold;
+      font-size: 2vw;
+      opacity: 0.6;
+
+      @media only screen and (min-width: 768px) {
+        font-size: 0.85vw;
+      }
+    }
+
+    .stat_value {
+      font-family: $font-bold;
+      font-size: 3vw;
+
+      @media only screen and (min-width: 768px) {
+        font-size: 1.2vw;
+      }
+    }
+
     .lead_trump_container {
       align-items: center;
+      justify-content: flex-start;
 
       span {
-        font-size: 4.2vw;
+        font-size: 3.5vw;
         line-height: 0.8;
       }
     }

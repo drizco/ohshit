@@ -1,15 +1,18 @@
 @import '../global/variables.scss';
 
-#header {
+.header {
   position: relative;
   z-index: 3;
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  position: relative;
 
   .img_container {
-    max-width: 4vw;
+    max-width: 9vw;
+
+    @media only screen and (min-width: 768px) {
+      max-width: 4vw;
+    }
 
     img {
       width: 100%;
@@ -17,41 +20,12 @@
   }
 
   h1 {
-    margin: 10px 2vw;
-    font-size: 5vw;
+    margin: 10px 3vw;
+    font-size: 7vw;
 
     @media only screen and (min-width: 768px) {
       font-size: 3vw;
-    }
-  }
-
-  .rules {
-    margin-left: auto;
-    display: flex;
-    cursor: pointer;
-
-    .icon {
-      width: 2vw;
-      margin-right: 1vw;
-    }
-
-    button {
-      background: transparent;
-      border: none;
-      margin: 0;
-      padding: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-
-    h4 {
-      padding: 4px;
-      margin: 0;
-      background-color: $black;
-      font-style: italic;
-      font-family: $font-bold;
-      cursor: pointer;
+      margin: 10px 2vw;
     }
   }
 }

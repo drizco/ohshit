@@ -2,10 +2,9 @@ import { useState, useRef, useContext, useEffect } from 'react'
 import type { ChangeEvent, MouseEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
-import Container from '@mui/material/Container'
+import NumberStepper from '../components/NumberStepper'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -116,254 +115,200 @@ const CreateGame = () => {
     setCopySuccess('Copied!')
   }
 
+  if (gameId) {
+    return (
+      <div className={styles.home}>
+        <div className={styles.game_created}>
+          <h2>Game Code</h2>
+          <h2 className={classnames(styles.suit_red, styles.game_code)}>{gameId}</h2>
+          <p className={styles.share_text}>Share this link to invite other players</p>
+          <div className={styles.share_row}>
+            <OutlinedInput
+              fullWidth
+              value={url}
+              readOnly
+              inputRef={gameUrlRef}
+              endAdornment={
+                <InputAdornment position="end">
+                  <button
+                    type="button"
+                    onClick={copyToClipboard}
+                    aria-label="Copy game URL"
+                    className={styles.copy_button}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: 18 }} />
+                  </button>
+                </InputAdornment>
+              }
+            />
+            <span className={styles.copied}>{copySuccess}</span>
+          </div>
+          <Link href={`/game/${gameId}`} className={styles.enter_game_button}>
+            ENTER GAME
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <Container id={styles.home}>
-      {gameId ? (
-        <>
-          <Box sx={{ display: 'flex', justifyContent: 'center', m: 4 }}>
-            <Box sx={{ width: { xs: '83.33%', sm: '58.33%' } }}>
-              <h2>Game Code</h2>
-              <h2 className={classnames(styles.suit_red, styles.game_code)}>{gameId}</h2>
-            </Box>
-          </Box>
-          <Box sx={{ textAlign: 'center', m: 4 }}>
-            <h3>Share this link to invite other players</h3>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-            <Box sx={{ width: { xs: '83.33%', sm: '58.33%' } }}>
-              <OutlinedInput
-                fullWidth
-                value={url}
-                readOnly
-                inputRef={gameUrlRef}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <button
-                      type="button"
-                      onClick={copyToClipboard}
-                      aria-label="Copy game URL"
-                      className={styles.copy_button}
-                    >
-                      <ContentCopyIcon sx={{ fontSize: 18 }} />
-                    </button>
-                  </InputAdornment>
+    <div className={styles.home}>
+      <div className={styles.form_wrap}>
+        <div
+          role="tablist"
+          aria-label="Game options"
+          className={styles.tab_row}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight') setCreate(false)
+            else if (e.key === 'ArrowLeft') setCreate(true)
+          }}
+        >
+          <button
+            role="tab"
+            type="button"
+            id="tab-create"
+            aria-selected={create}
+            aria-controls="panel-create"
+            tabIndex={create ? 0 : -1}
+            className={classnames(styles.toggle, { [styles.selected]: create })}
+            onClick={() => setCreate(true)}
+          >
+            create a new game
+          </button>
+          <button
+            role="tab"
+            type="button"
+            id="tab-join"
+            aria-selected={!create}
+            aria-controls="panel-join"
+            tabIndex={create ? -1 : 0}
+            className={classnames(styles.toggle, { [styles.selected]: !create })}
+            onClick={() => setCreate(false)}
+          >
+            join an existing game
+          </button>
+        </div>
+
+        <div
+          id="panel-create"
+          role="tabpanel"
+          aria-labelledby="tab-create"
+          hidden={!create}
+        >
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault()
+              initializeGame()
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Game Name"
+              id="game"
+              name="game"
+              value={game}
+              onChange={handleChange}
+              placeholder="optional"
+              autoComplete="off"
+            />
+            <TextField
+              key={isClient ? 'client' : 'server'}
+              fullWidth
+              label="Player Name"
+              id="name"
+              name="name"
+              autoComplete="nickname"
+              value={name}
+              onChange={handleChange}
+            />
+            <NumberStepper
+              label="Number of cards"
+              inputId="num-cards"
+              value={numCards}
+              decrementAriaLabel="Decrease number of cards"
+              incrementAriaLabel="Increase number of cards"
+              onDecrement={() => handleNumCards(false)}
+              onIncrement={() => handleNumCards(true)}
+            />
+            <FormControl fullWidth>
+              <InputLabel id="time-limit-label">Time limit</InputLabel>
+              <Select
+                labelId="time-limit-label"
+                id="time-limit"
+                value={timeLimit}
+                label="Time limit"
+                onChange={(e) => setTimeLimit(String(e.target.value))}
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="90">90 seconds</MenuItem>
+                <MenuItem value="60">60 seconds</MenuItem>
+                <MenuItem value="30">30 seconds</MenuItem>
+                <MenuItem value="10">10 seconds</MenuItem>
+              </Select>
+            </FormControl>
+            <div className={styles.checkboxes}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="bid-checkbox"
+                    checked={dirty}
+                    onChange={() => setDirty(!dirty)}
+                  />
                 }
+                label="Dirty bids only"
               />
-              <h6 className={styles.copied}>{copySuccess}</h6>
-            </Box>
-          </Box>
-          <Box sx={{ textAlign: 'center', m: 5 }}>
-            <Link href={`/game/${gameId}`} className={styles.enter_game_button}>
-              ENTER GAME
-            </Link>
-          </Box>
-        </>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Box sx={{ width: { xs: '100%', sm: '75%' } }}>
-            <Box sx={{ my: 5 }}>
-              <div
-                role="tablist"
-                aria-label="Game options"
-                className={styles.tab_row}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowRight') setCreate(false)
-                  else if (e.key === 'ArrowLeft') setCreate(true)
-                }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <button
-                    role="tab"
-                    type="button"
-                    id="tab-create"
-                    aria-selected={create}
-                    aria-controls="panel-create"
-                    tabIndex={create ? 0 : -1}
-                    className={classnames({
-                      [styles.toggle]: true,
-                      [styles.selected]: create,
-                    })}
-                    onClick={() => setCreate(true)}
-                  >
-                    create a new game
-                  </button>
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                  <button
-                    role="tab"
-                    type="button"
-                    id="tab-join"
-                    aria-selected={!create}
-                    aria-controls="panel-join"
-                    tabIndex={create ? -1 : 0}
-                    className={classnames({
-                      [styles.toggle]: true,
-                      [styles.selected]: !create,
-                    })}
-                    onClick={() => setCreate(false)}
-                  >
-                    join an existing game
-                  </button>
-                </Box>
-              </div>
-            </Box>
-          </Box>
-          <Box sx={{ width: { xs: '83.33%', sm: '58.33%' } }}>
-            <div
-              id="panel-create"
-              role="tabpanel"
-              aria-labelledby="tab-create"
-              hidden={!create}
-            >
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  initializeGame()
-                }}
-              >
-                <TextField
-                  fullWidth
-                  label="Game Name"
-                  id="game"
-                  name="game"
-                  value={game}
-                  onChange={handleChange}
-                  placeholder="optional"
-                  autoComplete="off"
-                  sx={{ mb: 2 }}
-                />
-                <TextField
-                  key={isClient ? 'client' : 'server'}
-                  fullWidth
-                  label="Player Name"
-                  id="name"
-                  name="name"
-                  autoComplete="nickname"
-                  value={name}
-                  onChange={handleChange}
-                  sx={{ mb: 2 }}
-                />
-
-                <Box sx={{ mb: 2 }}>
-                  <label htmlFor="num-cards" className={styles.num_cards_label}>
-                    Number of cards
-                  </label>
-                  <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => handleNumCards(false)}
-                    >
-                      -
-                    </Button>
-                    <input
-                      type="text"
-                      value={numCards}
-                      name="num-cards"
-                      id="num-cards"
-                      className={styles.num_cards}
-                      readOnly
-                    />
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleNumCards(true)}
-                    >
-                      +
-                    </Button>
-                  </Box>
-                </Box>
-
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel id="time-limit-label">Time limit</InputLabel>
-                  <Select
-                    labelId="time-limit-label"
-                    id="time-limit"
-                    value={timeLimit}
-                    label="Time limit"
-                    onChange={(e) => setTimeLimit(String(e.target.value))}
-                  >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="90">90 seconds</MenuItem>
-                    <MenuItem value="60">60 seconds</MenuItem>
-                    <MenuItem value="30">30 seconds</MenuItem>
-                    <MenuItem value="10">10 seconds</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="bid-checkbox"
-                      checked={dirty}
-                      onChange={() => setDirty(!dirty)}
-                    />
-                  }
-                  label="Dirty bids only"
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="bid-point-checkbox"
-                      checked={bidPoints}
-                      onChange={() => setBidPoints(!bidPoints)}
-                    />
-                  }
-                  label="Earn points for bad bids"
-                />
-
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={!name}
-                    color="primary"
-                  >
-                    NEW GAME
-                  </Button>
-                </Box>
-              </form>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="bid-point-checkbox"
+                    checked={bidPoints}
+                    onChange={() => setBidPoints(!bidPoints)}
+                  />
+                }
+                label="Earn points for bad bids"
+              />
             </div>
-            <div
-              id="panel-join"
-              role="tabpanel"
-              aria-labelledby="tab-join"
-              hidden={create}
-            >
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  joinGame()
-                }}
-              >
-                <TextField
-                  fullWidth
-                  label="Game Code"
-                  id="game-code"
-                  name="game-code"
-                  value={gameCode}
-                  onChange={handleChange}
-                  placeholder="Jb2X"
-                  autoComplete="off"
-                  sx={{ mb: 2 }}
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={gameCode.length < 4}
-                    color="primary"
-                  >
-                    JOIN GAME
-                  </Button>
-                </Box>
-              </form>
+            <div className={styles.submit_row}>
+              <Button type="submit" variant="contained" disabled={!name} color="primary">
+                NEW GAME
+              </Button>
             </div>
-          </Box>
-        </Box>
-      )}
-    </Container>
+          </form>
+        </div>
+
+        <div id="panel-join" role="tabpanel" aria-labelledby="tab-join" hidden={create}>
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault()
+              joinGame()
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Game Code"
+              id="game-code"
+              name="game-code"
+              value={gameCode}
+              onChange={handleChange}
+              placeholder="Jb2X"
+              autoComplete="off"
+            />
+            <div className={styles.submit_row}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={gameCode.length < 4}
+                color="primary"
+              >
+                JOIN GAME
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   )
 }
 
