@@ -10,6 +10,10 @@ export default function Document(props: DocumentHeadTagsProps) {
     <Html lang="en">
       <Head>
         <DocumentHeadTags {...props} />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </Head>
       <body>
         <Main />
