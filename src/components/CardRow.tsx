@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Box from '@mui/material/Box'
 
 import styles from '../styles/components/card-row.module.scss'
 import { getSuitSymbol, getSuitColorClass, isLegal } from '../utils/helpers'
@@ -7,11 +6,14 @@ import classNames from 'classnames'
 import { useCardAnimation } from '../context/CardAnimationContext'
 import type { Card, Suit } from '../types'
 
+const MOBILE_MAX_ROW = 7
+
 interface CardRowProps {
   cards: Card[]
   playCard: (card: Card) => void
   queuedCard: Card | null
   leadSuit: Suit | null
+  isMobile?: boolean
   onCardPlayed?: (card: Card, sourceEl: HTMLElement) => void
 }
 
@@ -20,6 +22,7 @@ const CardRow = ({
   playCard,
   queuedCard,
   leadSuit,
+  isMobile,
   onCardPlayed,
 }: CardRowProps) => {
   const { isCardFlying } = useCardAnimation()
@@ -33,8 +36,6 @@ const CardRow = ({
       clearTimeout(timer)
     }
   }, [illegalCard])
-
-  const cardWidth = 100 / (cards.length || 1)
 
   const handleCardAction = (card: Card) => {
     const legal = isLegal({ hand: cards, card, leadSuit })
@@ -53,79 +54,71 @@ const CardRow = ({
     playCard(card)
   }
 
-  return (
-    <>
-      <Box
-        component="ul"
-        className={styles.card_row}
-        aria-label="Your hand — select a card to play"
-        sx={{
-          '@media only screen and (max-width: 768px)': {
-            height: `${cardWidth * 1.5 * 0.6}vw`,
-            maxHeight: `${36 * 0.6}vw`,
-          },
-        }}
+  const isTwoRow = !!isMobile && cards.length > MOBILE_MAX_ROW
+  const topRow = isTwoRow ? cards.slice(0, cards.length - MOBILE_MAX_ROW) : []
+  const bottomRow = isTwoRow ? cards.slice(cards.length - MOBILE_MAX_ROW) : cards
+  const mobileCardVw = isTwoRow
+    ? 100 / MOBILE_MAX_ROW
+    : Math.min(100 / (cards.length || 1), 22)
+
+  const renderCard = (card: Card) => {
+    const legal = isLegal({ hand: cards, card, leadSuit })
+    const isSelected = !!(queuedCard && queuedCard.cardId === card.cardId)
+    const flying = !!(card.cardId && isCardFlying(card.cardId))
+    return (
+      <li
+        className={classNames({
+          'playing-card': true,
+          [styles.shake]: illegalCard === card.cardId,
+          [styles.selected]: isSelected,
+          [styles.flying]: flying,
+        })}
+        data-card-id={card.cardId}
+        key={card.cardId}
       >
-        {cards &&
-          cards.map((card) => {
-            const legal = isLegal({ hand: cards, card, leadSuit })
-            const isSelected = !!(queuedCard && queuedCard.cardId === card.cardId)
-            const flying = !!(card.cardId && isCardFlying(card.cardId))
-            return (
-              <Box
-                component="li"
-                className={classNames({
-                  'playing-card': true,
-                  [styles.shake]: illegalCard === card.cardId,
-                  [styles.selected]: isSelected,
-                  [styles.flying]: flying,
-                })}
-                data-card-id={card.cardId}
-                key={card.cardId}
-                sx={{
-                  '@media only screen and (max-width: 768px)': {
-                    width: `${cardWidth}vw`,
-                    height: `${cardWidth * 1.5}vw`,
-                    maxWidth: '24vw',
-                    maxHeight: '36vw',
-                    '& > div > span:first-of-type': {
-                      fontSize: `min(${cardWidth * 0.3}vw, ${24 * 0.3}vw)`,
-                    },
-                    '& > div > span:last-of-type': {
-                      fontSize: `min(${cardWidth * 0.35}vw, 10vw)`,
-                    },
-                  },
-                }}
-              >
-                <div aria-hidden="true">
-                  <span className={styles[getSuitColorClass(card.suit)]}>
-                    {getSuitSymbol(card.suit)}
-                  </span>
-                  <span
-                    className={classNames(
-                      styles.card_value,
-                      styles[getSuitColorClass(card.suit)]
-                    )}
-                  >
-                    {card.value}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className={styles.card_button}
-                  aria-label={`${card.value} of ${card.suit}`}
-                  aria-pressed={isSelected}
-                  aria-disabled={!legal}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleCardAction(card)
-                  }}
-                />
-              </Box>
-            )
-          })}
-      </Box>
-    </>
+        <div aria-hidden="true">
+          <span className={styles[getSuitColorClass(card.suit)]}>
+            {getSuitSymbol(card.suit)}
+          </span>
+          <span
+            className={classNames(
+              styles.card_value,
+              styles[getSuitColorClass(card.suit)]
+            )}
+          >
+            {card.value}
+          </span>
+        </div>
+        <button
+          type="button"
+          className={styles.card_button}
+          aria-label={`${card.value} of ${card.suit}`}
+          aria-pressed={isSelected}
+          aria-disabled={!legal}
+          onClick={(e) => {
+            e.preventDefault()
+            handleCardAction(card)
+          }}
+        />
+      </li>
+    )
+  }
+
+  return (
+    <div
+      className={styles.card_row_wrapper}
+      aria-label="Your hand — select a card to play"
+      style={{ '--mobile-card-vw': `${mobileCardVw}vw` } as React.CSSProperties}
+    >
+      {topRow.length > 0 && (
+        <ul className={`${styles.card_row} ${styles.card_row_top}`} aria-hidden="true">
+          {topRow.map(renderCard)}
+        </ul>
+      )}
+      <ul className={`${styles.card_row} ${styles.card_row_bottom}`}>
+        {bottomRow.map(renderCard)}
+      </ul>
+    </div>
   )
 }
 

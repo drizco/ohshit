@@ -344,6 +344,7 @@ function Game({ gameId, isMobile }: GameProps) {
         playCard={playCard}
         queuedCard={queuedCard}
         leadSuit={leadSuit || null}
+        isMobile={isMobile}
         onCardPlayed={(card, sourceEl) => {
           if (currentPlayer === playerId) {
             triggerCardFly(card, sourceEl, playerId)
