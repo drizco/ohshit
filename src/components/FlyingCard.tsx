@@ -19,17 +19,17 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
 
   const { sourceRect, targetRect, type, card } = entry
 
+  const naturalWidth = type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)
+
   useLayoutEffect(() => {
     const el = ref.current
     if (!el || animatedRef.current) return
     animatedRef.current = true
 
-    // Both types are explicitly sized: self to the source card, opponent to the target
-    // slot height with a 2:3 aspect ratio. startScale shrinks opponent cards to match
-    // the source name label at the beginning of the animation.
-    const naturalWidth = type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)
+    // self: sized to the hand card, scales down to the trick slot.
+    // opponent: sized to the trick slot (no scaling), flies from the name label position.
     const naturalHeight = type === 'self' ? sourceRect.height : targetRect.height
-    const startScale = type === 'self' ? 1 : sourceRect.height / naturalHeight
+    const startScale = 1
     const endScale = type === 'self' ? targetRect.height / naturalHeight : 1
 
     // Calculate centered positions
@@ -107,17 +107,23 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
       ref={ref}
       className={`playing-card ${styles.flying_card}`}
       aria-hidden="true"
-      style={{
-        position: 'fixed',
-        left: sourceRect.left,
-        top: sourceRect.top,
-        width: type === 'self' ? sourceRect.width : targetRect.height * (2 / 3),
-        height: type === 'self' ? sourceRect.height : targetRect.height,
-        opacity: 0,
-        zIndex: 999999,
-        '--fly-symbol-size': `${(type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)) * 0.5}px`,
-        '--fly-value-size': `${(type === 'self' ? sourceRect.width : targetRect.height * (2 / 3)) * 0.44}px`,
-      } as React.CSSProperties}
+      style={
+        {
+          position: 'fixed',
+          left: sourceRect.left,
+          top: sourceRect.top,
+          width: type === 'self' ? sourceRect.width : targetRect.height * (2 / 3),
+          height: type === 'self' ? sourceRect.height : targetRect.height,
+          opacity: 0,
+          zIndex: 999999,
+          '--fly-symbol-size': `${naturalWidth * 0.5}px`,
+          '--fly-value-size': `${naturalWidth * 0.44}px`,
+          '--fly-symbol-size-md': `${naturalWidth * 0.44}px`,
+          '--fly-value-size-md': `${naturalWidth * 0.38}px`,
+          '--fly-content-padding':
+            type === 'self' ? `${Math.round(naturalWidth * 0.09)}px` : '2px',
+        } as React.CSSProperties
+      }
     >
       <div className={styles.card_content}>
         <span className={styles[suitColorClass]}>{getSuitSymbol(card.suit)}</span>
