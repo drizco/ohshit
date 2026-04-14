@@ -10,6 +10,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import AppStateContext from '../../context/AppStateContext'
 import styles from '../../styles/pages/game.module.scss'
@@ -37,6 +38,7 @@ import useGameState from '../../hooks/useGameState'
 import useGameComputed from '../../hooks/useGameComputed'
 import useGameListeners from '../../hooks/useGameListeners'
 import useGameActions from '../../hooks/useGameActions'
+import useTrickTransition from '../../hooks/useTrickTransition'
 
 interface GameProps {
   gameId: string
@@ -54,24 +56,15 @@ function GameWithAnimation(props: GameProps) {
 function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
   const { visible, setError, setLoading } = useContext(AppStateContext)
-  const { triggerCardFly } = useCardAnimation()
+  const { triggerCardFly, reducedMotion } = useCardAnimation()
 
   // Hook #1: State Management
   const { state, updateState, dispatchRound, roundState, initializeGame } = useGameState({
     gameId,
   })
 
-  const {
-    game,
-    players,
-    playerId,
-    playerName,
-    hand,
-    bid,
-    showYourTurn,
-    queuedCard,
-    lastWinner,
-  } = state
+  const { game, players, playerId, playerName, hand, bid, showYourTurn, queuedCard } =
+    state
   const { tricks, bids, trump } = roundState
 
   // Hook #2: Computed Values
@@ -85,30 +78,25 @@ function Game({ gameId, isMobile }: GameProps) {
   // Refs for actions
   const autoPlayTimeoutRef = useRef(null)
 
-  // While the winner modal is open, show the completed trick and round data
-  // (snapshotted in the listener) so cards stay visible even if the round resets.
-  const lastRoundSnapshotRef = useRef<{
-    bids: Record<string, number>
-    roundScore: Record<string, number>
-  } | null>(null)
+  // Refs passed into useTrickTransition so onTrickWon always snapshots the
+  // latest bids/roundScore at the moment the Firebase event fires.
+  const bidsRef = useRef(bids)
+  bidsRef.current = bids
+  const roundScoreRef = useRef(roundScore)
+  roundScoreRef.current = roundScore
 
-  // Keep snapshot updated whenever we have real bids data
-  if (Object.keys(bids).length > 0) {
-    lastRoundSnapshotRef.current = { bids, roundScore }
-  }
-  // Clear snapshot when modal closes
-  if (!lastWinner) {
-    lastRoundSnapshotRef.current = null
-  }
+  // Trick transition: sequences card animations, winner modal, and snapshot display.
+  const { transitionState, onTrickWon, closeModal, onModalExited } = useTrickTransition({
+    reducedMotion,
+    bidsRef,
+    roundScoreRef,
+  })
+  const { displayedTrick, snapshot, winner, modalOpen } = transitionState
 
-  const displayedTrick =
-    lastWinner && state.lastCompletedTrick ? state.lastCompletedTrick : trick
-  const displayedBids =
-    lastWinner && lastRoundSnapshotRef.current ? lastRoundSnapshotRef.current.bids : bids
-  const displayedRoundScore =
-    lastWinner && lastRoundSnapshotRef.current
-      ? lastRoundSnapshotRef.current.roundScore
-      : roundScore
+  // Resolved display values: use transition snapshots while active, live values otherwise.
+  const resolvedTrick = displayedTrick ?? trick
+  const resolvedBids = snapshot?.bids ?? bids
+  const resolvedRoundScore = snapshot?.roundScore ?? roundScore
 
   // Hook #3: Firebase Listeners
   const { removeListeners } = useGameListeners({
@@ -118,6 +106,7 @@ function Game({ gameId, isMobile }: GameProps) {
     updateState,
     dispatchRound,
     setError,
+    onTrickWon,
   })
 
   // Hook #4: Game Actions
@@ -159,7 +148,6 @@ function Game({ gameId, isMobile }: GameProps) {
     handleChange,
     handleToggle,
     yourTurn,
-    closeModal,
   } = actions
 
   // Effect: Initialize game on mount and when gameId changes
@@ -262,7 +250,11 @@ function Game({ gameId, isMobile }: GameProps) {
               <Typography
                 variant="h6"
                 component="h2"
-                sx={{ textDecoration: 'underline', fontWeight: 'bold', fontSize: { xs: '4vw', sm: '1.5vw' } }}
+                sx={{
+                  textDecoration: 'underline',
+                  fontWeight: 'bold',
+                  fontSize: { xs: '4vw', sm: '1.5vw' },
+                }}
               >
                 {name}
               </Typography>
@@ -280,7 +272,9 @@ function Game({ gameId, isMobile }: GameProps) {
               <div className={styles.game_stats}>
                 <div className={styles.stat}>
                   <span className={styles.stat_label}>ROUND</span>
-                  <span className={styles.stat_value}>{`${roundNum} of ${numRounds}`}</span>
+                  <span
+                    className={styles.stat_value}
+                  >{`${roundNum} of ${numRounds}`}</span>
                 </div>
                 <div className={styles.stat}>
                   <span className={styles.stat_label}>TRICKS</span>
@@ -288,7 +282,9 @@ function Game({ gameId, isMobile }: GameProps) {
                 </div>
                 <div className={styles.stat}>
                   <span className={styles.stat_label}>BID DIFF</span>
-                  <span className={styles.stat_value}>{getAvailableTricks({ numCards, bids })}</span>
+                  <span className={styles.stat_value}>
+                    {getAvailableTricks({ numCards, bids })}
+                  </span>
                 </div>
               </div>
             )}
@@ -325,9 +321,9 @@ function Game({ gameId, isMobile }: GameProps) {
           players={players}
           playerOrder={playerOrder}
           currentPlayer={currentPlayer}
-          bids={displayedBids}
-          roundScore={displayedRoundScore}
-          trick={displayedTrick}
+          bids={resolvedBids}
+          roundScore={resolvedRoundScore}
+          trick={resolvedTrick}
           bid={bid}
           dealer={dealer}
           handleToggle={handleToggle}
@@ -337,7 +333,7 @@ function Game({ gameId, isMobile }: GameProps) {
           score={score}
           timeLimit={timeLimit}
           timeRemaining={timeRemaining}
-          winnerModalShowing={Boolean(lastWinner)}
+          winnerModalShowing={!!displayedTrick}
           status={status}
           numCards={numCards}
           dirty={game?.settings?.dirty ?? false}
@@ -362,25 +358,24 @@ function Game({ gameId, isMobile }: GameProps) {
       <FlyingCard />
       {/* Trick winner flash modal */}
       <Dialog
-        open={Boolean(lastWinner)}
+        open={modalOpen}
         onClose={closeModal}
         slotProps={{
           transition: {
             onEntered: () => {
-              setTimeout(() => {
-                closeModal()
-              }, 1000)
+              setTimeout(closeModal, 1000)
             },
+            onExited: onModalExited,
           },
         }}
       >
         <DialogContent sx={{ textAlign: 'center' }}>
-          {lastWinner && (
+          {winner && (
             <Typography
               variant="h5"
               component="h2"
               sx={{ mb: 2, fontWeight: 'bold' }}
-            >{`${getWinner({ winner: lastWinner, players })} won!`}</Typography>
+            >{`${getWinner({ winner, players })} won!`}</Typography>
           )}
           <Button variant="outlined" onClick={closeModal}>
             CLOSE
@@ -388,66 +383,49 @@ function Game({ gameId, isMobile }: GameProps) {
         </DialogContent>
       </Dialog>
       {/* Game over modal */}
-      <Dialog open={status === 'over'} onClose={() => {}}>
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <h1>game over</h1>
-          </Box>
+      <Dialog open={status === 'over' && !displayedTrick} onClose={() => {}} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ textAlign: 'center', pb: 0 }}>
+          <Typography variant="h4" component="h2" fontWeight="bold">
+            game over
+          </Typography>
         </DialogTitle>
         <DialogContent>
-          {Object.values(players)
-            .sort((a, b) => {
-              const aScore = score && score[a.playerId] ? score[a.playerId] : 0
-              const bScore = score && score[b.playerId] ? score[b.playerId] : 0
-              if (aScore < bScore) return 1
-              if (aScore > bScore) return -1
-              return 0
-            })
-            .map((player) => (
-              <Box key={player.playerId} sx={{ display: 'flex' }}>
-                <Box sx={{ flex: 1 }}>
-                  <h5>{player.name}</h5>
+          <Stack spacing={1} sx={{ mt: 2, mb: 3 }}>
+            {Object.values(players)
+              .sort((a, b) => {
+                const aScore = score?.[a.playerId] ?? 0
+                const bScore = score?.[b.playerId] ?? 0
+                return bScore - aScore
+              })
+              .map((player, i) => (
+                <Box key={player.playerId} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ opacity: 0.5, width: '1.5em', textAlign: 'right' }}>
+                    {i + 1}.
+                  </Typography>
+                  <Typography variant="body1" sx={{ flex: 1 }}>
+                    {player.name}
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {score?.[player.playerId] ?? 0}
+                  </Typography>
                 </Box>
-                <Box sx={{ flex: 1, textAlign: 'center' }}>
-                  <h5>
-                    {score && score[player.playerId] ? score[player.playerId] : '0'}
-                  </h5>
-                </Box>
-              </Box>
-            ))}
-          <Box>
-            {status === 'over' ? (
-              <>
-                <Box sx={{ mt: 3, textAlign: 'center' }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      router.push('/')
-                    }}
-                  >
-                    HOME
-                  </Button>
-                </Box>
-                {isHost && (
-                  <Box sx={{ mt: 3, textAlign: 'center' }}>
-                    <Button variant="contained" color="success" onClick={playAgain}>
-                      PLAY AGAIN
-                    </Button>
-                  </Box>
-                )}
-                {nextGame && (
-                  <Box sx={{ mt: 3, textAlign: 'center' }}>
-                    <Link href={`/game/${nextGame}`}>JOIN NEXT GAME</Link>
-                  </Box>
-                )}
-              </>
-            ) : (
-              <Button variant="contained" color="primary" onClick={closeModal}>
-                CLOSE
+              ))}
+          </Stack>
+          <Stack spacing={1.5}>
+            <Button variant="contained" color="primary" fullWidth onClick={() => router.push('/')}>
+              HOME
+            </Button>
+            {isHost && (
+              <Button variant="contained" color="success" fullWidth onClick={playAgain}>
+                PLAY AGAIN
               </Button>
             )}
-          </Box>
+            {nextGame && (
+              <Button variant="outlined" fullWidth component={Link} href={`/game/${nextGame}`}>
+                JOIN NEXT GAME
+              </Button>
+            )}
+          </Stack>
         </DialogContent>
       </Dialog>
       {!isMobile && (

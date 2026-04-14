@@ -763,41 +763,6 @@ describe('useGameActions Hook', () => {
       expect(mockCalculateAdjustedBid).toHaveBeenCalled()
     })
 
-    test('closeModal clears lastWinner', async () => {
-      const { result } = renderHook(() =>
-        useGameActions({
-          gameId: 'game-1',
-          playerId: 'p1',
-          playerName: 'Player 1',
-          game: {
-            state: {
-              roundId: 'round-1',
-            },
-          },
-          hand: [],
-          bid: 0,
-          bids: {},
-          tricks: [],
-          trickIndex: 0,
-          queuedCard: null,
-          visible: false,
-          setLoading: mockSetLoading,
-          setError: mockSetError,
-          updateState: mockUpdateState,
-          autoPlayTimeoutRef: mockAutoPlayTimeout,
-        })
-      )
-
-      await act(async () => {
-        await result.current.closeModal()
-      })
-
-      expect(mockUpdateState).toHaveBeenCalledWith({
-        lastWinner: null,
-        lastCompletedTrick: null,
-      })
-    })
-
     test('yourTurn handles queued card', async () => {
       const mockCard = { cardId: 'c1', rank: 5, suit: 'H' }
 
