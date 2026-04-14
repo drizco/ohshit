@@ -6,6 +6,7 @@
   border-style: solid;
   pointer-events: none;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .card_content {
@@ -21,7 +22,7 @@
   @media only screen and (min-width: 768px) {
     justify-content: flex-start;
     height: 30%;
-    padding: 10px;
+    padding: var(--fly-content-padding, 10px);
     flex-direction: row;
   }
 
@@ -32,6 +33,7 @@
     line-height: 0.8;
 
     @media only screen and (min-width: 768px) {
+      font-size: var(--fly-value-size-md, 3.5vw);
       margin: 0 0 0 5px;
     }
   }
@@ -39,6 +41,11 @@
   span:first-child {
     font-size: var(--fly-symbol-size, 4.2vw);
     margin-bottom: 0.4vw;
+
+    @media only screen and (min-width: 768px) {
+      font-size: var(--fly-symbol-size-md, 3vw);
+      margin-bottom: 0;
+    }
   }
 }
 
