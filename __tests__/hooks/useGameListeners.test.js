@@ -454,6 +454,7 @@ describe('useGameListeners Hook', () => {
           roundId: 'round-1',
           updateState: mockUpdateState,
           dispatchRound: mockDispatchRound,
+          onTrickWon: jest.fn(),
           game: {},
           players: {},
           bid: 0,

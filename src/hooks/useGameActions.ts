@@ -303,13 +303,6 @@ const useGameActions = ({
     [updateState, bids]
   )
 
-  // Close modal - closes the winner modal
-  const closeModal = useCallback(async () => {
-    if (!game) return
-
-    updateState({ lastWinner: null, lastCompletedTrick: null })
-  }, [game, updateState])
-
   return {
     playCard,
     yourTurn,
@@ -320,7 +313,6 @@ const useGameActions = ({
     startGameHandler,
     handleChange,
     handleToggle,
-    closeModal,
   }
 }
 

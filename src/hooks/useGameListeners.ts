@@ -5,7 +5,7 @@ import { ref } from 'firebase/database'
 import { db } from '../lib/firebase'
 import useFirebaseListener from './useFirebaseListener'
 import { calculateAdjustedBid } from '../utils/bidHelpers'
-import type { Card, Game, Player, LocalGameState, RoundAction } from '../types'
+import type { Card, Game, Player, LocalGameState, RoundAction, Trick } from '../types'
 
 type FirebaseEventType = 'value' | 'child_added' | 'child_changed' | 'child_removed'
 
@@ -26,6 +26,7 @@ interface UseGameListenersOptions {
   ) => void
   dispatchRound: Dispatch<RoundAction>
   setError: (error: string | null) => void
+  onTrickWon: (winner: string, trick: Trick) => void
 }
 
 /**
@@ -48,6 +49,7 @@ const useGameListeners = ({
   updateState,
   dispatchRound,
   setError,
+  onTrickWon,
 }: UseGameListenersOptions) => {
   // Store all unsubscribe functions
   const unsubscribeFuncs = useRef<(() => void)[]>([])
@@ -252,11 +254,11 @@ const useGameListeners = ({
         } else if (eventType === 'child_changed') {
           dispatchRound({ type: 'UPDATE_TRICK', trick })
           if (trick.winner) {
-            updateState({ lastWinner: trick.winner, lastCompletedTrick: trick })
+            onTrickWon(trick.winner, trick)
           }
         }
       },
-      [dispatchRound, updateState]
+      [dispatchRound, onTrickWon]
     ),
     onError: useCallback(
       (error: Error) => {
