@@ -148,12 +148,6 @@ const useGameActions = ({
       autoPlayTimeoutRef.current = null
     }
     if (queuedCard) {
-      const leadSuit = tricks[trickIndex]?.leadSuit || null
-      if (!isLegal({ hand, card: queuedCard, leadSuit })) {
-        updateState({ queuedCard: null })
-        onIllegalCardRef.current?.(queuedCard.cardId)
-        return
-      }
       autoPlayTimeoutRef.current = setTimeout(async () => {
         updateState({ queuedCard: null })
         await playCard(queuedCard)
@@ -164,7 +158,7 @@ const useGameActions = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, queuedCard, playCard, updateState, hand, tricks, trickIndex]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
+  }, [queuedCard, updateState, playCard, visible]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
 
   // Submit bid - submits the player's bid for the round
   const submitBid = useCallback(
