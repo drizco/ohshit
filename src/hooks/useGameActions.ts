@@ -95,16 +95,11 @@ const useGameActions = ({
         const legal = isLegal({ hand, card, leadSuit })
 
         if (currentPlayerId !== playerId) {
-          // Not our turn. only allow queueing once a lead suit is set AND
-          // the card is legal against it — otherwise the autoplay would
-          // fail or the queue decision would be uninformed.
-          if (!leadSuit || !legal) {
-            onIllegalCardRef.current?.(card.cardId)
-            return
-          }
-          // Toggle queue on re-click of the same card.
+          // Not our turn - queue the card for later auto-play
+
           updateState((prevState) => {
             let newCard: Card | null = card
+            // Toggle queue on re-click of the same card.
             if (prevState.queuedCard && prevState.queuedCard.cardId === card.cardId) {
               newCard = null
             }
