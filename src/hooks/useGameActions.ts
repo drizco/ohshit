@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import type { RefObject } from 'react'
 import {
   newGame,
@@ -33,7 +33,8 @@ interface UseGameActionsOptions {
       | ((prevState: LocalGameState) => Partial<LocalGameState>)
   ) => void
   autoPlayTimeoutRef: RefObject<NodeJS.Timeout | null>
-  onBeforeAutoPlay?: (card: Card) => void
+  onBeforePlay?: (card: Card, playerId: string) => void
+  onIllegalCard?: (cardId?: string) => void
 }
 
 /**
@@ -57,9 +58,17 @@ const useGameActions = ({
   setLoading,
   updateState,
   autoPlayTimeoutRef,
-  onBeforeAutoPlay,
+  onBeforePlay,
+  onIllegalCard,
 }: UseGameActionsOptions) => {
-  // Play card - handles playing a card or queuing it for later
+  // Stable ref for onBeforePlay and onIllegalCard so playCard's memoized
+  // identity isn't invalidated by a new inline callback on every render.
+  const onBeforePlayRef = useRef(onBeforePlay)
+  onBeforePlayRef.current = onBeforePlay
+  const onIllegalCardRef = useRef(onIllegalCard)
+  onIllegalCardRef.current = onIllegalCard
+
+  // Play card - single decision point for play / queue / reject.
   const playCard = useCallback(
     async (card: Card) => {
       try {
@@ -82,18 +91,35 @@ const useGameActions = ({
           return
         }
 
+        const leadSuit = trick.leadSuit || null
+        const legal = isLegal({ hand, card, leadSuit })
+
         if (currentPlayerId !== playerId) {
-          // Not our turn - queue the card for later auto-play
+          // Not our turn. only allow queueing once a lead suit is set AND
+          // the card is legal against it — otherwise the autoplay would
+          // fail or the queue decision would be uninformed.
+          if (!leadSuit || !legal) {
+            onIllegalCardRef.current?.(card.cardId)
+            return
+          }
+          // Toggle queue on re-click of the same card.
           updateState((prevState) => {
             let newCard: Card | null = card
             if (prevState.queuedCard && prevState.queuedCard.cardId === card.cardId) {
               newCard = null
             }
-            return {
-              queuedCard: newCard,
-            }
+            return { queuedCard: newCard }
           })
           return
+        }
+
+        if (!legal) {
+          onIllegalCardRef.current?.(card.cardId)
+          return
+        }
+
+        if (onBeforePlayRef.current) {
+          onBeforePlayRef.current(card, playerId)
         }
 
         const body = {
@@ -114,20 +140,26 @@ const useGameActions = ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setError, tricks, trickIndex, game, playerId, updateState] // autoPlayTimeoutRef is a ref
+    [setError, tricks, trickIndex, game, playerId, hand, updateState]
   )
 
-  // Your turn handler - auto-plays queued card when it's player's turn
+  // Your turn handler - auto-plays queued card when it's player's turn.
+  // playCard itself re-validates legality, so this hook just gates the
+  // 700ms "about to autoplay" pause: if the queued card is already illegal
+  // by the time your turn arrives, dequeue + shake immediately.
   const yourTurn = useCallback(async () => {
     if (autoPlayTimeoutRef.current) {
       clearTimeout(autoPlayTimeoutRef.current)
       autoPlayTimeoutRef.current = null
     }
     if (queuedCard) {
+      const leadSuit = tricks[trickIndex]?.leadSuit || null
+      if (!isLegal({ hand, card: queuedCard, leadSuit })) {
+        updateState({ queuedCard: null })
+        onIllegalCardRef.current?.(queuedCard.cardId)
+        return
+      }
       autoPlayTimeoutRef.current = setTimeout(async () => {
-        if (onBeforeAutoPlay) {
-          onBeforeAutoPlay(queuedCard)
-        }
         updateState({ queuedCard: null })
         await playCard(queuedCard)
       }, 700)
@@ -137,7 +169,7 @@ const useGameActions = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, queuedCard, playCard, updateState, onBeforeAutoPlay]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
+  }, [visible, queuedCard, playCard, updateState, hand, tricks, trickIndex]) // autoPlayTimeoutRef is a ref, doesn't need to be in deps
 
   // Submit bid - submits the player's bid for the round
   const submitBid = useCallback(

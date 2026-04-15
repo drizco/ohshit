@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
 import styles from '../styles/components/card-row.module.scss'
 import { getSuitSymbol, getSuitColorClass, isLegal } from '../utils/helpers'
@@ -14,45 +14,10 @@ interface CardRowProps {
   queuedCard: Card | null
   leadSuit: Suit | null
   isMobile?: boolean
-  onCardPlayed?: (card: Card, sourceEl: HTMLElement) => void
 }
 
-const CardRow = ({
-  cards,
-  playCard,
-  queuedCard,
-  leadSuit,
-  isMobile,
-  onCardPlayed,
-}: CardRowProps) => {
+const CardRow = ({ cards, playCard, queuedCard, leadSuit, isMobile }: CardRowProps) => {
   const { isCardFlying } = useCardAnimation()
-  const [illegalCard, setIllegalCard] = useState<string | null>(null)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIllegalCard(null)
-    }, 320)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [illegalCard])
-
-  const handleCardAction = (card: Card) => {
-    const legal = isLegal({ hand: cards, card, leadSuit })
-    if (!legal) {
-      setIllegalCard(card.cardId || null)
-      return
-    }
-    if (onCardPlayed && card.cardId) {
-      const el = document.querySelector(
-        `[data-card-id="${card.cardId}"]`
-      ) as HTMLElement | null
-      if (el) {
-        onCardPlayed(card, el)
-      }
-    }
-    playCard(card)
-  }
 
   const isTwoRow = !!isMobile && cards.length > MOBILE_MAX_ROW
   const topRow = isTwoRow ? cards.slice(0, cards.length - MOBILE_MAX_ROW) : []
@@ -69,7 +34,6 @@ const CardRow = ({
       <li
         className={classNames({
           'playing-card': true,
-          [styles.shake]: illegalCard === card.cardId,
           [styles.selected]: isSelected,
           [styles.flying]: flying,
         })}
@@ -97,7 +61,7 @@ const CardRow = ({
           aria-disabled={!legal}
           onClick={(e) => {
             e.preventDefault()
-            handleCardAction(card)
+            playCard(card)
           }}
         />
       </li>
