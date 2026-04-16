@@ -56,7 +56,7 @@ function GameWithAnimation(props: GameProps) {
 function Game({ gameId, isMobile }: GameProps) {
   const router = useRouter()
   const { visible, setError, setLoading } = useContext(AppStateContext)
-  const { triggerCardFly, reducedMotion } = useCardAnimation()
+  const { triggerCardFly, triggerCardShake, reducedMotion } = useCardAnimation()
 
   // Hook #1: State Management
   const { state, updateState, dispatchRound, roundState, initializeGame } = useGameState({
@@ -126,16 +126,8 @@ function Game({ gameId, isMobile }: GameProps) {
     setLoading,
     updateState,
     autoPlayTimeoutRef,
-    onBeforeAutoPlay: (card) => {
-      if (playerId && card.cardId) {
-        const el = document.querySelector(
-          `[data-card-id="${card.cardId}"]`
-        ) as HTMLElement | null
-        if (el) {
-          triggerCardFly(card, el, playerId)
-        }
-      }
-    },
+    onIllegalCard: triggerCardShake,
+    onBeforePlay: triggerCardFly,
   })
 
   const {
@@ -349,11 +341,6 @@ function Game({ gameId, isMobile }: GameProps) {
         queuedCard={queuedCard}
         leadSuit={leadSuit || null}
         isMobile={isMobile}
-        onCardPlayed={(card, sourceEl) => {
-          if (currentPlayer === playerId) {
-            triggerCardFly(card, sourceEl, playerId)
-          }
-        }}
       />
       <FlyingCard />
       {/* Trick winner flash modal */}
@@ -383,7 +370,12 @@ function Game({ gameId, isMobile }: GameProps) {
         </DialogContent>
       </Dialog>
       {/* Game over modal */}
-      <Dialog open={status === 'over' && !displayedTrick} onClose={() => {}} fullWidth maxWidth="xs">
+      <Dialog
+        open={status === 'over' && !displayedTrick}
+        onClose={() => {}}
+        fullWidth
+        maxWidth="xs"
+      >
         <DialogTitle sx={{ textAlign: 'center', pb: 0 }}>
           <Typography variant="h4" component="h2" fontWeight="bold">
             game over
@@ -398,8 +390,14 @@ function Game({ gameId, isMobile }: GameProps) {
                 return bScore - aScore
               })
               .map((player, i) => (
-                <Box key={player.playerId} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="body2" sx={{ opacity: 0.5, width: '1.5em', textAlign: 'right' }}>
+                <Box
+                  key={player.playerId}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ opacity: 0.5, width: '1.5em', textAlign: 'right' }}
+                  >
                     {i + 1}.
                   </Typography>
                   <Typography variant="body1" sx={{ flex: 1 }}>
@@ -412,7 +410,12 @@ function Game({ gameId, isMobile }: GameProps) {
               ))}
           </Stack>
           <Stack spacing={1.5}>
-            <Button variant="contained" color="primary" fullWidth onClick={() => router.push('/')}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => router.push('/')}
+            >
               HOME
             </Button>
             {isHost && (
@@ -421,7 +424,12 @@ function Game({ gameId, isMobile }: GameProps) {
               </Button>
             )}
             {nextGame && (
-              <Button variant="outlined" fullWidth component={Link} href={`/game/${nextGame}`}>
+              <Button
+                variant="outlined"
+                fullWidth
+                component={Link}
+                href={`/game/${nextGame}`}
+              >
                 JOIN NEXT GAME
               </Button>
             )}

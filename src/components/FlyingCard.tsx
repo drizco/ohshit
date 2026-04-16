@@ -98,7 +98,7 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
         // Animation was cancelled (e.g. component unmounted)
         onAnimationComplete(entry.id)
       })
-  }, [entry, onAnimationComplete, sourceRect, targetRect, type])
+  }, [entry, naturalWidth, onAnimationComplete, sourceRect, targetRect, type])
 
   const suitColorClass = getSuitColorClass(card.suit)
 
@@ -116,12 +116,14 @@ function FlyingCardClone({ entry }: { entry: FlyingCardEntry }) {
           height: type === 'self' ? sourceRect.height : targetRect.height,
           opacity: 0,
           zIndex: 999999,
+          border: 'none',
+          borderRadius: type === 'self' ? '6px' : '2px',
           '--fly-symbol-size': `${naturalWidth * 0.5}px`,
           '--fly-value-size': `${naturalWidth * 0.44}px`,
           '--fly-symbol-size-md': `${naturalWidth * 0.44}px`,
           '--fly-value-size-md': `${naturalWidth * 0.38}px`,
           '--fly-content-padding':
-            type === 'self' ? `${Math.round(naturalWidth * 0.09)}px` : '2px',
+            type === 'self' ? `${Math.round(naturalWidth * 0.09)}px` : '5px 3px',
         } as React.CSSProperties
       }
     >

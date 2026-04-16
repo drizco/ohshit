@@ -61,7 +61,6 @@ describe('useGameState Hook', () => {
         bid: 0,
         showYourTurn: false,
         queuedCard: null,
-
       })
     })
 
@@ -158,7 +157,6 @@ describe('useGameState Hook', () => {
         bid: 5,
         showYourTurn: false,
         queuedCard: null,
-
       })
     })
   })
@@ -429,7 +427,6 @@ describe('useGameState Hook', () => {
         bid: 0,
         showYourTurn: false,
         queuedCard: null,
-
       })
     })
 

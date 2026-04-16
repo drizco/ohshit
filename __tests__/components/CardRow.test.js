@@ -71,7 +71,9 @@ describe('CardRow Component', () => {
     expect(cardElements).toHaveLength(0)
   })
 
-  test('calls playCard for legal cards when lead suit is set', () => {
+  test('forwards every click to playCard regardless of legality', () => {
+    // CardRow is presentational — legality / queue / reject decisions
+    // live in useGameActions.playCard. CardRow simply forwards clicks.
     const cardsWithMixedSuits = [
       { rank: 13, suit: 'H', cardId: 'card-1', value: 'A' },
       { rank: 12, suit: 'H', cardId: 'card-2', value: 'K' },
@@ -80,14 +82,31 @@ describe('CardRow Component', () => {
 
     render(<CardRow {...defaultProps} cards={cardsWithMixedSuits} leadSuit="H" />)
 
-    // Click a legal card (Heart)
     fireEvent.click(screen.getByRole('button', { name: 'A of H' }))
     expect(defaultProps.playCard).toHaveBeenCalledWith(cardsWithMixedSuits[0])
 
     defaultProps.playCard.mockClear()
 
-    // Click an illegal card (Club when Hearts were led) - should NOT call playCard
     fireEvent.click(screen.getByRole('button', { name: '6 of C' }))
-    expect(defaultProps.playCard).not.toHaveBeenCalled()
+    expect(defaultProps.playCard).toHaveBeenCalledWith(cardsWithMixedSuits[2])
   })
+
+  test('marks illegal cards with aria-disabled when lead suit is set', () => {
+    const cardsWithMixedSuits = [
+      { rank: 13, suit: 'H', cardId: 'card-1', value: 'A' },
+      { rank: 5, suit: 'C', cardId: 'card-3', value: '6' },
+    ]
+
+    render(<CardRow {...defaultProps} cards={cardsWithMixedSuits} leadSuit="H" />)
+
+    expect(screen.getByRole('button', { name: 'A of H' })).toHaveAttribute(
+      'aria-disabled',
+      'false'
+    )
+    expect(screen.getByRole('button', { name: '6 of C' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    )
+  })
+
 })
